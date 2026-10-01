@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>ウミミポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* layout: 上に夜の海のヒーロー、その下に ウミミ帳（共通セーブのまとめ）、ゲームのカード、データの順 */
+:root{
+  --paper:#f4f3fc; --card:#ffffff; --line:#dcdcf2;
+  --ink:#383566; --ink2:#6c6a98; --tide:#5b64b8; --tide2:#8a92dc;
+  --moon:#e9b949; --moon2:#fbefc8; --coral:#e47b8f; --sea:#1d2255; --sea2:#2f3a86; --good:#4fae8a;
+  --f-disp:"Klee One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
+  --f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Meiryo",sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{margin:0;font-family:var(--f-body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:14px 32px}
+.app{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:600;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--f-disp);font-size:22px;font-weight:600;color:var(--tide)}
+.top .sp{flex:1}
+.shard{font-size:13px;color:var(--ink2);background:var(--moon2);border-radius:999px;padding:2px 12px}
+.shard b{color:#8a6410;font-variant-numeric:tabular-nums}
+.btn{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:9px 16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:var(--tide2)}
+.btn.main{background:var(--tide);border-color:var(--tide);color:#fff}
+.btn.main:hover{background:#4b54a6}
+.btn.sm{padding:5px 11px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:default}
+.sub{color:var(--ink2);font-size:13.5px;margin:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.hero{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,var(--sea),var(--sea2));color:#eef0ff;min-height:230px;display:flex;align-items:flex-end}
+#heroCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero .txt{position:relative;padding:22px 24px;max-width:520px}
+.hero h1{font-size:40px;color:#fff;line-height:1.15}
+.hero p{margin:8px 0 0;color:#d4d8fa}
+@media (max-width:600px){.hero h1{font-size:30px}.hero{min-height:200px}}
+
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.book{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:600px){.book{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bk{border-radius:14px;background:#f7f6ff;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.bk .k{font-size:12px;font-weight:700;color:var(--ink2);letter-spacing:.04em}
+.bk .v{font-family:var(--f-disp);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.bk .v small{font-size:14px;color:var(--ink2)}
+.bk.moon{background:var(--moon2)}
+.bk.moon .v{color:#8a6410}
+.star{display:flex;gap:12px;align-items:center;border-top:1px dashed var(--line);padding-top:12px}
+.star canvas{width:84px;height:62px;flex:none}
+.star b{font-family:var(--f-disp);font-size:17px}
+
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.game{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card);display:flex;flex-direction:column}
+.game canvas{width:100%;aspect-ratio:16/9;display:block}
+.game .gb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.game h3{font-size:19px}
+.game .gb p{margin:0;font-size:13.5px;color:var(--ink2);flex:1}
+.game .tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 8px;align-self:flex-start}
+.tag.play{background:#e2f3df;color:#3f8f3a}
+.tag.ext{background:#eceefe;color:var(--tide)}
+.tag.soon{background:#ecebf4;color:#7c7a9a}
+.game.soon{background:#faf9fe}
+.game.soon h3{color:var(--ink2)}
+
+details.data summary{cursor:pointer;font-family:var(--f-disp);font-weight:600;font-size:18px}
+.dsec{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:12px}
+.dsec h3{font-size:16px}
+textarea{font:inherit;font-size:12.5px;border:1.5px solid var(--line);border-radius:10px;padding:8px 11px;background:#fbfbff;color:var(--ink);width:100%;font-family:ui-monospace,Consolas,monospace}
+.codebox{font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all;background:#f7f6ff;border-radius:8px;padding:8px;max-height:120px;overflow:auto;user-select:all}
+.msg{font-size:13.5px;font-weight:700;color:var(--tide);margin:0;min-height:1.4em}
+.msg.bad{color:#c0392b}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--sea);color:#fff;padding:9px 18px;border-radius:999px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+</style>
+
+<div class="app">
+  <div class="top"><span class="logo">ウミミポータル</span><span class="sp"></span><span class="shard" id="topShard"></span></div>
+
+  <section class="hero">
+    <canvas id="heroCv" aria-hidden="true"></canvas>
+    <div class="txt">
+      <h1>ウミミポータル</h1>
+      <p>月の海に すむ ウミミたちの ゲームを ひとまとめに。かけらや 勝負服、なかまは ぜんぶの ゲームで いっしょだよ。</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="bookTitle">
+    <div class="row" style="justify-content:space-between"><h2 id="bookTitle">ウミミ帳</h2><span class="sub">ぜんぶの ゲームで つかえる もちもの</span></div>
+    <div class="book" id="book"></div>
+    <div id="star"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="gamesTitle">
+    <h2 id="gamesTitle">ゲーム</h2>
+    <div class="games" id="games"></div>
+  </section>
+
+  <section class="panel">
+    <details class="data" id="dataBox">
+      <summary>データ（バックアップ・ひっこし）</summary>
+      <div class="dsec">
+        <h3>前の ウミミダービーから ひっこす</h3>
+        <p class="sub">前の ウミミダービーの ホームにある「ウミミポータルへ ひっこす」で 出した コードを はりつけてね。育成中の子、でんどう、かけら、なかま、勝負服が うつります。</p>
+        <textarea id="mvIn" rows="3" placeholder="UMDSAVE1-..."></textarea>
+        <div class="row"><button class="btn sm main" id="mvGo" type="button">ひっこす</button></div>
+        <p class="msg" id="mvMsg" aria-live="polite"></p>
+      </div>
+      <div class="dsec">
+        <h3>ウミミ帳の バックアップ</h3>
+        <p class="sub">べつの パソコンや スマホに うつすときに つかってね。コードを 出して、うつした先の ここに はりつけます。</p>
+        <div class="row"><button class="btn sm" id="bkOut" type="button">コードを 出す</button></div>
+        <div id="bkOutBox" hidden><div class="codebox" id="bkCode"></div><div class="row" style="margin-top:6px"><button class="btn sm" id="bkCopy" type="button">コピー</button></div></div>
+        <textarea id="bkIn" rows="3" placeholder="UMBOOK1-..."></textarea>
+        <div class="row"><button class="btn sm" id="bkGo" type="button">コードから もどす</button></div>
+        <p class="msg" id="bkMsg" aria-live="polite"></p>
+      </div>
+    </details>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="core.js"></script>
+<script>
+(()=>{
+'use strict';
+const $ = id => document.getElementById(id);
+const {TAU, PALS, DRESSES, DRESS_KEYS, CARDS, drawUmi, drawVis, fitCanvas} = UMI;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastT = 0;
+function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 2400); }
+const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const dec = s => JSON.parse(decodeURIComponent(escape(atob(s))));
+
+// ゲームの 一覧（あたらしい ゲームは ここに 1行 たして、そのゲームの html を 同じ アーティファクトに 入れる）
+const GAMES = [
+  {key:'derby', name:'ウミミダービー', desc:'16週 そだてて、ライバルの セレネと 月光杯を めざす 育成レース。', href:'derby.html', st:'play'},
+  {key:'hakoniwa', name:'ウミミの箱庭', desc:'ウミミと いっしょに くらす いやしの 水そう。べつの ページで ひらくよ。', href:'https://claude.ai/artifact/NnwrAc1v6XpEGsrDqoFUuw', st:'ext'},
+  {key:'duel', name:'ウミミデュエル', desc:'海の なかまの カードで たたかう カードバトル。', st:'soon'},
+  {key:'quest', name:'ウミミクエスト', desc:'月の海を めぐって なかまと 冒険する RPG。', st:'soon'},
+  {key:'adventure', name:'ウミミの冒険', desc:'どんな 冒険に なるかは おたのしみ。', st:'soon'},
+  {key:'exe', name:'ウミミエグゼ', desc:'どんな ゲームに なるかは おたのしみ。', st:'soon'},
+  {key:'soul', name:'ウミミソウル', desc:'どんな ゲームに なるかは おたのしみ。', st:'soon'},
+];
+const TAGS = {play:'あそべる', ext:'べつのページ', soon:'じゅんびちゅう'};
+
+function render(){
+  const B = UMI.loadBook();
+  $('topShard').innerHTML = `つきのかけら <b>${B.shards}</b>`;
+  $('book').innerHTML = `
+    <div class="bk moon"><span class="k">つきのかけら</span><span class="v">${B.shards}</span></div>
+    <div class="bk"><span class="k">海の なかま</span><span class="v">${Object.keys(B.cards).length}<small> / ${CARDS.length}</small></span></div>
+    <div class="bk"><span class="k">勝負服</span><span class="v">${Object.keys(B.dresses).length}<small> / ${DRESS_KEYS.length}</small></span></div>
+    <div class="bk"><span class="k">でんどう</span><span class="v">${B.hall.length}<small> 匹</small></span></div>`;
+  const order = 'SS S A B C D E F G'.split(' ');
+  const best = B.hall.slice().sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank))[0];
+  $('star').innerHTML = best ? `<div class="star"><canvas data-col="${best.color}" data-out="${best.outfit||''}" aria-hidden="true"></canvas><div><span class="sub">いちばんの 子</span><br><b>${esc(best.name)}</b> <span class="sub">評価 ${esc(best.rank||'')}・${esc(best.title||'')}</span></div></div>` : `<p class="sub">ウミミダービーで 育成を おえた子が ここに のるよ。</p>`;
+  $('games').innerHTML = GAMES.map(g=>{
+    const btn = g.st==='play' ? `<a class="btn main" href="${g.href}">あそぶ</a>` : g.st==='ext' ? `<a class="btn" href="${g.href}" target="_blank" rel="noopener">ひらく ↗</a>` : `<button class="btn" type="button" disabled>じゅんびちゅう</button>`;
+    return `<article class="game ${g.st}"><canvas data-game="${g.key}" aria-hidden="true"></canvas><div class="gb"><span class="tag ${g.st}">${TAGS[g.st]}</span><h3>${g.name}</h3><p>${g.desc}</p>${btn}</div></article>`;
+  }).join('');
+  drawStatic();
+}
+
+// ゲームの サムネイル
+function drawThumb(cv){
+  const {w,h} = fitCanvas(cv, 1.5), c = cv.getContext('2d'), k = cv.dataset.game;
+  const g = c.createLinearGradient(0,0,0,h);
+  if(k==='hakoniwa'){ g.addColorStop(0,'#cfe6f8'); g.addColorStop(1,'#a9c9ef'); }
+  else if(k==='derby'){ g.addColorStop(0,'#1d2255'); g.addColorStop(1,'#3d4ea3'); }
+  else { g.addColorStop(0,'#2a2f5e'); g.addColorStop(1,'#454c86'); }
+  c.fillStyle = g; c.fillRect(0,0,w,h);
+  const s = h/330;
+  if(k==='derby'){
+    c.fillStyle='rgba(251,239,200,.9)'; c.beginPath(); c.arc(w*.85,h*.2,h*.1,0,TAU); c.fill();
+    c.fillStyle='#232b6c'; c.beginPath(); c.arc(w*.85+h*.04,h*.17,h*.09,0,TAU); c.fill();
+    [['sakura',.62,.55,''],['lavender',.42,.75,'constellation'],['mint',.25,.95,'']].forEach(([col,x,y,o])=>drawUmi(c,col,2,w*x,h*y,s*.75,1,o));
+  } else if(k==='hakoniwa'){
+    c.fillStyle='#e9dcc0'; c.fillRect(0,h*.82,w,h*.18);
+    c.strokeStyle='#74bf9c'; c.lineWidth=h*.03; for(let i=0;i<3;i++){ const x=w*(.12+i*.06); c.beginPath(); c.moveTo(x,h*.84); c.quadraticCurveTo(x-10,h*.6,x+6,h*.42); c.stroke(); }
+    drawUmi(c,'lavender',5,w*.55,h*.86,s*.9,-1,'');
+  } else {
+    c.fillStyle='rgba(255,255,255,.08)'; for(let i=0;i<14;i++) c.fillRect((i*97)%w,(i*53)%h,2,2);
+    const icon = {duel:'otter', quest:'turtle', adventure:'dolphin', exe:'octopus', soul:'jelly'}[k];
+    c.globalAlpha = .35; drawVis(c, icon, w*.5, h*.5, h*.6, 0, -1); c.globalAlpha = 1;
+    c.font = `600 ${Math.round(h*.22)}px "Klee One", sans-serif`; c.textAlign='center'; c.fillStyle='rgba(251,239,200,.85)'; c.fillText('?', w*.5, h*.62);
+  }
+}
+function drawStatic(){
+  document.querySelectorAll('canvas[data-game]').forEach(drawThumb);
+  document.querySelectorAll('canvas[data-col]').forEach(cv=>{ const {w,h}=fitCanvas(cv); const c=cv.getContext('2d'); c.clearRect(0,0,w,h); drawUmi(c, cv.dataset.col, 0, w*.5, h*.9, h/260, -1, cv.dataset.out||''); });
+}
+UMI.onAssets(drawStatic);
+let rt = 0; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(drawStatic, 150); });
+
+// ヒーロー（ゆっくり およぐ ウミミたち）
+const fish = [['lavender','idol'],['sky',''],['sakura','angel'],['mint',''],['yozora','gothic']].map(([col,o],i)=>({col, o, x:Math.random(), y:.5+i*.1, sp:.02+Math.random()*.025, ph:Math.random()*6}));
+let last = performance.now(), lastDraw = 0;
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(now-lastDraw < 40 || document.hidden) return;
+  const dt = Math.min(.1,(now-last)/1000); last = now; lastDraw = now;
+  const cv = $('heroCv'), {w,h} = fitCanvas(cv, 1.25), c = cv.getContext('2d'), t = now/1000;
+  const g = c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#1b2052'); g.addColorStop(1,'#34418f'); c.fillStyle=g; c.fillRect(0,0,w,h);
+  c.fillStyle='rgba(251,239,200,.92)'; c.beginPath(); c.arc(w*.86,h*.24,h*.11,0,TAU); c.fill();
+  c.fillStyle='#202765'; c.beginPath(); c.arc(w*.86+h*.045,h*.21,h*.1,0,TAU); c.fill();
+  for(let i=0;i<26;i++){ c.fillStyle=`rgba(255,255,255,${.25+.3*Math.sin(t*1.4+i)})`; c.fillRect((i*137.7)%w, (i*61.3)%(h*.45), 2, 2); }
+  c.strokeStyle='rgba(200,210,255,.12)'; c.lineWidth=1; for(let j=0;j<4;j++){ const y=h*(.55+j*.12); c.beginPath(); for(let x=0;x<=w;x+=16){ const yy=y+Math.sin(x*.02+t*1.2+j)*2; x?c.lineTo(x,yy):c.moveTo(x,yy);} c.stroke(); }
+  fish.forEach((f,i)=>{ if(!reduce) f.x += f.sp*dt; if(f.x>1.15) f.x=-.15; const gy=h*f.y+Math.sin(t*1.5+f.ph)*3; drawUmi(c, f.col, 2+(Math.floor(t*2.4+i)%2), w*(.52+f.x*.48), gy, h/1050, 1, f.o); });
+}
+requestAnimationFrame(loop);
+
+// ---------- データ ----------
+let mvPending = null;
+$('mvGo').addEventListener('click', ()=>{
+  const m = $('mvMsg'); m.className='msg';
+  const v = $('mvIn').value.trim();
+  if(mvPending && $('mvGo').dataset.confirm==='1'){
+    const d = mvPending; const own = {}; Object.keys(d).forEach(k=>{ if(!UMI.BOOK_KEYS.includes(k)) own[k]=d[k]; });
+    try{ localStorage.setItem('umimi-derby-v1', JSON.stringify(own)); }catch(e){}
+    UMI.saveBook(Object.assign(UMI.loadBook(), Object.fromEntries(UMI.BOOK_KEYS.filter(k=>d[k]!==undefined).map(k=>[k,d[k]]))));
+    mvPending = null; $('mvGo').dataset.confirm=''; $('mvGo').textContent='ひっこす'; $('mvIn').value='';
+    m.textContent = 'ひっこし できたよ！ ウミミダービーで つづきから あそべます。'; render(); return;
+  }
+  if(!v.startsWith('UMDSAVE1-')){ m.className='msg bad'; m.textContent='コードが ちがうみたい。「UMDSAVE1-」で はじまる コードを はりつけてね。'; return; }
+  try{ mvPending = dec(v.slice(9)); }catch(e){ m.className='msg bad'; m.textContent='コードが とちゅうで 切れているみたい。もう一度 コピーしてね。'; return; }
+  $('mvGo').dataset.confirm='1'; $('mvGo').textContent='上書きして ひっこす';
+  m.textContent = `でんどう ${(mvPending.hall||[]).length}匹・かけら ${mvPending.shards||0}${mvPending.cur?`・育成中の ${mvPending.cur.u&&mvPending.cur.u.name||'子'}`:''}。いまの ウミミ帳と ダービーの データは 上書きされます。よければ もう一度 おしてね。`;
+});
+$('bkOut').addEventListener('click', ()=>{ const code = 'UMBOOK1-' + enc(UMI.loadBook()); $('bkCode').textContent = code; $('bkOutBox').hidden = false; });
+$('bkCopy').addEventListener('click', ()=>{ const t=$('bkCode').textContent; try{ navigator.clipboard.writeText(t).then(()=>toast('コピーしたよ'), sel); }catch(e){ sel(); } });
+function sel(){ const r=document.createRange(); r.selectNodeContents($('bkCode')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('えらんだので Ctrl+C で コピーしてね'); }
+let bkPending = null;
+$('bkGo').addEventListener('click', ()=>{
+  const m = $('bkMsg'); m.className='msg'; const v = $('bkIn').value.trim();
+  if(bkPending && $('bkGo').dataset.confirm==='1'){ UMI.saveBook(Object.assign(UMI.loadBook(), bkPending)); bkPending=null; $('bkGo').dataset.confirm=''; $('bkGo').textContent='コードから もどす'; $('bkIn').value=''; m.textContent='ウミミ帳を もどしたよ。'; render(); return; }
+  if(!v.startsWith('UMBOOK1-')){ m.className='msg bad'; m.textContent='「UMBOOK1-」で はじまる コードを はりつけてね。'; return; }
+  try{ bkPending = dec(v.slice(8)); }catch(e){ m.className='msg bad'; m.textContent='コードが とちゅうで 切れているみたい。'; return; }
+  $('bkGo').dataset.confirm='1'; $('bkGo').textContent='上書きして もどす';
+  m.textContent = `かけら ${bkPending.shards||0}・でんどう ${(bkPending.hall||[]).length}匹。いまの ウミミ帳は 上書きされます。よければ もう一度 おしてね。`;
+});
+
+render();
+window.addEventListener('pageshow', render);
+})();
+</script>
+
+</body>
+</html>

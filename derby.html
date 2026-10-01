@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ウミミダービー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* layout: 1枚のアプリ画面。上に週と体力、左にウミミ、右にステータスと練習ボタン。レースは夜の海を横に走る */
+:root{
+  --paper:#f4f3fc; --card:#ffffff; --line:#dcdcf2;
+  --ink:#383566; --ink2:#6c6a98; --tide:#5b64b8; --tide2:#8a92dc;
+  --moon:#e9b949; --moon2:#fbefc8; --coral:#e47b8f; --sea:#1d2255; --sea2:#2f3a86;
+  --good:#4fae8a; --bad:#d9675f;
+  --f-disp:"Klee One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
+  --f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Meiryo",sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+.toportal{font-size:13px;font-weight:700;color:var(--tide);text-decoration:none;border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--card)}
+.toportal:hover{border-color:var(--tide2)}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:14px 28px}
+.app{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:600;margin:0;text-wrap:balance;color:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--f-disp);font-size:24px;font-weight:600;color:var(--tide);display:flex;align-items:baseline;gap:8px;background:none;border:0;padding:0}
+.logo small{font-size:13px;color:var(--ink2);font-weight:400}
+.top .sp{flex:1}
+.btn{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:9px 16px;font-weight:500;transition:transform .1s,border-color .15s}
+.btn:hover{border-color:var(--tide2)}
+.btn:active{transform:translateY(1px)}
+.btn.main{background:var(--tide);border-color:var(--tide);color:#fff}
+.btn.main:hover{background:#4b54a6}
+.btn.gold{background:var(--moon);border-color:var(--moon);color:#3b2c06}
+.btn.sm{padding:5px 11px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:default}
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px}
+.sub{color:var(--ink2);font-size:13.5px;margin:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:center;background:linear-gradient(160deg,var(--sea),var(--sea2));color:#eef0ff;border:0}
+.hero h1{color:#fff;font-size:34px;line-height:1.25}
+.hero p{color:#cfd3f7;margin:8px 0 0}
+.hero .menu{display:flex;flex-direction:column;gap:10px;margin-top:16px;max-width:320px}
+.hero .menu .btn{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.45);color:#fff;font-weight:700}
+.hero .menu .btn:hover{background:rgba(255,255,255,.24);border-color:#fff}
+.hero .menu .btn.main{background:#fff;border-color:#fff;color:var(--sea)}
+.hero .menu .btn.main:hover{background:#eceefe}
+.hero .menu .btn.gold{background:var(--moon);border-color:var(--moon);color:#3b2c06}
+.hero .menu .btn span{font-size:12.5px;font-weight:500;opacity:.9;white-space:nowrap}
+#heroCv{width:100%;max-width:100%;aspect-ratio:16/10;display:block;border-radius:14px}
+@media (max-width:720px){.hero{grid-template-columns:minmax(0,1fr)}.hero h1{font-size:28px}}
+
+/* create */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-size:14px}
+.chip[aria-pressed="true"]{border-color:var(--tide);background:#eceefe;color:var(--tide);font-weight:700}
+.chip .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.12)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lbl{font-size:12px;letter-spacing:.08em;color:var(--ink2);font-weight:700}
+input[type=text],textarea{font:inherit;border:1.5px solid var(--line);border-radius:10px;padding:8px 11px;background:#fbfbff;color:var(--ink);width:100%;box-sizing:border-box}
+.persTip{font-size:13.5px;color:var(--ink2);min-height:1.6em}
+
+/* train */
+.portrait{display:flex;flex-direction:column;gap:10px}
+.portrait canvas{width:100%;aspect-ratio:4/3;background:radial-gradient(ellipse at 50% 85%,#e4e6fb 0 35%,transparent 36%),linear-gradient(#f7f6ff,#eceafd);border-radius:14px;display:block}
+.nm{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.nm h2{font-size:22px}
+.tag{font-size:12px;border-radius:6px;padding:1px 8px;background:#eceefe;color:var(--tide);font-weight:700}
+.meter{display:flex;flex-direction:column;gap:4px}
+.meter .bar{height:10px;border-radius:6px;background:#ecebf7;overflow:hidden}
+.meter .bar i{display:block;height:100%;border-radius:6px;background:var(--good);transition:width .35s}
+.meter .t{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}
+.mood{font-size:14px}
+.weekbar{display:flex;gap:4px;align-items:flex-end}
+.weekbar b{flex:1;height:8px;border-radius:3px;background:#e4e3f4}
+.weekbar b.done{background:var(--tide2)}
+.weekbar b.now{background:var(--tide);height:12px}
+.weekbar b.race{background:var(--moon2);outline:1.5px solid var(--moon)}
+.weekbar b.race.done{background:var(--moon)}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.st{border:1.5px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.st .k{font-size:11.5px;color:var(--ink2);font-weight:700;letter-spacing:.04em}
+.st .r{font-family:var(--f-disp);font-size:24px;font-weight:600;line-height:1.1}
+.st .v{font-size:13px;font-variant-numeric:tabular-nums}
+.st .up{color:var(--good);font-size:12px;font-weight:700;min-height:1.2em}
+@media (max-width:460px){.stats{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.st .r{font-size:19px}.st .k{font-size:10.5px}}
+.trains{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tr{border:1.5px solid var(--line);background:#fbfbff;border-radius:14px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.tr:hover{border-color:var(--tide2);background:#f3f3ff}
+.tr b{font-family:var(--f-disp);font-size:16px}
+.tr .g{font-size:12.5px;color:var(--ink2)}
+.tr .lv{font-size:11.5px;color:var(--tide)}
+.tr .fail{font-size:12px;color:var(--bad);font-weight:700}
+.tr.rest b{color:var(--good)}
+.log{font-size:14px;background:#f7f6ff;border-radius:12px;padding:10px 12px;min-height:3.2em}
+.log .hl{color:var(--tide);font-weight:700}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(29,34,85,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal .panel{max-width:480px;width:100%;display:flex;flex-direction:column;gap:12px;box-shadow:0 16px 40px rgba(20,20,70,.3)}
+.modal h3{font-size:20px}
+.modal .opts{display:flex;flex-direction:column;gap:8px}
+
+/* race */
+.racehead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.racehead h2{font-size:22px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:5px 11px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--tide);color:#fff}
+#raceCv{width:100%;max-width:100%;aspect-ratio:16/10;display:block;border-radius:14px;background:var(--sea);touch-action:manipulation}
+.comment{font-family:var(--f-disp);font-size:17px;min-height:1.7em;color:var(--ink)}
+.entries{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.ent{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;background:#fbfbff;text-align:left}
+.ent.me{border-color:var(--moon);background:#fffaf0}
+.ent[aria-pressed="true"]{outline:3px solid var(--tide);outline-offset:-1px}
+.ent .n{font-weight:700;display:flex;gap:6px;align-items:center}
+.ent .n i{font-style:normal;font-size:11px;background:var(--sea);color:#fff;border-radius:5px;padding:0 6px}
+.ent .s{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.res{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.res li{display:flex;gap:10px;align-items:center;border-bottom:1px dashed var(--line);padding:4px 0}
+.res li .p{font-family:var(--f-disp);font-weight:600;font-size:20px;width:2.4em;color:var(--ink2)}
+.res li.first .p{color:var(--moon)}
+.res li .t{margin-left:auto;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.res li.me{font-weight:700}
+
+/* hall */
+.hall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.hc{border:1.5px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;background:#fff}
+.hc .top2{display:flex;gap:10px;align-items:center}
+.hc canvas{width:72px;height:54px;flex:none}
+.hc .rk{font-family:var(--f-disp);font-size:26px;font-weight:600;color:var(--moon);margin-left:auto}
+.hc .mini{font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.hc .ttl{font-size:12.5px;color:var(--tide);font-weight:700}
+.hc .acts{display:flex;gap:6px;flex-wrap:wrap}
+.hc.sel{border-color:var(--tide);background:#f3f3ff}
+.codebox{font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all;background:#f7f6ff;border-radius:8px;padding:8px;user-select:all}
+.empty{color:var(--ink2);text-align:center;padding:24px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--sea);color:#fff;padding:9px 18px;border-radius:999px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+/* cards */
+.shard{font-size:13px;color:var(--ink2);background:var(--moon2);border-radius:999px;padding:2px 12px}
+.shard b{color:#8a6410;font-variant-numeric:tabular-nums}
+.shard.big{font-size:15px;padding:5px 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.cards.small{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;max-height:330px;overflow:auto;padding:2px}
+.card{--rc:#a7aec4;position:relative;border:2px solid var(--rc);border-radius:12px;background:#fff;padding:6px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;font-size:12px;line-height:1.35;color:var(--ink)}
+.card.r-SR{--rc:#e3a23f}
+.card.r-SSR{--rc:#b86ad0;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#f5b0c5,#b9b6ef,#8fd3e8,#f3d68a) border-box;border-color:transparent}
+.card .art{width:100%;aspect-ratio:4/3;border-radius:8px;background:radial-gradient(circle at 50% 60%,#e7ebff,#cfd6f6);position:relative;display:flex;align-items:center;justify-content:center}
+.card.r-SR .art{background:radial-gradient(circle at 50% 60%,#fff6dc,#f4dca0)}
+.card.r-SSR .art{background:radial-gradient(circle at 50% 60%,#fff,#e8d9f6 60%,#cfe7f6)}
+.card .art canvas{width:86%;height:86%}
+.card .rar{position:absolute;top:4px;left:5px;font-family:var(--f-disp);font-weight:600;font-size:13px;color:#fff;background:var(--rc);border-radius:6px;padding:0 6px}
+.card.r-SSR .rar{background:linear-gradient(90deg,#e47b8f,#8a92dc)}
+.card b{font-weight:700;font-size:12.5px}
+.card .ty,.tyc{font-size:11px;border-radius:5px;padding:0 6px;color:#fff;font-weight:700;font-style:normal}
+.t-spd{background:#5b9ee0}.t-sta{background:#e47b8f}.t-pow{background:#e3a23f}.t-gut{background:#b86ad0}.t-int{background:#4fae8a}
+.card .lb{color:var(--rc);letter-spacing:1px;font-size:11px}
+.card.r-SSR .lb{color:#b86ad0}
+.card .badge{position:absolute;right:4px;top:4px;font-size:11px;font-weight:700;background:var(--coral);color:#fff;border-radius:6px;padding:0 6px}
+button.card{cursor:pointer;font:inherit}
+button.card[aria-pressed="true"]{outline:3px solid var(--tide);outline-offset:1px}
+button.card[aria-pressed="true"]::after{content:"✓";position:absolute;right:6px;top:4px;background:var(--tide);color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;font-size:12px}
+.card.locked{opacity:.55}
+.card.locked .q{font-family:var(--f-disp);font-size:30px;color:var(--ink2)}
+.gacha{display:flex;flex-direction:column;gap:14px}
+.gtop{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}
+.gtop>div:first-child{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.gbtns{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:200px}
+.cards.pull .pc{animation:pop .45s both}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}
+.deck{display:flex;flex-direction:column;gap:6px}
+.dk{display:flex;gap:8px;align-items:center}
+.dk canvas{width:40px;height:32px;flex:none}
+.dkb{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.dkb .bar{height:7px;border-radius:4px;background:#ecebf7;overflow:hidden}
+.dkb .bar i{display:block;height:100%;border-radius:4px}
+.naka{font-size:11px;background:var(--moon);color:#3b2c06;border-radius:5px;padding:0 6px;font-weight:700;font-family:var(--f-body)}
+.skl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sk{font:inherit;font-size:12px;border:1.5px solid var(--moon);background:#fffaf0;border-radius:999px;padding:1px 10px;color:#7a5a12;font-weight:700;cursor:pointer}
+.sk:hover{background:var(--moon2)}
+.sk::after{content:" ⓘ";font-weight:400;opacity:.7}
+.tr .who{display:flex;gap:2px;margin-top:2px}
+.tr .who canvas{width:34px;height:26px;border-radius:6px;background:#eceefe}
+.tr .who canvas.mx{background:var(--moon2);box-shadow:0 0 0 1.5px var(--moon)}
+.tr.nk{border-color:var(--moon);background:#fffaf0}
+.st .up.dn{color:var(--bad)}
+.evh{display:flex;gap:10px;align-items:center}
+.evh canvas{width:64px;height:50px;flex:none;background:#eceefe;border-radius:10px}
+.eff{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:14px}
+@media (prefers-reduced-motion:reduce){.cards.pull .pc{animation:none}}
+.g{font-style:normal;font-family:var(--f-disp);font-weight:600;display:inline-block;min-width:1.2em;text-align:center;border-radius:4px;margin-left:3px;font-size:.95em;line-height:1.3}
+.g-S{color:#fff;background:linear-gradient(90deg,#e47b8f,#8a92dc)}.g-A{color:#c0392b;background:#fde4dc}.g-B{color:#c7720d;background:#fdeccf}.g-C{color:#3f8f3a;background:#e2f3df}.g-D{color:#3a76b8;background:#e1ecf9}.g-E,.g-F,.g-G{color:#7c7a9a;background:#ecebf4}
+.apt{display:flex;flex-direction:column;gap:4px}
+.aptg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;font-size:12px}
+.aptg span{background:#f7f6ff;border-radius:7px;padding:2px 2px;text-align:center;white-space:nowrap;font-size:11.5px;overflow:hidden}
+.raceopts{display:flex;flex-direction:column;gap:8px}
+.ro{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px}
+.ro b{font-family:var(--f-disp);font-size:17px}
+.ro span{font-size:13px}
+.rwrap{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;align-items:start}
+@media (max-width:720px){.rwrap{grid-template-columns:minmax(0,1fr)}}
+.stand{list-style:none;margin:0;padding:8px;background:var(--sea);border-radius:12px;display:flex;flex-direction:column;gap:3px;color:#e8eaff;font-size:12.5px}
+@media (max-width:720px){.stand{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stand li{display:grid;grid-template-columns:1.4em minmax(0,1fr) auto;gap:2px 6px;align-items:center;padding:2px 4px;border-radius:6px}
+.stand li.me{background:rgba(233,185,73,.25);color:#fbefc8}
+.stand li.pk{outline:1.5px solid #6fd3a8}
+.stand .nmx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stand small{font-size:10.5px;opacity:.75}
+.stand .pl{grid-column:2 / 4;height:4px;border-radius:2px;background:rgba(255,255,255,.15);overflow:hidden;display:block}
+.stand .pl i{display:block;height:100%}
+.shop{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto}
+.shop li{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+.shop li>div{min-width:0}
+.shop small{color:var(--ink2);margin-left:4px}
+.hint{font-size:11px;background:#e2f3df;color:#3f8f3a;border-radius:5px;padding:0 6px;font-weight:700}
+.hint.inn{background:#eceefe;color:var(--tide)}
+.moonmark{display:inline-block;width:30px;height:30px;border-radius:50%;background:var(--moon2);box-shadow:inset -9px -3px 0 0 var(--moon);flex:none}
+.evd{line-height:1.8}
+.ending{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(160deg,var(--sea),var(--sea2));color:#eef0ff;border-radius:14px;padding:14px 16px}
+.ending p{margin:0;font-family:var(--f-disp);font-size:15.5px;line-height:1.85}
+.ent.rival{border-color:#7f7fd0;background:#f1f0ff}
+.rv{color:#5b4fb8}
+.ticket{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;align-items:center;border:2px solid transparent;border-radius:14px;padding:12px 14px;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#f5b0c5,#b9b6ef,#8fd3e8,#f3d68a) border-box}
+.tk-l{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.tk-l b{font-family:var(--f-disp);font-size:17px;color:#8a4fb0}
+.tk-bar{display:flex;gap:5px;align-items:center}
+.tk-bar i{width:26px;height:9px;border-radius:5px;background:#ecebf7}
+.tk-bar i.on{background:linear-gradient(90deg,#e47b8f,#8a92dc)}
+.tk-bar .sub{margin-left:6px;font-size:12.5px}
+.tk-r{display:flex;gap:10px;align-items:center}
+.tk-n{font-family:var(--f-disp);font-size:26px;font-weight:600;color:#8a4fb0;font-variant-numeric:tabular-nums}
+.tk-got{margin:0;padding:8px 12px;border-radius:10px;background:#f6effc;color:#6b3f8f;font-weight:700}
+.dresses{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:10px}
+.dresses.small{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.dress{--rc:#a7aec4;position:relative;border:2px solid var(--rc);border-radius:12px;background:#fff;padding:6px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;font-size:12px;line-height:1.35;color:var(--ink)}
+.dress.r-SR{--rc:#e3a23f}
+.dress.r-SSR{background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#f5b0c5,#b9b6ef,#8fd3e8,#f3d68a) border-box;border-color:transparent}
+.dress .art{width:100%;aspect-ratio:5/4;border-radius:8px;background:radial-gradient(circle at 50% 70%,#eef0ff,#d6dbf6);position:relative;display:flex;align-items:center;justify-content:center}
+.dress.r-SSR .art{background:radial-gradient(circle at 50% 70%,#fff,#ece0f8 60%,#d6ebf8)}
+.dress .art canvas{width:100%;height:100%}
+.dress .rar{position:absolute;top:4px;left:5px;font-family:var(--f-disp);font-weight:600;font-size:13px;color:#fff;background:var(--rc);border-radius:6px;padding:0 6px}
+.dress.r-SSR .rar{background:linear-gradient(90deg,#e47b8f,#8a92dc)}
+.dress b{font-size:12.5px}
+.dress .uqn{font-size:11px;color:#8a4fb0;font-weight:700}
+.dress .badge{position:absolute;right:4px;top:4px;font-size:11px;font-weight:700;background:var(--coral);color:#fff;border-radius:6px;padding:0 6px}
+button.dress{cursor:pointer;font:inherit}
+button.dress[aria-pressed="true"]{outline:3px solid var(--tide);outline-offset:1px}
+.dress.none{justify-content:center;min-height:90px;--rc:var(--line)}
+.dress.none .dn{color:var(--ink2);font-weight:700}
+.dress.locked{opacity:.55}
+.dress.locked .q{font-family:var(--f-disp);font-size:30px;color:var(--ink2)}
+.dpull{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#f6effc;border-radius:14px;padding:12px}
+.dpull .dress{width:150px;animation:pop .5s both}
+.dpull p{flex:1 1 220px;margin:0}
+.ssrget{color:#b05cc0;font-family:var(--f-disp);font-size:20px}
+.sk.uq{border-color:#b86ad0;background:#f6effc;color:#6b3f8f}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="top">
+    <a class="toportal" href="./" id="toPortal">← ポータル</a>
+    <button class="logo" id="goHome" type="button">ウミミダービー <small>そだてて はしらせよう</small></button>
+    <div class="sp"></div>
+    <span class="sub" id="topInfo"></span>
+  </div>
+  <main id="view"></main>
+</div>
+<div class="modal" id="modal" hidden><div class="panel" id="modalBox" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="core.js"></script>
+<script>
+(()=>{
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI*2;
+const rand = (a,b) => a + Math.random()*(b-a);
+const ri = (a,b) => Math.floor(rand(a,b+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ---------- データ ----------
+const SAVE_KEY = 'umimi-derby-v1';
+const STATS = [
+  {k:'spd', n:'スピード', c:'#5b9ee0'},
+  {k:'sta', n:'スタミナ', c:'#e47b8f'},
+  {k:'pow', n:'パワー',   c:'#e3a23f'},
+  {k:'gut', n:'こんじょう', c:'#b86ad0'},
+  {k:'int', n:'かしこさ', c:'#4fae8a'},
+];
+const STAT_MAX = 400;
+const {PALS, RECOLOR, COS, COS_KEEP, DRESSES, DRESS_KEYS, DRESS_RATE, DRESS_TICKET_SHARDS, VIS, CREA, RAR, CARDS, CARD, SPR, recolorSheet, drawUmi, drawVis, drawIcons, fitCanvas} = UMI;
+const PERS = {
+  genki:    {name:'げんき',       tip:'スタートダッシュが とくい。スピードの練習が のびやすい', bonus:'spd'},
+  nonbiri:  {name:'のんびり',     tip:'さいごに ぐんぐん のびる。スタミナが のびやすい',       bonus:'sta'},
+  kuishinbo:{name:'くいしんぼう', tip:'レース中の おやつで かそく。パワーが のびやすい',       bonus:'pow'},
+  amaenbo:  {name:'あまえんぼう', tip:'おいていかれると がんばる。こんじょうが のびやすい',   bonus:'gut'},
+  nebosuke: {name:'ねぼすけ',     tip:'あしは はやいけど いねむりも。おひるねで よく回復',   bonus:'spd'},
+  koukishin:{name:'こうきしん',   tip:'よりみち しがち。かしこさが のびやすい',               bonus:'int'},
+};
+const PERS_KEYS = Object.keys(PERS);
+const RIVAL_NAMES = ['ルナ','シズク','ホタル','ナギ','コハク','ミオ','ソラ','ユラ','サンゴ','マリン','アワ','シオン','ツムギ','ヒカリ','モモ','クラリス','ミナモ'];
+const MOODS = [
+  {n:'ぜっふちょう', f:.8,  s:'😣'},
+  {n:'ふちょう',     f:.9,  s:'😟'},
+  {n:'ふつう',       f:1,   s:'🙂'},
+  {n:'こうちょう',   f:1.1, s:'😊'},
+  {n:'ぜっこうちょう', f:1.2, s:'🤩'},
+];
+// 育成の 予定表（12週は 前の版の とちゅうデータ用）
+const PLANS = {
+  12: {6:  {rivalSum:[340,460], sk:[0,1], opts:[{name:'さざなみステークス', dist:1200}, {name:'しおかぜマイル', dist:1600}]},
+       12: {rivalSum:[580,780], sk:[1,2], opts:[{name:'月光杯', dist:2000}, {name:'銀河ステイヤーズ', dist:3000}], final:1}},
+  16: {4:  {rivalSum:[270,350], sk:[0,0], chap:'デビュー戦', opts:[{name:'さざなみステークス', dist:1200}, {name:'しおかぜマイル', dist:1600}]},
+       10: {rivalSum:[500,640], sk:[0,1], chap:'夏の大一番', opts:[{name:'うずしおカップ', dist:1600}, {name:'満ち潮記念', dist:2400}]},
+       16: {rivalSum:[780,960], sk:[1,2], chap:'最終決戦', opts:[{name:'月光杯', dist:2000}, {name:'銀河ステイヤーズ', dist:3000}], final:1}},
+};
+const NEW_LEN = 16;
+const lenOf = C => C.len || 12;
+const planOf = C => PLANS[lenOf(C)];
+// ライバル セレネ（毎回 出てくる）
+const SELENE = {name:'セレネ', color:'yozora', pers:'amaenbo', strat:'sashi'};
+function seleneFor(R, dist, idx){
+  const total = R.rivalSum[1]*1.02; const w = {spd:1.1, sta:1, pow:.95, gut:1.05, int:.9}; const ws = 5;
+  const st = {}; STATS.forEach(s=>{ st[s.k] = clamp(Math.round(total*w[s.k]/ws),1,STAT_MAX); });
+  const skills = ['sashi1','spurt','chase'].slice(0, idx+1);
+  const u = fixU({...SELENE, st, skills, rival:true, story:true});
+  u.apt = {d:{short:'B',mile:'A',mid:'A',long:'A'}, s:{nige:'D',senko:'B',sashi:'A',oikomi:'B'}}; u.strat = 'sashi';
+  return u;
+}
+const RUNNERS = 9;
+// ---------- 作戦と てきせい ----------
+const STRATS = {nige:'にげ', senko:'せんこう', sashi:'さし', oikomi:'おいこみ'};
+const STRAT_KEYS = Object.keys(STRATS);
+const STRAT_TIP = {nige:'さいしょから 先頭へ。スタミナを 多めに つかう', senko:'前の方で ねばる。あんていしている', sashi:'まんなかから 後半に のびる', oikomi:'うしろで 力を ためて さいごに 大まくり'};
+const DISTS = {short:'短距離', mile:'マイル', mid:'中距離', long:'長距離'};
+const DIST_KEYS = Object.keys(DISTS);
+const distCat = D => D<=1400 ? 'short' : D<=1800 ? 'mile' : D<=2400 ? 'mid' : 'long';
+const GRADES = 'GFEDCBAS';
+const gradeUp = (g,n) => GRADES[clamp(GRADES.indexOf(g)+(n||1),0,7)];
+const APT_SPD = {S:1.005,A:1,B:.994,C:.984,D:.968,E:.95,F:.93,G:.91};
+const APT_STR = {S:1.15,A:1,B:.8,C:.6,D:.4,E:.2,F:0,G:-.2};
+const APT_STR_BASE = {S:1,A:1,B:.995,C:.99,D:.98,E:.97,F:.96,G:.95};
+const PERS_STRAT = {genki:'AACE', nonbiri:'ECAA', kuishinbo:'CABD', amaenbo:'DBAC', nebosuke:'DCBA', koukishin:'BBBC'};
+const PERS_DIST = {genki:[4,3,2,1], nonbiri:[1,2,3,3], kuishinbo:[2,3,3,1], amaenbo:[2,3,3,2], nebosuke:[1,2,3,4], koukishin:[2,3,3,2]};
+function makeApt(pers){
+  const w = PERS_DIST[pers]||[1,1,1,1]; let q = Math.random()*w.reduce((a,b)=>a+b,0), ai = 0; for(;ai<3;ai++){ q -= w[ai]; if(q<0) break; }
+  const d = {}; DIST_KEYS.forEach((k,i)=>{ d[k] = ['A','B','D','F'][Math.abs(i-ai)]; });
+  const s = {}; STRAT_KEYS.forEach((k,i)=>{ s[k] = (PERS_STRAT[pers]||'BBBB')[i]; });
+  return {d, s};
+}
+function bestStrat(u){ return STRAT_KEYS.slice().sort((a,b)=>GRADES.indexOf(u.apt.s[b])-GRADES.indexOf(u.apt.s[a]))[0]; }
+function fixU(u){ if(!u.apt || !u.apt.d || !u.apt.s) u.apt = makeApt(u.pers); if(!STRATS[u.strat]) u.strat = bestStrat(u); if(!Array.isArray(u.skills)) u.skills = []; return u; }
+const TRAINS = [
+  {k:'spd', n:'およぎこみ', main:'spd', sub:{pow:5}, hp:-19},
+  {k:'sta', n:'とおおよぎ', main:'sta', sub:{gut:5}, hp:-17},
+  {k:'pow', n:'いわおし',   main:'pow', sub:{sta:5}, hp:-20},
+  {k:'gut', n:'なみのり',   main:'gut', sub:{spd:4,pow:3}, hp:-20},
+  {k:'int', n:'つきみ勉強', main:'int', sub:{spd:3}, hp:-8},
+];
+const RANKS = [[0,'G'],[60,'F'],[90,'E'],[120,'D'],[160,'C'],[200,'B'],[250,'A'],[300,'S']];
+const rankOf = v => { let r='G'; for(const [t,n] of RANKS) if(v>=t) r=n; return r; };
+const TOTAL_RANKS = [[0,'G'],[420,'F'],[520,'E'],[620,'D'],[720,'C'],[820,'B'],[920,'A'],[1030,'S'],[1150,'SS']];
+const totalRank = v => { let r='G'; for(const [t,n] of TOTAL_RANKS) if(v>=t) r=n; return r; };
+const sumSt = st => STATS.reduce((a,s)=>a+st[s.k],0);
+const stName = k => STATS.find(s=>s.k===k).n;
+
+// ---------- スキル ----------
+const SKILLS = {
+  spurt: {n:'月夜のスパート', d:'さいごの 4ぶんの1で ぐんと 加速', c:180},
+  rocket:{n:'ロケットスタート', d:'スタート直後に 前へ とびだす', c:140},
+  uzu:   {n:'うずしお抜け', d:'こみあっていても スピードが 落ちない', c:140},
+  awa:   {n:'ひと休みの泡', d:'レースの まんなかで スタミナを 少し 回復', c:160},
+  kiai:  {n:'ど根性', d:'つかれても スピードが 落ちにくい', c:170},
+  calm:  {n:'おちつき', d:'いねむりや よりみちを しなくなる', c:110},
+  chase: {n:'おいあげ', d:'先頭から はなされると がんばる', c:140},
+  long:  {n:'ながなみ', d:'2000m以上で スタミナが へりにくい', c:130},
+  short: {n:'さざなみ', d:'1400m以下で 少し はやい', c:120},
+  glow:  {n:'つきあかり', d:'いつでも ほんの少し はやい', c:170},
+  nige1: {n:'先手ひっしょう', d:'にげのとき、はじめの 3わりで 前へ', c:130, st:'nige'},
+  senko1:{n:'好位キープ', d:'せんこうのとき、中盤の スタミナが へりにくい', c:130, st:'senko'},
+  sashi1:{n:'するどい差しあし', d:'さしのとき、後半に のびる', c:130, st:'sashi'},
+  oikomi1:{n:'大外ひとまくり', d:'おいこみのとき、終盤に こみあいを さけて 加速', c:140, st:'oikomi'},
+  sprint:{n:'スプリントギア', d:'短距離の 後半で 加速', c:120, ds:'short'},
+  mile:  {n:'マイルの風', d:'マイルで 少し はやい', c:120, ds:'mile'},
+  mid:   {n:'中距離のこころえ', d:'中距離で 少し はやく、スタミナも もつ', c:120, ds:'mid'},
+  stayer:{n:'遠い月へ', d:'長距離で スタミナが へりにくい', c:130, ds:'long'},
+  breath:{n:'しんこきゅう', d:'3わり すぎで スタミナを 回復', c:150},
+  focus: {n:'しゅうちゅう', d:'スタートの 出だしが はやい', c:110},
+  u_star:  {n:'星めぐりの 加速', d:'終盤の はじめ、3着以内に いると 星の 力で 加速', c:0, uq:'constellation'},
+  u_angel: {n:'天の はばたき', d:'のこり 2わりで スタミナが すこし 回復して 加速', c:0, uq:'angel'},
+  u_gothic:{n:'月蝕の ささやき', d:'終盤に 4着より うしろだと、闇に まぎれて ぐんと 加速', c:0, uq:'gothic'},
+  u_idol:  {n:'アンコール！', d:'終盤に 2着以内だと、声援を うけて 加速', c:0, uq:'idol'},
+  u_space: {n:'流星ダッシュ', d:'レースの まんなかで 流れ星のように 一気に とびだす', c:0, uq:'space'},
+};
+const HINT_POOL = {spd:['rocket','spurt','sprint','nige1','focus'], sta:['awa','long','stayer','senko1','breath'], pow:['uzu','oikomi1','mile','rocket'], gut:['kiai','chase','sashi1','spurt'], int:['calm','focus','mid','glow','senko1']};
+const INNATE = {genki:['rocket','nige1'], nonbiri:['oikomi1','breath'], kuishinbo:['senko1','uzu'], amaenbo:['chase','sashi1'], nebosuke:['spurt','oikomi1'], koukishin:['calm','mid']};
+const skillCost = (k, lv) => Math.round(SKILLS[k].c * (1 - .1*Math.min(lv||0,3)));
+const skillCond = k => SKILLS[k].st ? `（${STRATS[SKILLS[k].st]}）` : SKILLS[k].ds ? `（${DISTS[SKILLS[k].ds]}）` : '';
+const SKILL_KEYS = Object.keys(SKILLS).filter(k=>!SKILLS[k].uq);
+
+// ---------- 海のなかま（サポートカード） ----------
+const CREA_SKILL = {dolphin:'spurt', penguin:'rocket', crab:'uzu', turtle:'awa', puffer:'kiai', octopus:'calm', star:'chase', otter:'long', seahorse:'short', jelly:'glow'};
+const cardName = c => `［${c.t}］${CREA[c.v]}`;
+const lbOf = id => Math.min(4, Math.max(0, (S.cards[id]||0)-1));
+const DECK_MAX = 4;
+// なかまの れんぞくイベント（3話）
+const CHAIN = {
+  dolphin:['イルカが「いっしょに 泳ごう！」と さそってくれた。','イルカが 波の のりかたを おしえてくれた。せなかに のせてもらって 大はしゃぎ！','「月光杯、ぜったい 見にいくからね」イルカと 夜の海を 全力で 泳いだ。'],
+  turtle:['ウミガメが 遠い海の 話を してくれた。','ウミガメと いっしょに ゆっくり 長く 泳ぐ れんしゅう。','「あせらず、さいごまで」ウミガメの ことばを むねに しまった。'],
+  crab:['カニが 大きな 岩を どかそうと している。手伝おう！','カニと 岩おし くらべ。なかなか しぶとい！','ふたりで ついに 大岩を うごかした！「すきまを ぬける コツ、わかったろ？」'],
+  puffer:['フグが ぷくーっと ふくらんで ちょうせんして きた。','フグと にらめっこ。どっちも まけない！','「くるしい ときほど わらうんだ」フグの かおが ぷくっと ほころんだ。'],
+  octopus:['タコが 8本の うでで 本を 読んでいる。','タコに 星の よみかたを おしえてもらった。','「レースは あたまで 走るもの」タコと さくせん会議を した。'],
+  penguin:['ペンギンが 氷の 上を すいーっと すべってきた。','ペンギンと スタートの れんしゅう。ぴょんと とびこむ！','「いちばんに とびだしたもん勝ち！」ふたりで ならんで とびこんだ。'],
+  otter:['ラッコが 貝を こんこん わっている。','ラッコと ぷかぷか 浮かびながら ひと休み。','「ながい道は ねむるように 泳ぐんだよ」ラッコの たからものの 貝を もらった。'],
+  star:['ヒトデの おうえん団が やってきた！','ヒトデと いっしょに おいかけっこ。','「おいていかれても、まだ おわってない！」ヒトデたちの 声が ひびいた。'],
+  seahorse:['タツノオトシゴが まっすぐ 立って あいさつ してくれた。','タツノオトシゴと みじかい きょりの 競争。','「みじかい 道は、さいしょから 全力で」ふたりで 波を こえた。'],
+  jelly:['クラゲが ふわふわ 光っている。','クラゲと いっしょに 夜の 水面を ただよった。','「月の 光は、いつも きみの 味方」クラゲの 光が ウミミを つつんだ。'],
+};
+
+// ---------- 保存 ----------
+let S;
+function load(){
+  let d=null; try{ d = JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){}
+  if(!d || typeof d!=='object') d = {};
+  const B = UMI.loadBook(); UMI.BOOK_KEYS.forEach(k=>{ d[k] = B[k]; });
+  if(!Array.isArray(d.hall)) d.hall = [];
+  if(!d.cur) d.cur = null;
+  if(!d.speed) d.speed = 1;
+  if(!d.nextId) d.nextId = 1;
+  if(typeof d.shards!=='number') d.shards = 600;
+  if(typeof d.tenCount!=='number') d.tenCount = 0;
+  if(typeof d.ssrTickets!=='number') d.ssrTickets = 0;
+  if(!d.dresses || typeof d.dresses!=='object') d.dresses = {};
+  if(typeof d.dressTickets!=='number') d.dressTickets = 3;
+  if(!d.cards || typeof d.cards!=='object') d.cards = {};
+  if(!Array.isArray(d.lastDeck)) d.lastDeck = [];
+  if(d.cur){ const C=d.cur; if(!Array.isArray(C.deck)) C.deck=[]; if(!C.bond) C.bond={}; if(!C.chain) C.chain={}; if(!C.wk) C.wk=null; if(typeof C.sp!=='number') C.sp=0; if(!C.hints) C.hints={}; fixU(C.u); }
+  d.hall.forEach(e=>fixU(e));
+  return d;
+}
+// かけら・カード・勝負服・でんどうは ウミミ帳（全ゲーム共通）に、のこりは ダービー用の セーブに 書く
+function save(){
+  try{ const own = {}; Object.keys(S).forEach(k=>{ if(!UMI.BOOK_KEYS.includes(k)) own[k]=S[k]; }); localStorage.setItem(SAVE_KEY, JSON.stringify(own)); }catch(e){}
+  UMI.saveBook(S);
+}
+S = load();
+
+// ---------- 連携コード ----------
+const CODE_PREFIX = 'UMDB1-';
+function toCode(u){
+  const o = {n:u.name, c:u.color, p:u.pers, s:STATS.map(s=>u.st[s.k]), r:u.rank||'', t:u.title||'', k:(u.skills||[]).slice(0,20), a:DIST_KEYS.map(k=>u.apt.d[k]).join('')+STRAT_KEYS.map(k=>u.apt.s[k]).join(''), g:u.strat, o:u.outfit||''};
+  return CODE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+function fromCode(str){
+  str = String(str||'').trim(); if(!str.startsWith(CODE_PREFIX)) return null;
+  try{
+    const o = JSON.parse(decodeURIComponent(escape(atob(str.slice(CODE_PREFIX.length)))));
+    if(!o || !Array.isArray(o.s) || o.s.length!==5) return null;
+    const st = {}; STATS.forEach((s,i)=>{ st[s.k] = clamp(Math.round(+o.s[i]||0), 1, STAT_MAX); });
+    const skills = Array.isArray(o.k) ? [...new Set(o.k.filter(k=>SKILLS[k]))] : [];
+    const u = {name:String(o.n||'ゲスト').slice(0,10), color:PALS[o.c]?o.c:'lavender', pers:PERS[o.p]?o.p:'genki', st, skills, rank:totalRank(sumSt(st)+skills.length*15), title:String(o.t||'').slice(0,20)};
+    const a = String(o.a||''); if(/^[SABCDEFG]{8}$/.test(a)){ u.apt = {d:{}, s:{}}; DIST_KEYS.forEach((k,i)=>u.apt.d[k]=a[i]); STRAT_KEYS.forEach((k,i)=>u.apt.s[k]=a[4+i]); }
+    u.strat = STRATS[o.g] ? o.g : undefined;
+    if(DRESSES[o.o]) u.outfit = o.o;
+    return fixU(u);
+  }catch(e){ return null; }
+}
+
+// ---------- スプライト ----------
+function cardTile(id, opt){
+  opt = opt || {}; const c = CARD[id], own = S.cards[id]||0;
+  if(opt.hide && !own) return `<div class="card r-${c.r} locked"><div class="art"><span class="q">？</span></div><span class="rar">${c.r}</span><b>？？？</b><span class="ty">${stName(c.type)}</span></div>`;
+  const lb = lbOf(id);
+  return `<${opt.btn?'button type="button"':'div'} class="card r-${c.r}${opt.on?' on':''}" data-card="${id}"${opt.btn?` aria-pressed="${!!opt.on}"`:''}>
+    <div class="art"><canvas data-vis="${c.v}" aria-hidden="true"></canvas>${opt.badge?`<span class="badge">${opt.badge}</span>`:''}</div>
+    <span class="rar">${c.r}</span><b>${esc(c.t)}<br>${CREA[c.v]}</b>
+    <span class="ty t-${c.type}">${stName(c.type)}</span>
+    ${own?`<span class="lb" aria-label="とっぱ ${lb}">${'◆'.repeat(lb)}${'◇'.repeat(4-lb)}</span>`:''}
+  </${opt.btn?'button':'div'}>`;
+}
+
+UMI.onAssets(()=>{ drawIcons(document); drawMinisAll(); });
+// ---------- 画面の共通 ----------
+let anim = null; // {draw(t,dt)}
+function setView(html){ anim = null; $('view').innerHTML = html; window.scrollTo({top:0}); requestAnimationFrame(()=>drawIcons($('view'))); }
+let toastT = 0;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 2400); }
+function modal(html){ $('modalBox').innerHTML = html; $('modal').hidden = false; requestAnimationFrame(()=>drawIcons($('modalBox'))); }
+function closeModal(){ $('modal').hidden = true; $('modalBox').innerHTML=''; }
+function copyText(txt, el){
+  const ok = () => toast('コピーしたよ');
+  try{ navigator.clipboard.writeText(txt).then(ok, ()=>{ selectEl(el); toast('えらんだので Ctrl+C でコピーしてね'); }); }
+  catch(e){ selectEl(el); toast('えらんだので Ctrl+C でコピーしてね'); }
+}
+function selectEl(el){ if(!el) return; const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+$('goHome').addEventListener('click', ()=>{ if(race && race.running) return; showHome(); });
+$('toPortal').addEventListener('click', e=>{ save(); });
+function updTop(){ $('topInfo').innerHTML = `<span class="shard">つきのかけら <b>${S.shards}</b></span>`; }
+
+// ---------- ホーム ----------
+function showHome(){
+  updTop();
+  const c = S.cur;
+  setView(`
+  <section class="panel hero">
+    <div>
+      <h1>月の海の<br>ウミミダービー</h1>
+      <p>${NEW_LEN}週かけて ウミミを そだてて、ライバルの セレネと 月光杯を めざそう。そだてた子は コードで ともだちと 走らせられるよ。</p>
+      <div class="menu">
+        ${c ? `<button class="btn gold" id="hCont" type="button">つづきから <span>${esc(c.u.name)}・${c.week}週目</span></button>` : ''}
+        <button class="btn ${c?'':'main'}" id="hNew" type="button">あたらしく そだてる <span>${c?'いまの子は おわかれ':NEW_LEN+'週'}</span></button>
+        <button class="btn" id="hGacha" type="button">なかまガチャ <span>かけら ${S.shards}${S.ssrTickets?`・SSR券 ${S.ssrTickets}`:''}</span></button>
+        <button class="btn" id="hDress" type="button">勝負服ガチャ <span>チケット ${S.dressTickets}</span></button>
+        <button class="btn" id="hCards" type="button">なかま図鑑 <span>${Object.keys(S.cards).length} / ${CARDS.length}</span></button>
+        <button class="btn" id="hVs" type="button">みんなで レース <span>コードで対戦</span></button>
+        <button class="btn" id="hHall" type="button">でんどう <span>${S.hall.length}匹</span></button>
+      </div>
+    </div>
+    <canvas id="heroCv" aria-label="ならんで およぐ ウミミたち"></canvas>
+  </section>`);
+  if(c) $('hCont').addEventListener('click', showTrain);
+  $('hNew').addEventListener('click', ()=>{
+    if(!c) return showCreate();
+    modal(`<h3>あたらしく そだてる？</h3><p class="sub">${esc(c.u.name)}（${c.week}週目）の 育成は おわりになります。</p><div class="row"><button class="btn" id="mNo" type="button">やめる</button><button class="btn main" id="mYes" type="button">あたらしく そだてる</button></div>`);
+    $('mNo').addEventListener('click', closeModal); $('mYes').addEventListener('click', ()=>{ closeModal(); S.cur=null; save(); showCreate(); });
+  });
+  $('hVs').addEventListener('click', showVsSetup);
+  $('hGacha').addEventListener('click', ()=>showGacha());
+  $('hDress').addEventListener('click', ()=>showDressGacha());
+  $('hCards').addEventListener('click', showCards);
+  $('hHall').addEventListener('click', showHall);
+  const cv = $('heroCv'); const cols = Object.keys(PALS);
+  const fish = cols.slice(0,5).map((col,i)=>({col, x:rand(0,1), y:.42+i*.12, sp:rand(.03,.06), ph:rand(0,6), out:['','constellation','','idol',''][i]}));
+  anim = {draw(t,dt){
+    const {w,h} = fitCanvas(cv,1.25); const c = cv.getContext('2d');
+    const g = c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#232a68'); g.addColorStop(1,'#3a4799'); c.fillStyle=g; c.fillRect(0,0,w,h);
+    c.fillStyle='#fbefc8'; c.globalAlpha=.9; c.beginPath(); c.arc(w*.82,h*.2,h*.1,0,TAU); c.fill();
+    c.fillStyle='#2b347a'; c.beginPath(); c.arc(w*.82+h*.045,h*.2-h*.02,h*.088,0,TAU); c.fill(); c.globalAlpha=1;
+    for(let i=0;i<14;i++){ const sx=(i*97.3%1)*w, sy=(i*53.7%1)*h*.35; c.fillStyle=`rgba(255,255,255,${.35+.3*Math.sin(t*1.5+i)})`; c.fillRect((i*137)%w, (i*71)%(h*.35), 2, 2); }
+    fish.forEach((f,i)=>{ f.x += f.sp*dt; if(f.x>1.15) f.x=-.15;
+      const gy = h*f.y + Math.sin(t*1.6+f.ph)*3;
+      c.strokeStyle='rgba(200,210,255,.25)'; c.lineWidth=1.5; c.beginPath(); c.moveTo(w*f.x-60,gy+1); c.lineTo(w*f.x-20,gy+1); c.stroke();
+      drawUmi(c, f.col, 2+(Math.floor(t*2.6+i)%2), w*f.x, gy, h/1100, 1, f.out); });
+  }};
+}
+
+// ---------- 作成 ----------
+let renderDressRef = null;
+function showCreate(){
+  renderDressRef = null;
+  const st = {name:pick(['ミミ','ルル','ココ','ノア','ユメ','ハル']), color:'lavender', pers:'genki', deck:S.lastDeck.filter(id=>S.cards[id]), outfit:S.dresses[S.lastDress]?S.lastDress:''};
+  setView(`
+  <div class="grid2">
+    <section class="panel portrait"><canvas id="pvCv" aria-label="ウミミの見た目"></canvas><p class="sub">いろと せいかくを えらんでね。せいかくで 得意な 作戦（にげ・せんこう・さし・おいこみ）が かわるよ。距離の 得意は うまれつき。</p></section>
+    <section class="panel" style="display:flex;flex-direction:column;gap:16px">
+      <h2>あたらしい ウミミ</h2>
+      <div class="field"><label for="cName">なまえ（10文字まで）</label><input type="text" id="cName" maxlength="10" value="${esc(st.name)}"></div>
+      <div class="field"><span class="lbl">いろ</span><div class="chips" id="cCol"></div></div>
+      <div class="field"><span class="lbl">せいかく</span><div class="chips" id="cPers"></div><p class="persTip" id="cTip"></p></div>
+      <div class="field"><span class="lbl">勝負服</span><div id="cDress"></div></div>
+      <div class="field"><span class="lbl">サポートの なかま（${DECK_MAX}匹まで・同じ生き物は1匹）</span><div id="cDeck"></div></div>
+      <div class="row"><button class="btn" id="cBack" type="button">もどる</button><button class="btn main" id="cGo" type="button">この子で はじめる</button></div>
+    </section>
+  </div>`);
+  const renderChips = () => {
+    $('cCol').innerHTML = Object.entries(PALS).map(([k,p])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===st.color}"><span class="dot" style="background:${p.dot}"></span>${p.name}</button>`).join('');
+    $('cPers').innerHTML = PERS_KEYS.map(k=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===st.pers}">${PERS[k].name}</button>`).join('');
+    $('cTip').textContent = PERS[st.pers].tip;
+    $('cCol').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ st.color=b.dataset.k; renderChips(); if($('cDress') && typeof renderDressRef==='function') renderDressRef(); }));
+    $('cPers').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ st.pers=b.dataset.k; renderChips(); }));
+  };
+  renderChips();
+  const renderDeck = () => {
+    const owned = CARDS.filter(c=>S.cards[c.id]);
+    $('cDeck').innerHTML = owned.length ? `<p class="sub" style="margin-bottom:6px">${st.deck.length} / ${DECK_MAX}匹 えらんでいます。カードを おすと 出し入れできるよ。</p><div class="cards small">${owned.map(c=>cardTile(c.id,{btn:1,on:st.deck.includes(c.id)})).join('')}</div>`
+      : `<p class="sub">まだ なかまが いないよ。<button class="btn sm" type="button" id="cToGacha">なかまガチャへ</button></p>`;
+    if($('cToGacha')) $('cToGacha').addEventListener('click', ()=>showGacha());
+    $('cDeck').querySelectorAll('[data-card]').forEach(b=>b.addEventListener('click',()=>{
+      const id=b.dataset.card, c=CARD[id];
+      if(st.deck.includes(id)) st.deck = st.deck.filter(x=>x!==id);
+      else { if(st.deck.length>=DECK_MAX) return toast(`${DECK_MAX}匹までだよ`); const same = st.deck.find(x=>CARD[x].v===c.v); if(same) st.deck = st.deck.filter(x=>x!==same); st.deck.push(id); }
+      renderDeck(); }));
+    drawIcons($('cDeck'));
+  };
+  renderDeck();
+  const renderDress = () => {
+    const owned = DRESS_KEYS.filter(k=>S.dresses[k]);
+    $('cDress').innerHTML = owned.length ? `<div class="dresses small"><button type="button" class="dress none" data-d="" aria-pressed="${!st.outfit}"><span class="dn">きない</span></button>${owned.map(k=>dressTile(k,{btn:1,on:st.outfit===k,col:st.color})).join('')}</div>${st.outfit?`<p class="sub">${dressEffect(st.outfit)}</p>`:''}`
+      : `<p class="sub">まだ 勝負服が ないよ。<button class="btn sm" type="button" id="cToDress">勝負服ガチャへ</button></p>`;
+    if($('cToDress')) $('cToDress').addEventListener('click', ()=>showDressGacha());
+    $('cDress').querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>{ st.outfit=b.dataset.d; renderDress(); }));
+    drawIcons($('cDress'));
+  };
+  renderDress(); renderDressRef = renderDress;
+  $('cBack').addEventListener('click', showHome);
+  $('cGo').addEventListener('click', ()=>{
+    const name = ($('cName').value.trim() || 'ウミミ').slice(0,10);
+    const base = {}; STATS.forEach(s=>{ base[s.k] = ri(58,78); }); base[PERS[st.pers].bonus] += 12;
+    const bond = {}; st.deck.forEach(id=>{ bond[id] = RAR[CARD[id].r].bond + lbOf(id)*3; });
+    S.lastDeck = st.deck.slice();
+    const u = fixU({name, color:st.color, pers:st.pers, st:base, skills:[]});
+    if(st.outfit && DRESSES[st.outfit]){ const D = DRESSES[st.outfit]; u.outfit = st.outfit; for(const [k,v] of Object.entries(D.st)) u.st[k] += v; if(D.u) u.skills.push(D.u); }
+    S.lastDress = st.outfit;
+    S.cur = {u, len:NEW_LEN, week:1, hp:100, mood:2, lv:{}, results:[], deck:st.deck.slice(), bond, chain:{}, wk:null, sp:0, hints:{},
+      log:`${esc(name)}の 育成が はじまったよ。${st.deck.length?'なかまが いる練習を えらぶと よく のびるよ。':'まずは 練習を えらんでね。'}`, fx:{}};
+    save(); showTrain(); const e0 = storyEvent(S.cur); if(e0) showEvent(S.cur, e0);
+  });
+  const cv = $('pvCv');
+  anim = {draw(t){ const {w,h}=fitCanvas(cv); const c=cv.getContext('2d'); c.clearRect(0,0,w,h); drawUmi(c, st.color, Math.floor(t*1.3)%2, w*.5, h*.8+Math.sin(t*2.2)*2, h/330, -1, st.outfit); }};
+}
+
+// ---------- 育成 ----------
+// 毎週、なかまが どの練習に 来るかを きめる
+function assignCards(C){
+  const wk = {};
+  (C.deck||[]).forEach(id=>{ if(Math.random()<.18) return; const c=CARD[id];
+    const ti = Math.random()<.45 ? TRAINS.findIndex(t=>t.main===c.type) : ri(0,TRAINS.length-1); wk[id]=ti; });
+  C.wk = {week:C.week, at:wk};
+}
+function presentAt(C, ti){ if(!C.wk || C.wk.week!==C.week) assignCards(C); return Object.keys(C.wk.at).filter(id=>C.wk.at[id]===ti); }
+const BOND_MAX = 100, NAKA = 75;
+function isNaka(C, id, tr){ return (C.bond[id]||0) >= NAKA && CARD[id].type===tr.main; }
+function gainOf(C, tr, ti){
+  const P = PERS[C.u.pers], mf = MOODS[C.mood].f, lv = C.lv[tr.k]||0, lvf = 1 + Math.min(lv,8)*.06;
+  const here = ti!=null ? presentAt(C, ti) : [];
+  let cardMul = 1 + here.length*.05, flat = 0, naka = 1;
+  here.forEach(id=>{ const c=CARD[id], R=RAR[c.r], lb=lbOf(id);
+    if(c.type===tr.main){ cardMul += R.bonus + lb*.02; flat += R.flat + (lb>=4?1:0); }
+    else cardMul += (R.bonus + lb*.02)*.4;
+    if(isNaka(C,id,tr)) naka *= R.naka + lb*.02; });
+  const out = {}; const m = 17*mf*lvf*(P.bonus===tr.main?1.12:1)*cardMul*naka + flat;
+  out[tr.main] = Math.round(m);
+  for(const [k,v] of Object.entries(tr.sub)) out[k] = Math.round(v*mf*lvf*cardMul*(naka>1?1.2:1));
+  return out;
+}
+const failRate = hp => hp>=45 ? 0 : Math.round(clamp((45-hp)*1.8, 0, 80));
+function addSt(u, g){ for(const [k,v] of Object.entries(g)) u.st[k] = clamp(u.st[k]+v, 1, STAT_MAX); }
+function moodAdd(C, d){ C.mood = clamp(C.mood + d, 0, 4); }
+function bondCol(v){ return v>=NAKA ? 'var(--moon)' : v>=50 ? 'var(--good)' : 'var(--tide2)'; }
+function showTrain(){
+  const C = S.cur; if(!C) return showHome();
+  updTop();
+  const WEEKS = lenOf(C), RACES = planOf(C);
+  if(C.week > WEEKS) return showFinish();
+  const race = RACES[C.week];
+  const nextRaceW = Object.keys(RACES).map(Number).find(w=>w>=C.week);
+  if(!race) presentAt(C, 0);
+  setView(`
+  <div class="grid2">
+    <section class="panel portrait">
+      <div class="nm"><h2>${esc(C.u.name)}</h2><span class="tag">${PERS[C.u.pers].name}</span><span class="tag">${PALS[C.u.color].name}</span></div>
+      <canvas id="tCv" aria-label="${esc(C.u.name)}のようす"></canvas>
+      <div class="meter"><div class="t"><span>たいりょく</span><span>${C.hp} / 100</span></div><div class="bar"><i style="width:${C.hp}%;background:${C.hp<45?'var(--bad)':C.hp<70?'var(--moon)':'var(--good)'}"></i></div></div>
+      <div class="mood">やる気：${MOODS[C.mood].s} <b>${MOODS[C.mood].n}</b></div>
+      ${C.deck.length?`<div class="deck"><span class="lbl">なかま</span>${C.deck.map(id=>{ const c=CARD[id], v=C.bond[id]||0; return `<div class="dk"><canvas data-vis="${c.v}" aria-hidden="true"></canvas><div class="dkb"><span>${CREA[c.v]} <small class="t-${c.type} tyc">${stName(c.type)}</small>${v>=NAKA?' <small class="naka">なかよし</small>':''}</span><div class="bar"><i style="width:${v}%;background:${bondCol(v)}"></i></div></div></div>`; }).join('')}</div>`:''}
+      ${aptTable(C.u)}
+      <div class="skl"><span class="lbl">スキル</span>${C.u.skills.length?C.u.skills.map(k=>skChip(k)).join(''):'<span class="sub">まだ ないよ</span>'}${C.u.skills.length?'<span class="sub" style="font-size:12px">おすと こうかが 見られるよ</span>':''}</div>
+      <div class="row"><button class="btn sm" id="tSkill" type="button">スキルを おぼえる（${C.sp}pt）</button>${Object.keys(C.hints).length?`<span class="sub">ヒント ${Object.keys(C.hints).length}こ</span>`:''}</div>
+    </section>
+    <section class="panel" style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="row" style="justify-content:space-between"><h2>${C.week}週目 <small class="sub" style="font-family:var(--f-body)">／ ${WEEKS}週</small></h2>
+        <span class="sub">${race ? `こんしゅうは ${race.chap||'レース'}！` : nextRaceW ? `つぎの レース（${RACES[nextRaceW].opts.map(o=>o.name).join('／')}）まで あと ${nextRaceW-C.week}週` : ''}</span></div>
+      <div class="weekbar" aria-hidden="true">${Array.from({length:WEEKS},(_,i)=>{ const w=i+1; return `<b class="${RACES[w]?'race ':''}${w<C.week?'done':w===C.week?'now':''}"></b>`; }).join('')}</div>
+      <div class="stats">${STATS.map(s=>`<div class="st"><span class="k">${s.n}</span><span class="r" style="color:${s.c}">${rankOf(C.u.st[s.k])}</span><span class="v">${C.u.st[s.k]}</span><span class="up${C.fx[s.k]<0?' dn':''}">${C.fx[s.k]?(C.fx[s.k]>0?'+':'')+C.fx[s.k]:''}</span></div>`).join('')}</div>
+      <div class="log" id="tLog">${C.log}</div>
+      ${race ? `<div class="raceopts">${race.opts.map((o,i)=>{ const cat=distCat(o.dist), g=C.u.apt.d[cat]; return `<button class="btn ${i?'':'gold'} ro" type="button" data-ri="${i}"><b>${o.name}</b><span>${o.dist}m・${DISTS[cat]}・てきせい <i class="g g-${g}">${g}</i></span></button>`; }).join('')}<p class="sub">どちらかに 出よう。ライバル${RUNNERS-1}匹と 走るよ。距離の てきせいが 低いと 走りにくいよ。</p></div>` : `
+      <div class="trains">${TRAINS.map((tr,i)=>{ const g=gainOf(C,tr,i), f=failRate(C.hp), here=presentAt(C,i), naka=here.some(id=>isNaka(C,id,tr));
+        return `<button type="button" class="tr${naka?' nk':''}" data-i="${i}"><b>${tr.n}${naka?' <small class="naka">なかよし！</small>':''}</b><span class="g">${Object.entries(g).map(([k,v])=>`${stName(k)}+${v}`).join(' ')}</span><span class="lv">練習レベル ${1+Math.min(C.lv[tr.k]||0,8)}　たいりょく${tr.hp}</span>${f?`<span class="fail">しっぱい ${f}%</span>`:''}${here.length?`<span class="who">${here.map(id=>`<canvas data-vis="${CARD[id].v}" class="${(C.bond[id]||0)>=NAKA?'mx':''}" title="${CREA[CARD[id].v]}" aria-label="${CREA[CARD[id].v]}"></canvas>`).join('')}</span>`:''}</button>`; }).join('')}
+        <button type="button" class="tr rest" id="tRest"><b>おひるね</b><span class="g">たいりょく +${C.u.pers==='nebosuke'?55:45}</span><span class="lv">すやすや 休む</span></button>
+        <button type="button" class="tr rest" id="tPlay"><b>おでかけ</b><span class="g">やる気 アップ・たいりょく +15</span><span class="lv">${C.deck.length?'なかま みんなと なかよく':'ともだちと あそぶ'}</span></button>
+      </div>`}
+      <div class="row"><button class="btn sm" id="tHome" type="button">ホームへ（とちゅうから再開できます）</button></div>
+    </section>
+  </div>`);
+  C.fx = {};
+  $('tHome').addEventListener('click', showHome);
+  $('tSkill').addEventListener('click', ()=>skillShop(()=>showTrain()));
+  if(race) document.querySelectorAll('.raceopts [data-ri]').forEach(b=>b.addEventListener('click',()=>startTrainRace(+b.dataset.ri)));
+  else {
+    document.querySelectorAll('.tr[data-i]').forEach(b=>b.addEventListener('click',()=>doTrain(+b.dataset.i)));
+    $('tRest').addEventListener('click', ()=>{ const add=C.u.pers==='nebosuke'?55:45; C.hp=clamp(C.hp+add,0,100); if(Math.random()<.25) moodAdd(C,1); endWeek(`${esc(C.u.name)}は ぐっすり おひるね。たいりょくが <span class="hl">+${add}</span> 回復したよ。`, 'sleep'); });
+    $('tPlay').addEventListener('click', ()=>{ C.hp=clamp(C.hp+15,0,100); moodAdd(C,1); C.sp += 5; C.deck.forEach(id=>C.bond[id]=clamp((C.bond[id]||0)+8,0,BOND_MAX));
+      endWeek(C.deck.length ? `なかまたちと 月のかけら さがし。やる気アップ、なかよし度も <span class="hl">+8</span>！` : `${esc(C.u.name)}は ともだちと 月のかけら さがし。やる気が あがったよ。`, 'happy'); });
+  }
+  let pose = C.pose || 'idle'; C.pose = 'idle'; let poseT = 2.2;
+  const cv = $('tCv');
+  anim = {draw(t,dt){ const {w,h}=fitCanvas(cv); const c=cv.getContext('2d'); c.clearRect(0,0,w,h); poseT-=dt; if(poseT<0) pose='idle';
+    let f = Math.floor(t*1.3)%2;
+    if(pose==='happy') f = [7,8,9][Math.floor(t*3)%3]; else if(pose==='sleep') f = 5+Math.floor(t)%2; else if(pose==='shine') f = 4;
+    if(pose==='idle' && C.hp<30) f = 5+Math.floor(t*.9)%2;
+    drawUmi(c, C.u.color, f, w*.5, h*.82+(pose==='sleep'?0:Math.sin(t*2.2)*2), h/330, -1, C.u.outfit); }};
+}
+function doTrain(ti){
+  const C = S.cur, tr = TRAINS[ti], f = failRate(C.hp), here = presentAt(C, ti);
+  C.hp = clamp(C.hp + tr.hp, 0, 100);
+  if(Math.random()*100 < f){
+    addSt(C.u, {[tr.main]:-6}); moodAdd(C,-1);
+    C.fx = {[tr.main]:-6};
+    return endWeek(`<span class="hl">しっぱい…</span> ${esc(C.u.name)}は つかれて うまく できなかった。${stName(tr.main)}-6、やる気ダウン。`, 'sleep');
+  }
+  const naka = here.some(id=>isNaka(C,id,tr));
+  const g = gainOf(C, tr, ti); addSt(C.u, g); C.lv[tr.k] = (C.lv[tr.k]||0)+1; C.fx = Object.assign({}, g);
+  here.forEach(id=>{ C.bond[id] = clamp((C.bond[id]||0) + (CARD[id].type===tr.main?14:11), 0, BOND_MAX); });
+  const spGot = 10 + (naka?6:0) + here.length*2; C.sp += spGot;
+  const hintMsgs = [];
+  here.forEach(id=>{ if(Math.random() < .3){ const c=CARD[id]; const pool = HINT_POOL[c.type].concat([CREA_SKILL[c.v]]).filter(k=>!C.u.skills.includes(k) && (C.hints[k]||0)<3);
+    if(pool.length){ const k = pick(pool); C.hints[k] = (C.hints[k]||0)+1; hintMsgs.push(`${CREA[c.v]}から「${SKILLS[k].n}」の ヒント！（Lv${C.hints[k]}）`); } } });
+  const big = Math.random() < .12 + MOODS[C.mood].f*.05;
+  let msg = `${naka?'<span class="hl">なかよしトレーニング！</span> ':''}${tr.n}を がんばった！ ${Object.entries(g).map(([k,v])=>`${stName(k)}<span class="hl">+${v}</span>`).join('、')}`;
+  msg += `　スキルpt <span class="hl">+${spGot}</span>`;
+  if(here.length) msg += `<br>${here.map(id=>CREA[CARD[id].v]).join('・')}が いっしょだったよ。`;
+  if(hintMsgs.length) msg += `<br><span class="hl">${hintMsgs.join(' ')}</span>`;
+  if(big){ const k=tr.main; C.u.st[k]=clamp(C.u.st[k]+6,1,STAT_MAX); C.fx[k]=(C.fx[k]||0)+6; msg += `　<span class="hl">月の光で ひらめいた！ さらに +6</span>`; }
+  // なかまの れんぞくイベント
+  const TH = [0, 40, NAKA];
+  const nxt = here.find(id=>{ const st=C.chain[id]||0; return st<3 && (C.bond[id]||0) >= TH[st]; });
+  endWeek(msg, big||naka?'shine':'happy', nxt ? chainEvent(C, nxt) : null);
+}
+function chainEvent(C, id){
+  const c = CARD[id], step = C.chain[id]||0, text = CHAIN[c.v][step];
+  const head = `${CREA[c.v]}との おもいで ${step+1}/3`;
+  const reward = () => {
+    C.chain[id] = step+1;
+    if(step===0){ C.bond[id]=clamp((C.bond[id]||0)+6,0,BOND_MAX); addSt(C.u,{[c.type]:6}); return `${stName(c.type)}+6 なかよし度+6`; }
+    if(step===1){ addSt(C.u,{[c.type]:10}); moodAdd(C,1); return `${stName(c.type)}+10 やる気アップ`; }
+    const sk = CREA_SKILL[c.v];
+    if(c.r!=='R' && !C.u.skills.includes(sk)){ C.u.skills.push(sk); addSt(C.u,{[c.type]:8}); return `スキル「${SKILLS[sk].n}」を おぼえた！ ${stName(c.type)}+8`; }
+    addSt(C.u,{[c.type]:16}); C.hp=clamp(C.hp+10,0,100); return `${stName(c.type)}+16 たいりょく+10`;
+  };
+  return {t:head, d:text, icon:c.v, o:[[step===2?'ありがとう！':'うん！', reward]]};
+}
+// ---------- イベント ----------
+const EVENTS = [
+  {t:'月のしずく', d:'砂の中で きらきら光る しずくを みつけた！', o:[['のんでみる',C=>{C.hp=clamp(C.hp+20,0,100); return 'たいりょく+20';}],['よく しらべる',C=>{addSt(C.u,{int:12}); return 'かしこさ+12';}]]},
+  {t:'クラゲ先生の とっくん', d:'ふわふわ クラゲ先生が 声を かけてくれた。', o:[['おねがいします！',C=>{addSt(C.u,{spd:8,pow:8}); C.hp=clamp(C.hp-10,0,100); return 'スピード+8 パワー+8 たいりょく-10';}]]},
+  {t:'さんごの おやつ', d:'ともだちが おやつを わけてくれた。', o:[['いただきます',C=>{C.hp=clamp(C.hp+15,0,100); moodAdd(C,1); return 'たいりょく+15 やる気アップ';}]]},
+  {t:'なみが たかい日', d:'きょうは 海が あれている…', o:[['あえて およぐ',C=>{addSt(C.u,{gut:14}); C.hp=clamp(C.hp-15,0,100); return 'こんじょう+14 たいりょく-15';}],['おうちで やすむ',C=>{C.hp=clamp(C.hp+12,0,100); return 'たいりょく+12';}]]},
+  {t:'ライバルあらわる', d:'となりの入り江の ウミミが「月光杯で まってるよ」と いってきた。', o:[['まけないぞ！',C=>{addSt(C.u,{gut:8}); moodAdd(C,1); return 'こんじょう+8 やる気アップ';}]]},
+  {t:'ほしぞら', d:'夜の水面に 星が うつって とても きれい。', o:[['ずっと ながめる',C=>{addSt(C.u,{int:7}); moodAdd(C,1); return 'かしこさ+7 やる気アップ';}]]},
+  {t:'かいがら ひろい', d:'めずらしい かいがらを みつけた。', o:[['たからものに する',C=>{const s=pick(STATS); addSt(C.u,{[s.k]:9}); return `${s.n}+9`;}]]},
+  {t:'ちょっと かぜぎみ', d:'くしゅん！ 水が つめたかったかも。', o:[['あったかくして ねる',C=>{C.hp=clamp(C.hp-8,0,100); moodAdd(C,-1); return 'たいりょく-8 やる気ダウン';}]]},
+  {t:'ねすごした', d:'気づいたら おひさまが 高い…', o:[['まあ いっか',C=>{C.hp=clamp(C.hp+18,0,100); moodAdd(C,-1); return 'たいりょく+18 やる気ダウン';}]], pers:'nebosuke'},
+  {t:'よりみち', d:'みなれない 洞くつを みつけた。', o:[['はいってみる',C=>{addSt(C.u,{int:10,sta:4}); return 'かしこさ+10 スタミナ+4';}],['きょうは やめとく',C=>{C.hp=clamp(C.hp+8,0,100); return 'たいりょく+8';}]], pers:'koukishin'},
+  {t:'ながれ星', d:'夜空を 大きな ながれ星が よこぎった！', o:[['おねがいごとを する',C=>{ const left=SKILL_KEYS.filter(k=>!C.u.skills.includes(k)); if(Math.random()<.5 && left.length){ const k=pick(left); C.u.skills.push(k); return `スキル「${SKILLS[k].n}」を おぼえた！`; } moodAdd(C,1); return 'やる気アップ'; }]]},
+  {t:'しおだまり競争', d:'しおだまりで ちびっこたちと かけっこ。', o:[['本気で 走る',C=>{addSt(C.u,{spd:8,gut:4}); C.hp=clamp(C.hp-6,0,100); return 'スピード+8 こんじょう+4 たいりょく-6';}],['ゆずってあげる',C=>{moodAdd(C,1); return 'やる気アップ';}]]},
+  {t:'あらしの よる', d:'外は あらし。おうちで じっと がまん。', o:[['じっくり 体づくり',C=>{addSt(C.u,{sta:9,pow:4}); return 'スタミナ+9 パワー+4';}],['ぐっすり ねる',C=>{C.hp=clamp(C.hp+22,0,100); return 'たいりょく+22';}]]},
+  {t:'月の みちかけ', d:'ものしりの ヒラメが 月の みちかけを 教えてくれた。', o:[['ふむふむ',C=>{addSt(C.u,{int:11}); return 'かしこさ+11';}]]},
+  {t:'おうえんの 手紙', d:'小さな 貝に 手紙が 入っていた。「がんばってね」', o:[['うれしい！',C=>{moodAdd(C,1); STATS.forEach(s=>addSt(C.u,{[s.k]:3})); return 'やる気アップ ぜんぶ+3';}]]},
+  {t:'みじかい道と ながい道', d:'物知りの ウミウシ先生が「どっちの 道を きたえる？」と きいてきた。', o:[['みじかい道',C=>aptUp(C,['short','mile'])],['ながい道',C=>aptUp(C,['mid','long'])]]},
+  {t:'作戦会議', d:'ライバルの 走りを ビデオ貝で 研究した。', o:[['前で 走る',C=>stratUp(C,['nige','senko'])],['うしろから 差す',C=>stratUp(C,['sashi','oikomi'])]]},
+  {t:'海の 図書館', d:'むかしの 名ウミミの 本を みつけた。', o:[['読みふける',C=>{C.sp+=25; addSt(C.u,{int:5}); return 'スキルpt+25 かしこさ+5';}]]},
+  {t:'ふしぎな うずまき', d:'目の前に 小さな うずしおが できた。', o:[['とびこむ',C=>{ if(Math.random()<.6){ addSt(C.u,{pow:12}); return 'うずを ぬけた！ パワー+12'; } C.hp=clamp(C.hp-12,0,100); return 'ぐるぐる… たいりょく-12'; }],['さける',C=>{addSt(C.u,{int:5}); return 'かしこさ+5';}]]},
+];
+function seleneLine(me, sel, fin){
+  if(me < sel) return fin ? '<span class="hl">セレネ「…まけたよ。きみは ほんとうに 強くなったね」</span>' : `<span class="hl">セレネ「やるじゃない。つぎは まけないから」</span>（セレネは ${sel}着）`;
+  return fin ? '<span class="hl">セレネ「いい レースだった。また いっしょに 泳ごう」</span>' : `<span class="hl">セレネ「まだまだ だね。月光杯で まってる」</span>（セレネは ${sel}着）`;
+}
+const STORY = {16:{
+  1: {story:1, t:'月の入り江の ものがたり', d:'ここは 月の光が とどく 入り江。小さな ウミミが ひとり、遠くの 海で ひらかれる「月光杯」の うわさを 聞いた。16週の あいだに、どこまで 強くなれるだろう？', o:[['はじめよう',C=>'']]},
+  2: {story:1, t:'銀色の ウミミ', d:'月の入り江に、銀色に 光る ウミミが およいできた。「わたしは セレネ。月光杯を めざしてるの。きみも？」', o:[['うん、ぼくも！',C=>{moodAdd(C,1); addSt(C.u,{gut:6}); return 'やる気アップ こんじょう+6';}],['まだ わからない…',C=>{addSt(C.u,{int:6}); C.sp+=10; return 'かしこさ+6 スキルpt+10';}]]},
+  5: {story:1, t:'はじめての レースを おえて', d:'レースの あと、入り江の なかまたちが 集まってくれた。「つぎは もっと 大きな レースだよ」', o:[['がんばる！',C=>{STATS.forEach(s=>addSt(C.u,{[s.k]:3})); return 'ぜんぶ+3';}]]},
+  8: {story:1, t:'セレネの 秘密練習', d:'夜、セレネが ひとりで 何度も 何度も スパートの 練習を していた。', o:[['こっそり 見て まなぶ',C=>{addSt(C.u,{int:10}); C.hints.spurt=(C.hints.spurt||0)+1; return 'かしこさ+10 「月夜のスパート」ヒント';}],['いっしょに 走る',C=>{addSt(C.u,{spd:8,gut:8}); C.hp=clamp(C.hp-10,0,100); return 'スピード+8 こんじょう+8 たいりょく-10';}]]},
+  12:{story:1, t:'夏の おわり', d:'大一番を おえて、海の 色が すこし 変わった。月光杯まで あと すこし。', o:[['からだを ととのえる',C=>{C.hp=clamp(C.hp+20,0,100); return 'たいりょく+20';}],['もっと きたえる',C=>{addSt(C.u,{sta:8,pow:8}); return 'スタミナ+8 パワー+8';}]]},
+  15:{story:1, t:'最終決戦の 前夜', d:'満月の 夜。セレネが となりに ならんだ。「あしたは 本気で いくから」', o:[['こっちも 本気だよ',C=>{moodAdd(C,2); return 'やる気 大アップ';}],['いっしょに 月を 見る',C=>{C.hp=clamp(C.hp+25,0,100); moodAdd(C,1); return 'たいりょく+25 やる気アップ';}]]},
+}};
+function aptUp(C, keys){ const k = keys.slice().sort((a,b)=>GRADES.indexOf(C.u.apt.d[a])-GRADES.indexOf(C.u.apt.d[b]))[0]; const g0 = C.u.apt.d[k]; if(g0==='S' || g0==='A'){ C.sp += 20; return 'もう とくい！ スキルpt+20'; } C.u.apt.d[k] = gradeUp(g0); return `${DISTS[k]}てきせい ${g0}→${C.u.apt.d[k]}`; }
+function stratUp(C, keys){ const k = keys.slice().sort((a,b)=>GRADES.indexOf(C.u.apt.s[a])-GRADES.indexOf(C.u.apt.s[b]))[0]; const g0 = C.u.apt.s[k]; if(g0==='S' || g0==='A'){ C.sp += 20; return 'もう とくい！ スキルpt+20'; } C.u.apt.s[k] = gradeUp(g0); return `${STRATS[k]}てきせい ${g0}→${C.u.apt.s[k]}`; }
+function skChip(k){ return `<button type="button" class="sk${SKILLS[k].uq?' uq':''}" data-sk="${k}">${SKILLS[k].n}</button>`; }
+function showSkill(k){
+  const sk = SKILLS[k], src = Object.entries(CREA_SKILL).find(([v,x])=>x===k);
+  modal(`<h3>${sk.n}</h3><p>${sk.d}</p><p class="sub">${sk.st?`はたらくのは 作戦が「${STRATS[sk.st]}」の ときだけ。`:sk.ds?`はたらくのは ${DISTS[sk.ds]}の レースだけ。`:'どの レースでも はたらく。'}${src?`<br>${CREA[src[0]]}（SR・SSR）との おもいでイベントで おぼえられる。`:''}${sk.uq?`<br>勝負服「${DRESSES[sk.uq].n}」の 固有スキル。`:''}</p><div class="row"><button class="btn" id="mClose" type="button">とじる</button></div>`);
+  $('mClose').addEventListener('click', closeModal);
+}
+document.addEventListener('click', e=>{ const b = e.target.closest && e.target.closest('.sk[data-sk]'); if(!b) return; e.stopPropagation(); e.preventDefault(); if(SKILLS[b.dataset.sk]) showSkill(b.dataset.sk); }, true);
+function aptTable(u){
+  return `<div class="apt"><span class="lbl">てきせい</span><div class="aptg">${DIST_KEYS.map(k=>`<span>${DISTS[k]}<i class="g g-${u.apt.d[k]}">${u.apt.d[k]}</i></span>`).join('')}</div><div class="aptg">${STRAT_KEYS.map(k=>`<span>${STRATS[k]}<i class="g g-${u.apt.s[k]}">${u.apt.s[k]}</i></span>`).join('')}</div></div>`;
+}
+// スキルを おぼえる
+function skillShop(done){
+  const C = S.cur; const avail = [...new Set((INNATE[C.u.pers]||[]).concat(Object.keys(C.hints)))].filter(k=>!C.u.skills.includes(k));
+  avail.sort((a,b)=>skillCost(a,C.hints[a])-skillCost(b,C.hints[b]));
+  modal(`<h3>スキルを おぼえる</h3><p class="sub">スキルpt <b>${C.sp}</b>。なかまの ヒントが あると 安くなるよ（Lv1ごとに 1わり引き）。</p>
+    ${avail.length?`<ul class="shop">${avail.map(k=>{ const lv=C.hints[k]||0, cost=skillCost(k,lv); return `<li><div><b>${SKILLS[k].n}</b><small>${skillCond(k)}</small>${lv?` <span class="hint">ヒントLv${lv}</span>`:''}${(INNATE[C.u.pers]||[]).includes(k)&&!lv?' <span class="hint inn">うまれつき</span>':''}<br><span class="sub">${SKILLS[k].d}</span></div><button class="btn sm ${C.sp>=cost?'main':''}" type="button" data-k="${k}" ${C.sp<cost?'disabled':''}>${cost}pt</button></li>`; }).join('')}</ul>`:'<p class="sub">おぼえられる スキルが まだ ないよ。なかまと 練習すると ヒントが もらえるよ。</p>'}
+    <div class="row"><button class="btn" id="mClose" type="button">とじる</button></div>`);
+  $('mClose').addEventListener('click', ()=>{ closeModal(); done&&done(); });
+  $('modalBox').querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.k, cost=skillCost(k,C.hints[k]); if(C.sp<cost) return; C.sp-=cost; C.u.skills.push(k); delete C.hints[k]; save(); toast(`「${SKILLS[k].n}」を おぼえた！`); skillShop(done); }));
+}
+function endWeek(msg, pose, ev){
+  const C = S.cur; C.log = msg; C.pose = pose; C.week++; C.wk = null; save();
+  let e = storyEvent(C) || ev || null;
+  if(!e && C.week<=lenOf(C) && !planOf(C)[C.week] && Math.random() < .34){
+    const pool = EVENTS.filter(x=>!x.pers || x.pers===C.u.pers || Math.random()<.3);
+    e = pick(pool);
+  }
+  showTrain();
+  if(e) showEvent(C, e);
+}
+function storyEvent(C){
+  const st = STORY[lenOf(C)]; if(!st || !st[C.week]) return null;
+  C.storySeen = C.storySeen || {}; if(C.storySeen[C.week]) return null;
+  C.storySeen[C.week] = 1; save(); return st[C.week];
+}
+function showEvent(C, e){
+  modal(`<div class="evh">${e.icon?`<canvas data-vis="${e.icon}" aria-hidden="true"></canvas>`:e.story?'<span class="moonmark" aria-hidden="true"></span>':''}<h3>${e.t}</h3></div><p class="evd">${e.d}</p><div class="opts">${e.o.map((o,i)=>`<button class="btn" type="button" data-i="${i}">${o[0]}</button>`).join('')}</div>`);
+  $('modalBox').querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{ const r = e.o[+b.dataset.i][1](C); if(r) C.log += `<br>${e.icon||e.story?'':'できごと'}「${e.t}」：<span class="hl">${r}</span>`; save(); closeModal(); showTrain(); }));
+  $('modalBox').querySelector('.opts button').focus();
+}
+
+// ---------- レース ----------
+let race = null;
+function rivalOf(sumRange, used, nSk, dist){
+  const total = rand(sumRange[0], sumRange[1]); const w = STATS.map(()=>rand(.7,1.3)); const ws = w.reduce((a,b)=>a+b,0);
+  const st = {}; STATS.forEach((s,i)=>{ st[s.k] = clamp(Math.round(total*w[i]/ws),1,STAT_MAX); });
+  const names = RIVAL_NAMES.filter(n=>!used.has(n)); const name = pick(names.length?names:RIVAL_NAMES); used.add(name);
+  const skills = SKILL_KEYS.slice().sort(()=>Math.random()-.5).slice(0, nSk||0);
+  const pers = pick(PERS_KEYS), u = {name, color:pick(Object.keys(PALS)), pers, st, skills, rival:true};
+  u.apt = makeApt(pers); u.strat = bestStrat(u);
+  if(dist){ const q=Math.random(); u.apt.d[distCat(dist)] = q<.6?'A':q<.9?'B':'C'; }
+  return u;
+}
+function runnerState(u, lane, rnd, D){
+  rnd = rnd || Math.random; fixU(u);
+  const sg = u.apt.s[u.strat], dg = u.apt.d[distCat(D||2000)];
+  return {u, lane, x:0, v:0, pool:POOL(u.st.sta), out:false, fin:null, ev:null, evT:0, say:'', sayT:0, nz:1, nzT:0, boostT:0, ph:rnd()*6, form:1 + (rnd()-.5)*.08,
+    mood:u.mood!=null?1+(MOODS[u.mood].f-1)*.3:1, sk:new Set(u.skills||[]), uq:(u.skills||[]).some(k=>k.startsWith('u_')), used:{}, strat:u.strat, sa:APT_STR[sg], aptMul:APT_SPD[dg]*APT_STR_BASE[sg], cat:distCat(D||2000)};
+}
+const POOL = sta => 40 + sta*.5;
+function stepRunner(r, all, dt, D, rnd){
+  if(r.fin!=null){ r.v*=.94; r.x = Math.min(r.x + r.v*dt*.5, D + 5); return; }
+  const u = r.u, st = u.st, prog = r.x/D; let lead = 0; for(const o of all) if(o.x>lead) lead=o.x;
+  r.nzT -= dt; if(r.nzT<=0){ r.nzT = 1.5; const spread = .06 - st.int*.00008; r.nz = 1 + (rnd()-.5)*2*Math.max(.025,spread); }
+  if(r.sayT>0) r.sayT -= dt;
+  const has = k => r.sk.has(k);
+  const fire = k => { if(r.used[k]) return; r.used[k]=1; r.say=`${SKILLS[k].n}！`; r.sayT=1.4; r.skT=1.2; };
+  if(r.skT>0) r.skT -= dt;
+  if(r.ev){ r.evT -= dt; if(r.evT<=0){ if(r.ev==='snack'){ r.boostT = 3; r.say='げんき100ばい！'; r.sayT=1.2; } r.ev = null; } }
+  else if(prog>.1 && prog<.88 && !has('calm')){
+    const q = rnd(), p = dt*(1.2 - st.int/500);
+    const say = (ev, dur, s) => { r.ev=ev; r.evT=dur; r.say=s; r.sayT=1.5; };
+    if(u.pers==='nebosuke' && q < .02*p) say('doze',.9,'すや…');
+    else if(u.pers==='koukishin' && q < .03*p) say('look',.8, pick(['あっ かいがら！','なにこれ？','きらきら！']));
+    else if(u.pers==='kuishinbo' && q < .045*p) say('snack',.6,'もぐもぐ');
+    else if(q > 1 - .02*dt){ r.boostT = 1.2; r.say='びゅーん！'; r.sayT=1.1; }
+  }
+  let vt = 33 + st.spd*.03, drainMul = 1;
+  vt *= r.mood * (has('calm') ? 1+(r.nz-1)*.5 : r.nz) * r.form * r.aptMul;
+  // 作戦
+  const sa = r.sa;
+  if(r.strat==='nige'){ if(prog<.4) vt *= 1+.055*sa; drainMul *= 1.065; }
+  else if(r.strat==='senko'){ if(prog<.5) vt *= 1+.025*sa; else if(prog>.7) vt *= 1+.02*sa; }
+  else if(r.strat==='sashi'){ if(prog<.5) vt *= .98; else if(prog>.6) vt *= 1+.065*sa; }
+  else if(r.strat==='oikomi'){ if(prog<.55) vt *= .96; else if(prog>.68) vt *= 1+.075*sa; drainMul *= .93; }
+  if(u.pers==='genki' && prog<.3) vt *= 1.05;
+  if(u.pers==='nonbiri'){ if(prog<.5) vt *= .985; else if(prog>.65) vt *= 1.06; }
+  if(u.pers==='amaenbo' && r.x < lead-5) vt *= 1.045;
+  if(u.pers==='nebosuke') vt *= 1.025;
+  if(u.pers==='koukishin') vt *= 1.025;
+  if(u.pers==='kuishinbo') vt *= 1.015;
+  // スキル
+  if(has('glow')) vt *= 1.015;
+  if(has('short') && D<=1400) vt *= 1.03;
+  if(has('rocket') && prog<.15){ vt *= 1.07; if(prog>.01) fire('rocket'); }
+  if(has('focus') && prog<.08){ vt *= 1.05; if(prog>.01) fire('focus'); }
+  if(has('spurt') && prog>.75){ vt *= 1.05; fire('spurt'); }
+  if(has('chase') && r.x < lead-8){ vt *= 1.04; fire('chase'); }
+  if(has('awa') && prog>.5 && !r.used.awa){ r.pool += 5; fire('awa'); }
+  if(has('breath') && prog>.35 && !r.used.breath){ r.pool += 5; fire('breath'); }
+  if(has('nige1') && r.strat==='nige' && prog<.3){ vt *= 1.04; if(prog>.05) fire('nige1'); }
+  if(has('senko1') && r.strat==='senko' && prog>.3 && prog<.7){ drainMul *= .94; fire('senko1'); }
+  if(has('sashi1') && r.strat==='sashi' && prog>.65){ vt *= 1.05; fire('sashi1'); }
+  const wide = has('oikomi1') && r.strat==='oikomi' && prog>.7;
+  if(wide){ vt *= 1.06; fire('oikomi1'); }
+  if(has('sprint') && r.cat==='short' && prog>.5){ vt *= 1.04; fire('sprint'); }
+  if(has('mile') && r.cat==='mile'){ vt *= 1.035; if(prog>.4) fire('mile'); }
+  if(has('mid') && r.cat==='mid'){ vt *= 1.008; drainMul *= .97; if(prog>.4) fire('mid'); }
+  if(has('stayer') && r.cat==='long'){ drainMul *= .94; if(prog>.4) fire('stayer'); }
+  if(has('long') && D>=2000) drainMul *= .96;
+  if(r.uq){ let rank = 1; for(const o of all) if(o!==r && (o.fin!=null || o.x>r.x)) rank++;
+    if(has('u_star') && prog>.7 && prog<.9 && rank<=3){ vt *= 1.06; fire('u_star'); }
+    if(has('u_angel') && prog>.8){ vt *= 1.05; if(!r.used.u_angel) r.pool += 6; fire('u_angel'); }
+    if(has('u_gothic') && prog>.7 && rank>=4){ vt *= 1.07; fire('u_gothic'); }
+    if(has('u_idol') && prog>.75 && rank<=2){ vt *= 1.05; fire('u_idol'); }
+    if(has('u_space') && prog>.5 && !r.used.u_space){ r.boostT = 2.5; fire('u_space'); } }
+  const spurt = prog > .7 && r.pool > 0;
+  if(spurt) vt *= 1.04 + st.gut*.0002;
+  let near = 0; for(const o of all) if(o!==r && o.fin==null && o.x>r.x && o.x-r.x<5 && Math.abs(o.lane-r.lane)<=2) near++;
+  if(near>=2 && !wide){ if(has('uzu')){ vt *= 1.02; fire('uzu'); } else vt *= .965 + st.pow*.0001; }
+  if(r.boostT>0){ r.boostT-=dt; vt *= 1.13; }
+  if(r.pool<=0){ const pen = .72 + st.gut*.0006; vt *= has('kiai') ? 1-(1-pen)*.75 : pen; if(has('kiai')) fire('kiai'); if(!r.out){ r.out=true; r.say='はぁはぁ…'; r.sayT=1.4; } }
+  if(r.ev==='doze') vt = 0; else if(r.ev==='look') vt *= .3; else if(r.ev==='snack') vt *= .6;
+  const acc = .55 + st.pow*.006;
+  r.v += (vt - r.v) * Math.min(1, dt*acc);
+  const drain = 1.7 * Math.pow(Math.max(r.v,0)/37, 3) * (spurt?1.5:1) * (1.06 - st.int*.0004) * drainMul;
+  r.pool -= drain*dt;
+  r.x += r.v*dt;
+}
+function makeRng(seed){ let s = seed>>>0 || 1; return ()=>{ s ^= s<<13; s>>>=0; s ^= s>>17; s ^= s<<5; s>>>=0; return s/4294967296; }; }
+function simulate(us, D, seed){
+  const rnd = makeRng(seed); const rs = us.map((u,i)=>runnerState(u,i,rnd,D)); let t=0, n=0; const dt=1/30;
+  while(n<rs.length && t<240){ rs.forEach(r=>{ const was=r.fin; stepRunner(r,rs,dt,D,rnd); if(was==null && r.x>=D){ r.fin=t; n++; } }); t+=dt; }
+  return rs.map((r,i)=>({i, fin:r.fin==null?999:r.fin})).sort((a,b)=>a.fin-b.fin);
+}
+function startTrainRace(ri_){
+  const C = S.cur, R = planOf(C)[C.week], O = R.opts[ri_]; const used = new Set([C.u.name, 'セレネ']);
+  C.raceSel = ri_;
+  const me = Object.assign({}, C.u, {me:true, mood:C.mood});
+  const us = [me];
+  if(lenOf(C)>=16){ const idx = Object.keys(planOf(C)).map(Number).indexOf(C.week); us.push(seleneFor(R, O.dist, idx)); }
+  while(us.length<RUNNERS) us.push(rivalOf(R.rivalSum, used, ri(R.sk[0],R.sk[1]), O.dist));
+  us.sort(()=>Math.random()-.5);
+  setupRace({title:O.name, dist:O.dist, us, mode:'train'});
+}
+function calcPop(){
+  const R = race; const wins = R.us.map(()=>0); for(let k=0;k<60;k++){ const r = simulate(R.us, R.dist, ri(1,1e9)); wins[r[0].i]++; }
+  R.pop = wins.map((w,i)=>({i,w})).sort((a,b)=>b.w-a.w).map((x,rank)=>({...x,rank:rank+1}));
+}
+function setupRace(o){
+  race = {title:o.title, dist:o.dist, us:o.us, mode:o.mode, phase:'pre', pickI:null, running:false};
+  calcPop(); showRace();
+}
+function popOf(i){ return race.pop.find(p=>p.i===i).rank; }
+function showRace(){
+  const R = race;
+  setView(`
+  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div class="racehead"><div><h2>${esc(R.title)}</h2><p class="sub">${R.dist}m（${DISTS[distCat(R.dist)]}）・${R.us.length}匹</p></div>
+      <div class="row"><span class="sub">はやさ</span><div class="seg" id="spdSeg">${[[0.35,'のんびり'],[1,'ふつう'],[2.5,'はやい']].map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${S.speed==v}">${n}</button>`).join('')}</div></div></div>
+    <div class="rwrap"><canvas id="raceCv" aria-label="レースのようす"></canvas><ol class="stand" id="rStand" hidden></ol></div>
+    <div class="comment" id="rCom" aria-live="polite">${R.mode==='vs'?'1着を よそうしてから スタート！（よそうしなくても走れます）':'作戦を えらんで スタート！'}</div>
+    <div id="rBody"></div>
+  </section>`);
+  $('spdSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ S.speed=+b.dataset.v; save(); $('spdSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); }));
+  const initRs = () => { R.rnd = makeRng(ri(1,1e9)); R.rs = R.us.map((u,i)=>runnerState(u,i,R.rnd,R.dist)); R.t=0; R.acc=0; R.leader=-1; R.order=[]; R.flags={}; };
+  R.init = initRs; initRs();
+  renderRaceBody(); drawStand();
+  const cv = $('raceCv'); let st = 0;
+  anim = {draw(t,dt){ if(R.running) raceTick(dt); drawRace(cv, t); st -= dt; if(st<=0 && R.phase!=='pre'){ st=.25; drawStand(); } }};
+}
+function drawStand(){
+  const R = race, el = $('rStand'); if(!el) return; el.hidden = false;
+  const pos = R.rs.slice().sort((a,b)=> (a.fin??1e9)-(b.fin??1e9) || b.x-a.x);
+  el.innerHTML = pos.map((r,i)=>{ const max=POOL(r.u.st.sta); return `<li class="${r.u.me?'me':''}${R.pickI!=null&&R.rs[R.pickI]===r?' pk':''}"><b>${i+1}</b><span class="nmx">${esc(r.u.name)}</span><small>${STRATS[r.strat]}</small><i class="pl"><i style="width:${Math.round(clamp(r.pool/max,0,1)*100)}%;background:${r.pool>0?'var(--good)':'var(--coral)'}"></i></i></li>`; }).join('');
+}
+function renderRaceBody(){
+  const R = race, b = $('rBody'); if(!b) return;
+  if(R.phase==='pre'){
+    const me = R.us.find(u=>u.me);
+    b.innerHTML = `${me?`<div class="field" style="margin-bottom:10px"><span class="lbl">${esc(me.name)}の 作戦</span><div class="chips" id="rStrat">${STRAT_KEYS.map(k=>`<button type="button" class="chip" data-s="${k}" aria-pressed="${me.strat===k}">${STRATS[k]} <i class="g g-${me.apt.s[k]}">${me.apt.s[k]}</i></button>`).join('')}</div><p class="sub">${STRAT_TIP[me.strat]}</p></div>`:''}
+    <div class="entries">${R.us.map((u,i)=>{ const dg=u.apt.d[distCat(R.dist)], sg=u.apt.s[u.strat]; return `<button type="button" class="ent${u.me?' me':''}${u.story?' rival':''}" data-i="${i}" aria-pressed="${R.pickI===i}"><span class="n"><i>${i+1}</i>${esc(u.name)}</span><span class="s">${popOf(i)}番人気・${STRATS[u.strat]}<i class="g g-${sg}">${sg}</i>・距離<i class="g g-${dg}">${dg}</i>${u.me?'・<b>あなた</b>':''}${u.story?'・<b class="rv">ライバル</b>':''}</span><span class="s">${STATS.map(s=>`${s.n.slice(0,2)}${rankOf(u.st[s.k])}`).join(' ')}</span><span class="s">${PERS[u.pers].name}${(u.skills||[]).length?`・スキル ${u.skills.length}こ`:''}</span></button>`; }).join('')}</div>
+    <div class="row" style="margin-top:10px"><button class="btn gold" id="rGo" type="button">スタート</button><span class="sub" id="rPick">${R.pickI!=null?`よそう：${esc(R.us[R.pickI].name)}`:`カードを おすと 1着よそう（当たると つきのかけら +${R.mode==='vs'?15:'10・スキルpt +10'}）`}</span></div>`;
+    if(me) $('rStrat').querySelectorAll('button').forEach(x=>x.addEventListener('click',()=>{ me.strat = x.dataset.s; if(S.cur && R.mode==='train') S.cur.u.strat = me.strat; save(); calcPop(); R.init(); renderRaceBody(); drawStand(); }));
+    b.querySelectorAll('.ent').forEach(e=>e.addEventListener('click',()=>{ const i=+e.dataset.i; R.pickI = R.pickI===i?null:i; renderRaceBody(); }));
+    $('rGo').addEventListener('click', ()=>{ R.phase='run'; R.running=true; say('スタート！ いっせいに およぎだした！'); renderRaceBody(); });
+  } else if(R.phase==='run'){
+    b.innerHTML = `<div class="row"><button class="btn sm" id="rSkip" type="button">けっかまで とばす</button></div>`;
+    $('rSkip').addEventListener('click', ()=>{ let k=0; while(R.running && k<40000){ raceTick(1/30, true); k++; } });
+  } else {
+    const order = R.rs.map((r,i)=>({r,i})).sort((a,b)=>a.r.fin-b.r.fin);
+    const hit = R.pickI!=null ? (order[0].i===R.pickI) : null;
+    b.innerHTML = `<ol class="res">${order.map((o,p)=>`<li class="${p===0?'first ':''}${o.r.u.me?'me':''}"><span class="p">${p+1}着</span><span>${esc(o.r.u.name)}</span><span class="sub">${STRATS[o.r.strat]}</span><span class="t">${o.r.fin.toFixed(2)}秒${p?`（+${(o.r.fin-order[0].r.fin).toFixed(2)}）`:''}</span></li>`).join('')}</ol>
+      ${hit!=null?`<p style="margin:10px 0 0;font-weight:700;color:${hit?'var(--good)':'var(--ink2)'}">${hit?`よそう的中！ つきのかけら +${R.reward||0}${R.rewardSp?`・スキルpt +${R.rewardSp}`:''}`:'よそうは はずれ…'}</p>`:''}
+      <div class="row" style="margin-top:12px" id="rAfter"></div>`;
+    const a = $('rAfter');
+    if(R.mode==='train'){ a.innerHTML = `<button class="btn main" id="rNext" type="button">つぎへ</button>`; $('rNext').addEventListener('click', ()=>afterTrainRace(order)); }
+    else { a.innerHTML = `<button class="btn" id="rAgain" type="button">同じメンバーで もう1回</button><button class="btn main" id="rBack" type="button">メンバーを えらびなおす</button>`;
+      $('rAgain').addEventListener('click', ()=>setupRace({title:R.title, dist:R.dist, us:R.us, mode:'vs'}));
+      $('rBack').addEventListener('click', showVsSetup); }
+  }
+}
+function say(msg){ const el=$('rCom'); if(el) el.textContent = msg; }
+function raceTick(dt, silent){
+  const R = race; R.acc += dt*S.speed;
+  const step = 1/30; let guard = 0;
+  while(R.acc >= step && R.running && guard++<200){
+    R.acc -= step; R.t += step;
+    R.rs.forEach(r=>{ const was=r.fin; stepRunner(r, R.rs, step, R.dist, R.rnd); if(was==null && r.x>=R.dist){ r.fin=R.t; R.order.push(r); if(R.order.length===1 && !silent) say(`${r.u.name}が 1着で ゴール！`); } });
+    if(!silent){
+      const live = R.rs.filter(r=>r.fin==null).sort((a,b)=>b.x-a.x);
+      if(live.length){
+        const L = live[0], li = R.rs.indexOf(L), prog = L.x/R.dist;
+        if(li!==R.leader && R.t>2 && R.order.length===0){ R.leader=li; say(`${L.u.name}が せんとうに たった！`); }
+        if(prog>.5 && !R.flags.half){ R.flags.half=1; say(`はんぶん 通過。せんとうは ${L.u.name}！`); }
+        if(prog>.72 && !R.flags.spurt){ R.flags.spurt=1; say('さいごの なみに のって ラストスパート！'); }
+        R.rs.forEach(r=>{ if(r.out && !r.saidOut){ r.saidOut=1; if(R.order.length===0) say(`${r.u.name}、ちょっと つかれてきた…`); } });
+      }
+    }
+    if(R.order.length===R.rs.length){ R.running=false; R.phase='done'; say(`${R.order[0].u.name}が ゆうしょう！`);
+      if(R.pickI!=null && R.rs[R.pickI]===R.order[0]){ R.reward = R.mode==='vs' ? 15 : 10; S.shards += R.reward; if(R.mode==='train' && S.cur){ S.cur.sp += 10; R.rewardSp = 10; } save(); updTop(); }
+      drawStand(); renderRaceBody(); }
+  }
+}
+function drawRace(cv, t){
+  const R = race; const {w,h} = fitCanvas(cv, 1.25); const c = cv.getContext('2d'); const N = R.rs.length;
+  const view = 70; const ppm = w/view;
+  let lead = 0; R.rs.forEach(r=>{ lead = Math.max(lead, Math.min(r.x, R.dist+6)); });
+  let cam = clamp(lead - view*.68, -view*.24, R.dist + 10 - view);
+  const g = c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#1d2255'); g.addColorStop(.3,'#2c377f'); g.addColorStop(1,'#3d4ea3'); c.fillStyle=g; c.fillRect(0,0,w,h);
+  c.fillStyle='rgba(251,239,200,.9)'; c.beginPath(); c.arc(w*.86 - cam*ppm*.02, h*.09, h*.05, 0, TAU); c.fill();
+  c.fillStyle='#252f77'; c.beginPath(); c.arc(w*.86 - cam*ppm*.02 + h*.022, h*.09 - h*.011, h*.044, 0, TAU); c.fill();
+  for(let i=0;i<22;i++){ const sx = ((i*173.3 - cam*ppm*.05) % w + w) % w, sy = (i*61.7 % 1)*h*.12 + (i*13)%(h*.1); c.fillStyle=`rgba(255,255,255,${.3+.3*Math.sin(t*1.7+i)})`; c.fillRect(sx, sy, 2, 2); }
+  const top = h*.2, laneH = (h*.78)/N;
+  for(let i=0;i<N;i++){ const y = top + laneH*(i+1); c.strokeStyle='rgba(190,205,255,.14)'; c.lineWidth=1; c.beginPath();
+    for(let x=0;x<=w;x+=14){ const yy = y + Math.sin((x/ppm+cam)*.25 + t*1.4 + i)*1.5; x?c.lineTo(x,yy):c.moveTo(x,yy); } c.stroke(); }
+  c.font = `600 ${Math.round(h*.034)}px "Zen Maru Gothic", sans-serif`; c.textAlign='center';
+  for(let m=Math.ceil(cam/100)*100; m<cam+view; m+=100){ if(m<=0 || m>=R.dist) continue; const x=(m-cam)*ppm;
+    c.strokeStyle='rgba(255,255,255,.2)'; c.setLineDash([4,6]); c.beginPath(); c.moveTo(x,top); c.lineTo(x,h); c.stroke(); c.setLineDash([]);
+    c.fillStyle='rgba(220,226,255,.75)'; c.fillText(`のこり ${R.dist-m}m`, x, top-6); }
+  const gx = (R.dist-cam)*ppm;
+  const sx0 = (0-cam)*ppm; if(sx0>-5 && sx0<w){ c.strokeStyle='rgba(251,239,200,.5)'; c.lineWidth=2; c.beginPath(); c.moveTo(sx0,top); c.lineTo(sx0,h); c.stroke(); c.lineWidth=1; c.fillStyle='rgba(251,239,200,.8)'; c.fillText('スタート', sx0, top-6); }
+  if(gx>-20 && gx<w+20){ const sq = Math.max(5, h*.02); for(let y=top, k=0; y<h; y+=sq, k++){ c.fillStyle = k%2?'#fff':'#e9b949'; c.fillRect(gx-sq/2, y, sq, sq); }
+    c.fillStyle='#fbefc8'; c.fillText('ゴール', gx, top-6); }
+  const fs = Math.max(10, Math.round(laneH*.42));
+  R.rs.forEach(r=>{
+    const x = (r.x-cam)*ppm, y = top + laneH*(r.lane+1) - 2 + Math.sin(t*3+r.ph)*1.2;
+    let f;
+    if(r.fin!=null && R.phase==='done') f = R.order[0]===r ? [7,8,9][Math.floor(t*3)%3] : Math.floor(t*1.3)%2;
+    else if(r.ev==='doze') f = 5+Math.floor(t*2)%2;
+    else if(!R.running && R.phase==='pre') f = Math.floor(t*1.3+r.ph)%2;
+    else f = 2 + Math.floor(t*(2+r.v/12)+r.ph)%2;
+    const sc = laneH/190;
+    if(r.skT>0){ c.fillStyle=`rgba(233,185,73,${.4*Math.min(1,r.skT)})`; c.beginPath(); c.ellipse(x, y-laneH*.4, laneH*1.1, laneH*.6, 0, 0, TAU); c.fill(); }
+    if(r.boostT>0){ c.fillStyle='rgba(251,239,200,.22)'; c.beginPath(); c.ellipse(x, y-laneH*.4, laneH*.9, laneH*.5, 0, 0, TAU); c.fill(); }
+    drawUmi(c, r.u.color, f, x, y, sc, 1, r.u.outfit);
+    c.font = `700 ${fs}px "Zen Maru Gothic", sans-serif`; c.textAlign='right';
+    const lab = `${r.lane+1} ${r.u.name}`, lx = x - laneH*.75, ly = y - laneH*.25;
+    c.lineWidth=3; c.strokeStyle='rgba(20,24,70,.75)'; c.strokeText(lab, lx, ly);
+    c.fillStyle = r.u.me ? '#fbefc8' : (R.pickI===R.rs.indexOf(r) ? '#bfe9d6' : '#fff'); c.fillText(lab, lx, ly);
+    if(r.sayT>0 && r.say){ c.font=`600 ${fs}px "Klee One", sans-serif`; c.textAlign='left'; const tw=c.measureText(r.say).width+12; const bx=x+laneH*.75, by=y-laneH*.25;
+      c.fillStyle='rgba(255,255,255,.92)'; c.beginPath(); c.roundRect ? c.roundRect(bx,by-fs*1.05,tw,fs*1.45,6) : c.rect(bx,by-fs*1.05,tw,fs*1.45); c.fill(); c.fillStyle='#383566'; c.fillText(r.say, bx+6, by); }
+  });
+}
+function afterTrainRace(order){
+  const C = S.cur, R = planOf(C)[C.week], O = R.opts[C.raceSel||0]; const place = order.findIndex(o=>o.r.u.me)+1;
+  const sel = order.findIndex(o=>o.r.u.story)+1;
+  C.results.push({name:O.name, place, dist:O.dist, sel});
+  let msg = `${O.name}は <span class="hl">${place}着</span>！`;
+  if(sel) msg += `<br>${seleneLine(place, sel, !!R.final)}`;
+  const spGot = [70,55,45,35,30,25,25,20,20][place-1]||20; C.sp += spGot;
+  if(!R.final){
+    if(place===1){ STATS.forEach(s=>C.u.st[s.k]=clamp(C.u.st[s.k]+10,1,STAT_MAX)); moodAdd(C,1); msg += ' ゆうしょう！ ぜんぶの能力 +10'; }
+    else if(place<=3){ STATS.forEach(s=>C.u.st[s.k]=clamp(C.u.st[s.k]+5,1,STAT_MAX)); msg += ' ぜんぶの能力 +5'; }
+    else if(place>5){ moodAdd(C,-1); msg += ' くやしい… つぎこそ！'; }
+    C.hp = clamp(C.hp-15,0,100);
+  }
+  const got = ([60,40,25,15,10,10,5,5,5][place-1]||5) * (R.final?2:1); S.shards += got;
+  msg += `<br>スキルpt <span class="hl">+${spGot}</span>　つきのかけら <span class="hl">+${got}</span>`;
+  C.log = msg; C.pose = place===1?'happy':'idle'; C.week++; C.wk = null; save(); race = null;
+  showTrain(); const e = storyEvent(C); if(e) showEvent(C, e);
+}
+
+// ---------- 育成おわり ----------
+function showFinish(){
+  const C = S.cur; const total = sumSt(C.u.st);
+  const bonus = C.results.reduce((a,r)=>a + (r.place===1?70:r.place===2?40:r.place===3?20:0), 0) + C.u.skills.length*15;
+  const rk = totalRank(total + bonus);
+  const fin = C.results[C.results.length-1];
+  const title = fin && fin.place===1 ? (fin.name==='月光杯' ? '月光杯ウミミ' : '銀河のステイヤー') : fin && fin.place<=3 ? `${fin.name} 入賞` : C.results.some(r=>r.place===1) ? `${C.results.find(r=>r.place===1).name}の星` : 'がんばりやさん';
+  const beatSel = C.results.filter(r=>r.sel && r.place<r.sel).length;
+  const ending = (lenOf(C)<16 || !fin) ? '' : fin.place===1 ? `${esc(C.u.name)}は ${fin.name}で ゆうしょう！ 満月の 下、入り江の なかまたちが いっせいに 光った。セレネが にっこり わらって 言った。「やっぱり きみだったね」`
+    : fin.place<=3 ? `${esc(C.u.name)}は ${fin.name}で ${fin.place}着。とどかなかった くやしさも、ここまで 来た うれしさも、ぜんぶ 月が 見ていた。${beatSel?'セレネとは なんども いい勝負を した。':'セレネの せなかは まだ 少し 遠い。'}「つぎの 月光杯で また 会おう」`
+    : `${esc(C.u.name)}の ${fin.name}は ${fin.place}着。それでも 16週の あいだに、${esc(C.u.name)}は ずっと 強くなった。入り江に 帰ると、なかまたちが あたたかく むかえてくれた。`;
+  setView(`
+  <div class="grid2">
+    <section class="panel portrait"><canvas id="fCv" aria-label="${esc(C.u.name)}"></canvas>
+      <div class="nm"><h2>${esc(C.u.name)}</h2><span class="tag">${title}</span></div></section>
+    <section class="panel" style="display:flex;flex-direction:column;gap:14px">
+      <h2>育成おつかれさま！</h2>
+      ${ending?`<div class="ending"><span class="moonmark" aria-hidden="true"></span><p>${ending}</p></div>`:''}
+      <div class="row" style="align-items:baseline"><span class="lbl">ひょうか</span><span style="font-family:var(--f-disp);font-size:48px;font-weight:600;color:var(--moon);line-height:1">${rk}</span><span class="sub">のうりょく合計 ${total}${bonus?`＋レースとスキルの ボーナス ${bonus}`:''}</span></div>
+      <div class="stats">${STATS.map(s=>`<div class="st"><span class="k">${s.n}</span><span class="r" style="color:${s.c}">${rankOf(C.u.st[s.k])}</span><span class="v">${C.u.st[s.k]}</span><span class="up"></span></div>`).join('')}</div>
+      <p class="sub">${C.results.map(r=>`${r.name} ${r.place}着`).join('　')}</p>
+      <div class="skl"><span class="lbl">スキル</span>${C.u.skills.length?C.u.skills.map(k=>skChip(k)).join(''):'<span class="sub">なし</span>'}</div>
+      ${aptTable(C.u)}
+      <div class="row"><button class="btn" id="fSkill" type="button">のこりの スキルpt（${C.sp}）で スキルを おぼえる</button><button class="btn main" id="fSave" type="button">でんどう入りさせる</button></div>
+    </section>
+  </div>`);
+  $('fSkill').addEventListener('click', ()=>skillShop(()=>showFinish()));
+  $('fSave').addEventListener('click', ()=>{
+    const e = {id:S.nextId++, name:C.u.name, color:C.u.color, pers:C.u.pers, st:Object.assign({},C.u.st), skills:C.u.skills.slice(), apt:JSON.parse(JSON.stringify(C.u.apt)), strat:C.u.strat, outfit:C.u.outfit||'', rank:rk, title, results:C.results, date:new Date().toISOString().slice(0,10)};
+    const got = 30 + Math.max(0, TOTAL_RANKS.findIndex(x=>x[1]===rk))*10; S.shards += got;
+    const tk = 1 + (fin && fin.place===1 ? 1 : 0); S.dressTickets += tk;
+    S.hall.unshift(e); if(S.hall.length>40) S.hall.length=40; S.cur=null; save(); toast(`${C.u.name}が でんどう入り！ かけら +${got}・勝負服チケット +${tk}`); showHall();
+  });
+  const cv=$('fCv'); anim={draw(t){ const {w,h}=fitCanvas(cv); const c=cv.getContext('2d'); c.clearRect(0,0,w,h); drawUmi(c,C.u.color,[7,8,9][Math.floor(t*2.5)%3],w*.5,h*.82,h/330,-1,C.u.outfit); }};
+}
+
+// ---------- でんどう ----------
+function hallCard(e, opt){
+  return `<div class="hc${opt&&opt.sel?' sel':''}" data-id="${e.id}">
+    <div class="top2"><canvas data-col="${e.color}" data-out="${e.outfit||''}" aria-hidden="true"></canvas><div><b>${esc(e.name)}</b><div class="ttl">${esc(e.title||'')}</div></div><span class="rk">${e.rank||''}</span></div>
+    <div class="mini">${STATS.map(s=>`${s.n.slice(0,2)} ${e.st[s.k]}`).join('・')}</div>
+    ${(e.skills||[]).length?`<div class="skl">${e.skills.map(k=>skChip(k)).join('')}</div>`:''}
+    ${e.outfit&&DRESSES[e.outfit]?`<div class="mini">勝負服：${DRESSES[e.outfit].n}</div>`:''}
+    <div class="mini">${PERS[e.pers].name}・${STRATS[e.strat]}・得意 ${DIST_KEYS.filter(k=>'SA'.includes(e.apt.d[k])).map(k=>DISTS[k]).join('/')||'なし'}${e.date?`・${e.date}`:''}${e.guest?'・ともだちの子':''}</div>
+    ${opt&&opt.acts?`<div class="acts">${opt.acts}</div>`:''}
+  </div>`;
+}
+function drawMinisAll(){ const v=$('view'); if(v){ drawMinis(v); drawIcons(v); } }
+function drawMinis(root){
+  root.querySelectorAll('canvas[data-col]').forEach(cv=>{ const {w,h}=fitCanvas(cv); const c=cv.getContext('2d'); c.clearRect(0,0,w,h); drawUmi(c, cv.dataset.col, 0, w*.5, h*.9, h/260, -1, cv.dataset.out||''); });
+}
+function showHall(){
+  updTop();
+  setView(`<section class="panel" style="display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="justify-content:space-between"><h2>でんどう</h2><button class="btn sm" id="hlBack" type="button">ホームへ</button></div>
+    <p class="sub">そだてた子の「コード」を ともだちに おくると、「みんなで レース」で いっしょに 走らせられるよ。</p>
+    ${S.hall.length ? `<div class="hall">${S.hall.map(e=>hallCard(e,{acts:`<button class="btn sm" type="button" data-code="${e.id}">コード</button><button class="btn sm" type="button" data-del="${e.id}">おわかれ</button>`})).join('')}</div>` : `<p class="empty">まだ だれも いないよ。育成を さいごまで おえると ここに のります。</p>`}
+  </section>`);
+  $('hlBack').addEventListener('click', showHome);
+  document.querySelectorAll('[data-code]').forEach(b=>b.addEventListener('click',()=>{ const e=S.hall.find(x=>x.id==b.dataset.code); const code=toCode(e);
+    modal(`<h3>${esc(e.name)}の コード</h3><p class="sub">これを ともだちに おくってね。「みんなで レース」に はりつけると 走れます。</p><div class="codebox" id="codeTxt">${esc(code)}</div><div class="row"><button class="btn" id="mClose" type="button">とじる</button><button class="btn main" id="mCopy" type="button">コピー</button></div>`);
+    $('mClose').addEventListener('click', closeModal); $('mCopy').addEventListener('click', ()=>copyText(code, $('codeTxt'))); }));
+  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ const e=S.hall.find(x=>x.id==b.dataset.del);
+    modal(`<h3>${esc(e.name)}と おわかれ？</h3><p class="sub">でんどうから けします。もとに もどせません。</p><div class="row"><button class="btn" id="mNo" type="button">やめる</button><button class="btn main" id="mYes" type="button">おわかれする</button></div>`);
+    $('mNo').addEventListener('click', closeModal); $('mYes').addEventListener('click', ()=>{ S.hall=S.hall.filter(x=>x!==e); save(); closeModal(); showHall(); }); }));
+  requestAnimationFrame(()=>drawMinis($('view')));
+}
+
+// ---------- なかまガチャ ----------
+const PULL_COST = 30;
+function rollCard(minR){
+  let r; const q = Math.random()*100;
+  r = q < RAR.SSR.rate ? 'SSR' : q < RAR.SSR.rate + RAR.SR.rate ? 'SR' : 'R';
+  if(minR==='SR' && r==='R') r = Math.random()*100 < RAR.SSR.rate/(RAR.SSR.rate+RAR.SR.rate)*100 ? 'SSR' : 'SR';
+  return pick(CARDS.filter(c=>c.r===r)).id;
+}
+const TICKET_EVERY = 5;
+function addCard(id){
+  const had = S.cards[id]||0;
+  if(!had){ S.cards[id]=1; return 'NEW'; }
+  if(had<5){ S.cards[id]=had+1; return 'とっぱ！'; }
+  S.shards += 10; return 'かけら+10';
+}
+function doPull(n){
+  const cost = n*PULL_COST; if(S.shards < cost) return toast('つきのかけらが たりないよ');
+  S.shards -= cost; const out = [];
+  for(let i=0;i<n;i++){ const id = rollCard(n===10 && i===9 && !out.some(o=>CARD[o.id].r!=='R') ? 'SR' : null);
+    out.push({id, tag:addCard(id)}); }
+  let gotTicket = false;
+  if(n===10){ S.tenCount++; if(S.tenCount % TICKET_EVERY === 0){ S.ssrTickets++; gotTicket = true; } }
+  save(); showGacha(out, gotTicket);
+}
+function useTicket(){
+  if(S.ssrTickets<1) return;
+  S.ssrTickets--; const id = pick(CARDS.filter(c=>c.r==='SSR')).id;
+  const tag = addCard(id); save(); showGacha([{id, tag}], false, true);
+}
+function showGacha(result, gotTicket, fromTicket){
+  updTop();
+  setView(`<section class="panel gacha">
+    <div class="row" style="justify-content:space-between"><h2>なかまガチャ</h2><div class="row"><button class="btn sm" id="gToDress" type="button">勝負服ガチャへ</button><button class="btn sm" id="gBack" type="button">ホームへ</button></div></div>
+    <div class="gtop"><div><p class="sub">月の海の なかまが サポートに 来てくれるよ。同じ なかまが 重なると「とっぱ」して 強くなる（最大4回）。</p>
+      <p class="sub">でる確率：SSR ${RAR.SSR.rate}%・SR ${RAR.SR.rate}%・R ${RAR.R.rate}%。10回ひくと SR以上が 1枚 かならず 入るよ。</p></div>
+      <div class="gbtns"><span class="shard big">つきのかけら <b>${S.shards}</b></span>
+        <button class="btn" id="g1" type="button" ${S.shards<PULL_COST?'disabled':''}>1回 ひく（${PULL_COST}）</button>
+        <button class="btn gold" id="g10" type="button" ${S.shards<PULL_COST*10?'disabled':''}>10回 ひく（${PULL_COST*10}）</button></div></div>
+    <div class="ticket">
+      <div class="tk-l"><b>SSR確定チケット</b><span class="sub">10回ガチャを ${TICKET_EVERY}回 ひくごとに 1まい もらえるよ。つかうと SSRの なかまが かならず 1枚 来る。</span>
+        <div class="tk-bar" aria-label="つぎの チケットまで">${Array.from({length:TICKET_EVERY},(_,i)=>`<i class="${i < S.tenCount % TICKET_EVERY ? 'on':''}"></i>`).join('')}<span class="sub">あと ${TICKET_EVERY - S.tenCount % TICKET_EVERY}回</span></div></div>
+      <div class="tk-r"><span class="tk-n">×${S.ssrTickets}</span><button class="btn ${S.ssrTickets?'main':''}" id="gTk" type="button" ${S.ssrTickets?'':'disabled'}>チケットを つかう</button></div>
+    </div>
+    ${gotTicket?`<p class="tk-got">10回ガチャ ${TICKET_EVERY}回 たっせい！ <b>SSR確定チケット</b>を 1まい もらったよ。</p>`:''}
+    ${fromTicket?`<p class="tk-got">SSR確定チケットを つかったよ！</p>`:''}
+    ${result ? `<div class="cards pull">${result.map((o,i)=>`<div class="pc" style="animation-delay:${i*.09}s">${cardTile(o.id,{badge:o.tag})}</div>`).join('')}</div>` : `<p class="empty">かけらは レースで 手に入るよ（1着 60・2着 40・3着 25、月光杯は 2ばい）。育成を おえても もらえます。</p>`}
+    <div class="row"><button class="btn sm" id="gCards" type="button">なかま図鑑を 見る</button></div>
+  </section>`);
+  $('gBack').addEventListener('click', showHome);
+  $('gCards').addEventListener('click', showCards);
+  $('g1').addEventListener('click', ()=>doPull(1));
+  $('g10').addEventListener('click', ()=>doPull(10));
+  $('gTk').addEventListener('click', useTicket);
+  $('gToDress').addEventListener('click', ()=>showDressGacha());
+}
+function showCards(){
+  updTop();
+  setView(`<section class="panel" style="display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="justify-content:space-between"><h2>なかま図鑑 <small class="sub" style="font-family:var(--f-body)">${Object.keys(S.cards).length} / ${CARDS.length}</small></h2><div class="row"><button class="btn sm gold" id="cdG" type="button">ガチャへ</button><button class="btn sm" id="cdBack" type="button">ホームへ</button></div></div>
+    <p class="sub">カードを おすと くわしい こうかが 見られるよ。</p>
+    <div class="cards">${CARDS.map(c=>S.cards[c.id] ? cardTile(c.id,{btn:1}) : cardTile(c.id,{hide:1})).join('')}</div>
+  </section>`);
+  $('cdBack').addEventListener('click', showHome);
+  $('cdG').addEventListener('click', ()=>showGacha());
+  document.querySelectorAll('.cards [data-card]').forEach(b=>b.addEventListener('click',()=>{
+    const c = CARD[b.dataset.card], R = RAR[c.r], lb = lbOf(c.id);
+    modal(`<div class="evh"><canvas data-vis="${c.v}" aria-hidden="true"></canvas><h3>${esc(cardName(c))}</h3></div>
+      <p class="sub">${c.r}・とくい：<b>${stName(c.type)}</b>・とっぱ ${lb}/4（もっている数 ${S.cards[c.id]}）</p>
+      <ul class="eff">
+        <li>${stName(c.type)}の 練習に いると のびが <b>+${Math.round((R.bonus+lb*.02)*100)}%</b>、さらに <b>+${R.flat+(lb>=4?1:0)}</b></li>
+        <li>なかよし度 ${NAKA}以上で「なかよしトレーニング」：のび <b>×${(R.naka+lb*.02).toFixed(2)}</b></li>
+        <li>はじめの なかよし度 ${R.bond+lb*3}</li>
+        <li>おもいでイベント 3話め：${c.r==='R' ? `${stName(c.type)}が 大きく のびる` : `スキル「${SKILLS[CREA_SKILL[c.v]].n}」（${SKILLS[CREA_SKILL[c.v]].d}）`}</li>
+      </ul>
+      <div class="row"><button class="btn" id="mClose" type="button">とじる</button></div>`);
+    $('mClose').addEventListener('click', closeModal);
+  }));
+}
+
+// ---------- 勝負服ガチャ ----------
+function dressTile(k, opt){
+  opt = opt || {}; const D = DRESSES[k];
+  return `<${opt.btn?'button type="button"':'div'} class="dress r-${D.r}${opt.on?' on':''}" data-d="${k}"${opt.btn?` aria-pressed="${!!opt.on}"`:''}>
+    <div class="art"><canvas data-dress="${k}" data-col="${opt.col||'lavender'}" aria-hidden="true"></canvas>${opt.badge?`<span class="badge">${opt.badge}</span>`:''}</div>
+    <span class="rar">${D.r}</span><b>${esc(D.n)}</b>${D.u?`<span class="uqn">${SKILLS[D.u].n}</span>`:''}
+  </${opt.btn?'button':'div'}>`;
+}
+function dressEffect(k){
+  const D = DRESSES[k];
+  return `はじめの 能力 ${Object.entries(D.st).map(([s,v])=>`${stName(s)}+${v}`).join('・')}${D.u?`、固有スキル「${SKILLS[D.u].n}」（${SKILLS[D.u].d}）`:''}`;
+}
+function pullDress(){
+  if(S.dressTickets<1) return;
+  S.dressTickets--; const q = Math.random()*100; const r = q<DRESS_RATE.SSR ? 'SSR' : q<DRESS_RATE.SSR+DRESS_RATE.SR ? 'SR' : 'R';
+  const k = pick(DRESS_KEYS.filter(x=>DRESSES[x].r===r)); let tag;
+  if(!S.dresses[k]){ S.dresses[k]=1; tag='NEW'; } else { S.shards += 30; tag='かけら+30'; }
+  save(); showDressGacha({k, tag});
+}
+function showDressGacha(res){
+  updTop();
+  setView(`<section class="panel gacha">
+    <div class="row" style="justify-content:space-between"><h2>勝負服ガチャ</h2><div class="row"><button class="btn sm" id="dToSup" type="button">なかまガチャへ</button><button class="btn sm" id="dBack" type="button">ホームへ</button></div></div>
+    <div class="gtop"><div><p class="sub">育成の はじめに 着せる 勝負服。はじめの 能力が 上がり、SSRには その服だけの <b>固有スキル</b>が ついているよ。</p>
+      <p class="sub">でる確率：SSR ${DRESS_RATE.SSR}%・SR ${DRESS_RATE.SR}%・R ${DRESS_RATE.R}%。もっている服が 出たら つきのかけら+30。</p>
+      <p class="sub">チケットは 育成を さいごまで おえると 1まい（さいごの レースで ゆうしょうすると もう1まい）。つきのかけら ${DRESS_TICKET_SHARDS}こでも こうかんできるよ。</p></div>
+      <div class="gbtns"><span class="shard big">勝負服チケット <b>${S.dressTickets}</b></span>
+        <button class="btn gold" id="dPull" type="button" ${S.dressTickets<1?'disabled':''}>チケットで 1回 ひく</button>
+        <button class="btn" id="dBuy" type="button" ${S.shards<DRESS_TICKET_SHARDS?'disabled':''}>かけら ${DRESS_TICKET_SHARDS} → チケット1まい</button></div></div>
+    ${res?`<div class="dpull">${dressTile(res.k,{badge:res.tag})}<p>${DRESSES[res.k].r==='SSR'?'<b class="ssrget">SSR！</b> ':''}「${esc(DRESSES[res.k].n)}」${res.tag==='NEW'?'を 手に入れた！':'は もう もっていたよ。'}<br><span class="sub">${dressEffect(res.k)}</span></p></div>`:''}
+    <h3 style="font-size:17px">勝負服ずかん <small class="sub" style="font-family:var(--f-body)">${Object.keys(S.dresses).length} / ${DRESS_KEYS.length}</small></h3>
+    <div class="dresses">${DRESS_KEYS.map(k=>S.dresses[k] ? dressTile(k,{btn:1}) : `<div class="dress r-${DRESSES[k].r} locked"><div class="art"><span class="q">？</span></div><span class="rar">${DRESSES[k].r}</span><b>？？？</b></div>`).join('')}</div>
+  </section>`);
+  $('dBack').addEventListener('click', showHome);
+  $('dToSup').addEventListener('click', ()=>showGacha());
+  $('dPull').addEventListener('click', pullDress);
+  $('dBuy').addEventListener('click', ()=>{ if(S.shards<DRESS_TICKET_SHARDS) return; S.shards-=DRESS_TICKET_SHARDS; S.dressTickets++; save(); showDressGacha(); toast('勝負服チケットを 1まい こうかんしたよ'); });
+  document.querySelectorAll('.dresses [data-d]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.d;
+    modal(`<div class="evh"><canvas data-dress="${k}" data-col="lavender" aria-hidden="true" style="width:90px;height:70px"></canvas><h3>${esc(DRESSES[k].n)}</h3></div><p class="sub">${DRESSES[k].r}</p><p>${dressEffect(k)}</p><div class="row"><button class="btn" id="mClose" type="button">とじる</button></div>`);
+    $('mClose').addEventListener('click', closeModal); }));
+}
+
+// ---------- みんなで レース ----------
+let vsSel = new Set(), vsGuests = [], vsDist = 2000;
+function showVsSetup(){
+  updTop(); race = null;
+  const all = S.hall.map(e=>({...fixU(e), key:'h'+e.id})).concat(vsGuests);
+  vsSel = new Set([...vsSel].filter(k=>all.some(e=>e.key===k)));
+  setView(`<section class="panel" style="display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="justify-content:space-between"><h2>みんなで レース</h2><button class="btn sm" id="vBack" type="button">ホームへ</button></div>
+    <p class="sub">でんどうの子や、ともだちの コードの子を ${RUNNERS}匹まで えらんでね。足りない分は ライバルが 入ります。</p>
+    <div class="field"><label for="vCode">ともだちの コード（1行に1つ。まとめて はりつけOK）</label><textarea id="vCode" rows="3" placeholder="UMDB1-..."></textarea><div class="row"><button class="btn sm" id="vAdd" type="button">コードの子を ついか</button><span class="sub" id="vMsg"></span></div></div>
+    <div class="field"><span class="lbl">きょり</span><div class="chips" id="vDist">${[[1200,'短距離 1200m'],[1600,'マイル 1600m'],[2000,'中距離 2000m'],[3000,'長距離 3000m']].map(([d,n])=>`<button type="button" class="chip" data-d="${d}" aria-pressed="${vsDist===d}">${n}</button>`).join('')}</div></div>
+    <div class="row"><span class="lbl">えらんだ子 ${vsSel.size} / ${RUNNERS}</span><button class="btn gold" id="vGo" type="button">レースへ</button></div>
+    ${all.length ? `<div class="hall" id="vList">${all.map(e=>hallCard(e,{sel:vsSel.has(e.key)}).replace('class="hc','data-key="'+e.key+'" role="button" tabindex="0" class="hc')).join('')}</div>` : `<p class="empty">でんどうの子が まだ いないよ。コードを はりつけるか、ライバルだけで 走らせてみよう。</p>`}
+  </section>`);
+  $('vBack').addEventListener('click', showHome);
+  $('vDist').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ vsDist=+b.dataset.d; showVsSetup(); }));
+  $('vAdd').addEventListener('click', ()=>{
+    const lines = $('vCode').value.split(/[\s,、]+/).filter(Boolean); let ok=0, bad=0;
+    lines.forEach(l=>{ const u = fromCode(l); if(!u){ bad++; return; } const key='g'+Date.now()+ok; vsGuests.push({...u, key, guest:true, id:key}); if(vsSel.size<RUNNERS) vsSel.add(key); ok++; });
+    showVsSetup(); $('vMsg').textContent = ok||bad ? `${ok}匹 ついか${bad?`／よめなかった ${bad}こ`:''}` : 'コードが はいっていないよ';
+  });
+  document.querySelectorAll('#vList [data-key]').forEach(el=>{ const tog=()=>{ const k=el.dataset.key; if(vsSel.has(k)) vsSel.delete(k); else if(vsSel.size<RUNNERS) vsSel.add(k); else return toast(`${RUNNERS}匹までだよ`); showVsSetup(); };
+    el.addEventListener('click', tog); el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); tog(); } }); });
+  $('vGo').addEventListener('click', ()=>{
+    const picked = all.filter(e=>vsSel.has(e.key)).map(e=>fixU({name:e.name, color:e.color, pers:e.pers, outfit:e.outfit||'', st:Object.assign({},e.st), skills:(e.skills||[]).slice(), apt:JSON.parse(JSON.stringify(e.apt)), strat:e.strat}));
+    const used = new Set(picked.map(p=>p.name)); const avg = picked.length ? picked.reduce((a,p)=>a+sumSt(p.st),0)/picked.length : 600;
+    while(picked.length<RUNNERS) picked.push(rivalOf([avg*.85, avg*1.05], used, ri(0,2), vsDist));
+    picked.sort(()=>Math.random()-.5);
+    setupRace({title:`みんなで レース ${vsDist}m`, dist:vsDist, us:picked, mode:'vs'});
+  });
+  if($('vList')) requestAnimationFrame(()=>drawMinis($('vList')));
+}
+
+// ---------- ループ（30fpsで軽く） ----------
+let last = performance.now(), lastDraw = 0;
+function loop(now){
+  requestAnimationFrame(loop);
+  if(now - lastDraw < 32) return;
+  const dt = Math.min(.1, (now-last)/1000); last = now; lastDraw = now;
+  if(anim && !document.hidden){ try{ anim.draw(now/1000, dt); }catch(e){ console.error(e); } }
+}
+requestAnimationFrame(loop);
+$('modal').addEventListener('click', e=>{ if(e.target===$('modal') && $('mClose')) $('mClose').click(); });
+window.__derbyTest = {simulate, rivalOf, STATS};
+showHome();
+})();
+</script>
+
+</body>
+</html>

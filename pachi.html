@@ -180,6 +180,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
       <span class="sw" style="background:#ffd0db;color:#c0244f">あか</span><span>大チャンス！！ かならず リーチ</span>
       <span class="sw" style="background:#ffe28a;color:#5a3d00">きん</span><span>大当たり 確定</span>
       <span class="sw" style="background:linear-gradient(90deg,#ffd1dc,#fff1bf,#d3f5cf,#cfe4ff,#e3d6ff);color:#5a2a8a">にじ</span><span>大当たり 確定（プレミア）</span>
+      <h3>とくべつ</h3>
+      <span class="sw" style="background:#111;color:#fff">ピチュン</span><span>回りはじめに 「ピチュン！」と 鳴って 液晶が まっくら → 大当たり 確定（レア）</span>
       <h3>リーチ</h3>
       <span class="sw">ノーマル</span><span class="stars">★</span>
       <span class="sw" style="background:#d3f5cf;color:#25733a">なかまリーチ</span><span class="stars">★★</span>
@@ -381,6 +383,7 @@ const sfx = {
   zen(){ for(let i=0;i<16;i++) tone(84+(i%8)*2,i*.06,.12,i%2?'square':'triangle',.12); sweep(400,3000,.9,.6,'sine',.25); },
   serif(c){ const m = {white:84,blue:86,green:88,red:91,rainbow:96}[c]||84; tone(m,0,.16,'sine',.22); if(c==='red'||c==='rainbow') tone(m+7,.1,.3,'sine',.24); },
   pon(){ tone(79,0,.08,'triangle',.15); },
+  pichun(){ sweep(5200,1800,0,.09,'square',.22); sweep(2600,900,.02,.14,'sine',.3); noise(0,.05,.25,9000); },
   pop(){ noise(0,.18,.16,2500); tone(96+rint(6),0,.12,'sine',.12); },
   whoosh(){ noise(0,.35,.22,4500); sweep(300,1400,0,.3,'sawtooth',.06); },
 };
@@ -500,6 +503,7 @@ function planNormal(h){
   p.serif = chance(hit ? .7 : reach ? .45 : .12) ? (hit ? pickW({blue:10,green:25,red:45,rainbow:20}) : pickW({white:55,blue:28,green:13,red:hot>.3?4:1})) : null;
   p.cutin = chance(hit ? .4 : reach ? .12 : .01) ? (hit ? pickW({green:15,red:50,gold:35}) : pickW({blue:50,green:38,red:12})) : null;
   p.giji = hit ? +pickW({1:30,2:30,3:28,4:12}) : reach ? +pickW({1:82,2:15,3:3}) : +pickW({1:97,2:3});
+  p.pichun = hit && chance(.08);
   p.btn = chance(hit ? .2 : reach ? .06 : .015); p.btnHit = p.btn && (hit ? chance(.8) : chance(.15));
   const up = {white:'blue', blue:'green', green:'red', red:'gold'}[h.col];
   p.tc = up && (hit ? chance(.4) : (reach && reach!=='normal' && up!=='gold') ? chance(.15) : false) ? up : null;
@@ -523,6 +527,7 @@ async function runSpin(h){
   spinAll(fast ? 20 : 13); sfx.start();
   if(fast) return fastSpin(h, p);
   L.mood = 'idle';
+  if(p.pichun){ await wait(120); const was = L.led; L.led = 'off'; fx('black', 650); sfx.pichun(); await wait(700); L.led = was==='normal' ? 'normal' : was; }
   if(p.tc){ await wait(380); h.col = p.tc; sfx.hold(h.col); fx('flash',300,{col:'rgba(255,255,255,.45)'}); { const hc = h.col==='rainbow' ? RAINBOW : [HCOL[h.col],'#fff']; ring(SC.x+22, SC.y+SC.h-14, hc[0], 50, .6, 4); burst(SC.x+22, SC.y+SC.h-14, 20, hc, 150, {type:'star'}); punch(.03); } say(h.col==='gold' ? 'きんいろ…！！' : h.col==='red' ? 'あかく なった…！' : '保留の 色が かわった！', h.col==='gold'?'rainbow':h.col==='red'?'red':'blue', 1600); }
   if(p.btn){ await wait(450); say('ボタンを おしてね！','blue'); await pushPrompt(2600); if(p.btnHit){ cut('チャンス！','red',1100); sfx.cut(); L.led = 'hot'; } else say('…なにも おきなかった', '', 1200); await wait(800); }
   if(p.step) await stepUp(p.step);
@@ -907,6 +912,7 @@ function drawFx(c, t, now){
       for(let j=0;j<36;j++){ const a = Math.random()*TAU, w = .012+Math.random()*.02, r0 = 70+Math.random()*60; c.beginPath(); c.moveTo(200+Math.cos(a)*r0, 212+Math.sin(a)*r0); c.lineTo(200+Math.cos(a-w)*320, 212+Math.sin(a-w)*320); c.lineTo(200+Math.cos(a+w)*320, 212+Math.sin(a+w)*320); c.closePath(); c.fill(); } c.restore(); }
     else if(f.type==='wipe'){ const cols = f.cols||['#fff','#ccc','#888']; c.save(); for(let j=0;j<3;j++){ const x = SC.x-260+(k*1.25-j*.09)*(SC.w+520); c.fillStyle = cols[j]; c.beginPath(); c.moveTo(x,SC.y-10); c.lineTo(x+150,SC.y-10); c.lineTo(x+70,SC.y+SC.h+10); c.lineTo(x-80,SC.y+SC.h+10); c.closePath(); c.fill(); } c.restore(); }
     else if(f.type==='vignette'){ const a = (.35+.25*Math.sin(t*9))*Math.min(1,k*5,(1-k)*3); const g = c.createRadialGradient(200,212,70,200,212,190); g.addColorStop(0,`rgba(${f.col},0)`); g.addColorStop(1,`rgba(${f.col},${a})`); c.fillStyle = g; c.fillRect(SC.x,SC.y,SC.w,SC.h); }
+    else if(f.type==='black'){ c.fillStyle = `rgba(0,0,0,${k<.7 ? 1 : (1-k)/.3})`; c.fillRect(SC.x,SC.y,SC.w,SC.h); }
     else if(f.type==='dim'){ c.fillStyle = `rgba(5,6,25,${.55*Math.min(1,k*4,(1-k)*2)})`; c.fillRect(SC.x,SC.y,SC.w,SC.h); }
     else if(f.type==='shine'){ c.save(); const x = SC.x-80+k*(SC.w+160); const g = c.createLinearGradient(x-40,0,x+40,0); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,.18)'); g.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle = g; c.transform(1,0,-.4,1,85,0); c.fillRect(x-40,SC.y,80,SC.h); c.restore(); }
     else if(f.type==='school'){ f.list.forEach(o=>{ const kk = (k-o.d)/(1-o.d)*1.6; if(kk<0||kk>1) return; drawVis(c, o.v, SC.x+SC.w+30-kk*(SC.w+60), o.y+Math.sin(kk*12+o.y)*3, o.s, Math.floor(t*6)%2, -1); }); }
@@ -1018,6 +1024,7 @@ for(let i=0;i<=26;i++){ const a = Math.PI*(1.06+i/26*.88); LEDS.push([200+Math.c
 for(let y=230;y<=580;y+=35){ LEDS.push([1.8,y]); LEDS.push([398.2,y]); }
 function ledColor(i, t){
   const m = L.led, n = LEDS.length;
+  if(m==='off') return 'rgba(20,20,40,.6)';
   if(m==='rainbow') return `hsl(${(i*25+t*400)%360},95%,${55+15*Math.sin(t*10+i)}%)`;
   if(m==='rush') return (Math.floor(t*8)+i)%3 ? '#ffb3c8' : '#ffcf8a';
   if(m==='gold') return Math.floor(t*10)%2 ? '#ffd34d' : '#fff6cf';

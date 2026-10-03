@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ウミミめざまし</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* layout: one phone-sized card — sky band with Umimi on top, giant pop clock, alarm controls below */
+:root{
+  --sky1:#bfe3ff; --sky2:#ffe7f3; --bg:#f6f1ff; --card:#ffffff; --ink:#3a3466; --sub:#7a73a8;
+  --lav:#9c8cf0; --pop:#ff7aa8; --sun:#ffc94d; --line:#e4dcfb; --ok:#38b98a;
+  --display:"Mochiy Pop One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
+  --body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky1:#2b2f6e; --sky2:#4a3a74; --bg:#17152e; --card:#221f42; --ink:#f1edff; --sub:#b4abe6;
+  --lav:#b3a6ff; --pop:#ff8fb7; --sun:#ffd76e; --line:#3a3566; --ok:#5fd3a7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky1:#2b2f6e; --sky2:#4a3a74; --bg:#17152e; --card:#221f42; --ink:#f1edff; --sub:#b4abe6;
+  --lav:#b3a6ff; --pop:#ff8fb7; --sun:#ffd76e; --line:#3a3566; --ok:#5fd3a7; color-scheme:dark}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:500;padding-inline:16px;padding-block:16px 28px;box-sizing:border-box}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.back{font-family:var(--body);font-weight:700;font-size:14px;color:var(--sub);text-decoration:none;align-self:flex-start;padding:4px 2px}
+.back:hover{color:var(--ink)}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.sky{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(170deg,var(--sky1),var(--sky2));aspect-ratio:4/3;max-width:100%}
+.sky.night{background:linear-gradient(170deg,#262a63,#4b3a78)}
+#stage{width:100%;height:100%;display:block}
+.bubble{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--card);color:var(--ink);font-family:var(--display);font-size:15px;padding:8px 14px;border-radius:18px;white-space:nowrap;box-shadow:0 3px 0 var(--line);max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-top-color:var(--card);border-bottom:0}
+.clock{text-align:center;line-height:1}
+#time{font-family:var(--display);font-size:clamp(64px,22vw,104px);letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+#time .colon{color:var(--pop);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+#sec{font-family:var(--display);font-size:20px;color:var(--lav);margin-left:4px;font-variant-numeric:tabular-nums}
+#date{margin-top:8px;color:var(--sub);font-size:15px;letter-spacing:.05em}
+.panel{background:var(--card);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;border:2px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lbl{font-size:13px;color:var(--sub);letter-spacing:.08em}
+#alarmTime{font-family:var(--display);font-size:34px;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:6px 12px;min-width:0;flex:1}
+#alarmTime:focus-visible,button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
+.btn{font-family:var(--display);font-size:17px;border:0;border-radius:999px;padding:14px 20px;cursor:pointer;color:#fff;background:var(--pop);box-shadow:0 5px 0 color-mix(in srgb,var(--pop) 60%,#000 20%);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 color-mix(in srgb,var(--pop) 60%,#000 20%)}
+.btn.on{background:var(--ok);box-shadow:0 5px 0 color-mix(in srgb,var(--ok) 60%,#000 20%)}
+.btn.ghost{background:transparent;color:var(--sub);box-shadow:none;border:2px solid var(--line);font-size:14px;padding:10px 16px}
+.btn.wide{width:100%}
+#status{font-size:15px;color:var(--sub);min-height:1.4em}
+#status b{color:var(--ink);font-family:var(--display);font-weight:400}
+.tunes{display:flex;gap:8px;flex-wrap:wrap}
+.tune{font-family:var(--body);font-weight:700;font-size:14px;border-radius:999px;padding:8px 14px;border:2px solid var(--line);background:transparent;color:var(--sub);cursor:pointer}
+.tune[aria-pressed="true"]{border-color:var(--lav);background:var(--lav);color:#fff}
+.note{font-size:12.5px;color:var(--sub);line-height:1.7}
+/* ringing */
+.ring{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));background:linear-gradient(170deg,var(--sun),var(--pop));color:#3a2350;text-align:center}
+.ring h2{font-family:var(--display);font-weight:400;font-size:clamp(40px,13vw,64px);margin:0;letter-spacing:.04em;animation:wob .6s ease-in-out infinite alternate}
+@keyframes wob{from{transform:rotate(-3deg) scale(1)}to{transform:rotate(3deg) scale(1.06)}}
+#ringCanvas{width:min(80vw,340px);aspect-ratio:245/222;max-width:100%}
+.ring .btn{background:#fff;color:#e2507f;box-shadow:0 6px 0 rgba(0,0,0,.18);font-size:22px;padding:18px 40px}
+.ring .btn.ghost{background:transparent;color:#3a2350;border-color:rgba(58,35,80,.35);font-size:15px;box-shadow:none}
+@media (prefers-reduced-motion:reduce){#time .colon,.ring h2{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back" href="./">← ポータル</a>
+  <div class="sky" id="sky">
+    <canvas id="stage" width="440" height="330" aria-label="ウミミ"></canvas>
+    <div class="bubble" id="bubble">おはよ〜！めざまし、まかせて！</div>
+  </div>
+
+  <div class="clock">
+    <div><span id="time">--<span class="colon">:</span>--</span><span id="sec">--</span></div>
+    <div id="date">&nbsp;</div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <span class="lbl">おこしてほしい じかん</span>
+    </div>
+    <div class="row">
+      <input type="time" id="alarmTime" value="07:00" aria-label="アラームの時刻">
+    </div>
+    <div class="lbl">おこしかた</div>
+    <div class="tunes" id="tunes" role="group" aria-label="おこしかた">
+      <button class="tune" type="button" data-t="box" aria-pressed="true">オルゴール</button>
+      <button class="tune" type="button" data-t="pop" aria-pressed="false">ぴこぴこ</button>
+      <button class="tune" type="button" data-t="bell" aria-pressed="false">かね</button>
+    </div>
+    <button class="btn wide" type="button" id="setBtn">めざましをセット</button>
+    <div id="status">まだセットしてないよ</div>
+    <button class="btn ghost" type="button" id="testBtn">ためしに鳴らしてみる</button>
+    <p class="note">このページを開いたまま、画面をつけておいてね。スマホは画面が消えたりほかのアプリに切りかえると鳴らないことがあるので、充電しながら置いておくのがおすすめ。</p>
+  </div>
+</div>
+
+<div class="ring" id="ring" hidden>
+  <h2>おきて〜！</h2>
+  <canvas id="ringCanvas" width="245" height="222"></canvas>
+  <div id="ringMsg" style="font-family:var(--display);font-size:18px">あさだよ、ウミミがよんでるよ</div>
+  <button class="btn" type="button" id="stopBtn">おきた！</button>
+  <button class="btn ghost" type="button" id="snoozeBtn">あと5分…（スヌーズ）</button>
+</div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const CW=245,CH=222;
+const spr=new Image(); spr.src='umimi-sprites.png';
+const KEY='umimi-alarm-v1';
+let st={time:'07:00',tune:'box',on:false};
+try{Object.assign(st,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+
+/* ---------- clock ---------- */
+const WD=['にち','げつ','か','すい','もく','きん','ど'];
+const pad=n=>String(n).padStart(2,'0');
+function isNight(d){const h=d.getHours();return h>=20||h<5}
+
+/* ---------- sound (Web Audio, no files) ---------- */
+let AC=null,master=null,loopT=null;
+function ac(){ if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); master.gain.value=0; master.connect(AC.destination);} if(AC.state==='suspended')AC.resume(); return AC; }
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function note(t,m,dur,kind,vol){
+  const o=AC.createOscillator(),g=AC.createGain();
+  if(kind==='box'){o.type='sine';}
+  else if(kind==='pop'){o.type='square';vol*=.35;}
+  else {o.type='triangle';}
+  o.frequency.value=mtof(m);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0005,t+(kind==='bell'?1.6:kind==='box'?.9:.18));
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+2);
+  if(kind!=='pop'){ const o2=AC.createOscillator(),g2=AC.createGain(); o2.type='sine'; o2.frequency.value=mtof(m)*(kind==='bell'?2.76:2); g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(vol*.25,t+.005); g2.gain.exponentialRampToValueAtTime(.0005,t+.5); o2.connect(g2); g2.connect(master); o2.start(t); o2.stop(t+1); }
+}
+const TUNES={
+  box:{bpm:132,mel:[76,79,84,79,81,79,76,72, 74,77,81,77,79,77,74,71, 72,76,79,84,83,79,76,74, 72,null,79,null,84,null,null,null],bass:[48,null,55,null,53,null,55,null]},
+  pop:{bpm:168,mel:[72,76,79,84,79,76,72,null, 74,77,81,86,81,77,74,null, 76,79,83,88,83,79,76,79, 84,null,84,null,88,null,null,null],bass:[48,48,55,55,53,53,55,55]},
+  bell:{bpm:96,mel:[84,79,81,76,null,null,null,null, 84,81,79,76,null,null,null,null],bass:[60,null,null,null,55,null,null,null]}
+};
+let playing=false;
+function startMusic(kind){
+  ac(); stopMusic(true); playing=true;
+  const T=TUNES[kind]; const step=60/T.bpm/2;
+  master.gain.cancelScheduledValues(AC.currentTime);
+  master.gain.setValueAtTime(.12,AC.currentTime);
+  master.gain.linearRampToValueAtTime(.55,AC.currentTime+40); // だんだん大きく
+  let t0=AC.currentTime+.05;
+  const sched=()=>{ if(!playing)return;
+    while(t0<AC.currentTime+1.2){
+      T.mel.forEach((m,i)=>{ if(m!=null) note(t0+i*step,m,step,kind,.5); });
+      T.bass.forEach((m,i)=>{ if(m!=null) note(t0+i*step*T.mel.length/T.bass.length,m,step,kind==='pop'?'pop':'box',.28); });
+      t0+=T.mel.length*step + (kind==='bell'?step*2:0);
+    }
+    loopT=setTimeout(sched,300);
+  }; sched();
+}
+function stopMusic(quick){ playing=false; clearTimeout(loopT); if(AC&&master){ master.gain.cancelScheduledValues(AC.currentTime); master.gain.setValueAtTime(master.gain.value,AC.currentTime); master.gain.linearRampToValueAtTime(0,AC.currentTime+(quick?.02:.3)); } }
+function chime(){ ac(); master.gain.cancelScheduledValues(AC.currentTime); master.gain.setValueAtTime(.35,AC.currentTime); const t=AC.currentTime+.02; [84,88,91,96].forEach((m,i)=>note(t+i*.09,m,.1,'box',.4)); }
+
+/* ---------- wake lock ---------- */
+let lock=null;
+async function keepAwake(){ try{ if('wakeLock' in navigator && !lock){ lock=await navigator.wakeLock.request('screen'); lock.addEventListener('release',()=>{lock=null}); } }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ if(st.on) keepAwake(); tick(); } });
+
+/* ---------- Umimi drawing ---------- */
+const cv=$('stage'),cx=cv.getContext('2d');
+const rc=$('ringCanvas'),rx=rc.getContext('2d');
+let mode='idle', lastBubble=0, stars=[...Array(22)].map(()=>({x:Math.random(),y:Math.random()*.55,s:Math.random()*1.6+.6,p:Math.random()*6}));
+let hop=0, hopV=0, hearts=[];
+function frameAt(t){
+  if(mode==='sleep') return (Math.floor(t/1400)%2)?6:5;
+  if(mode==='happy') return [8,7,9,8][Math.floor(t/600)%4];
+  const c=Math.floor(t/700)%14; return c===13?1:(c===6?2:0);
+}
+function drawSpr(x,f,dx,dy,w,flip){
+  if(!spr.complete||!spr.naturalWidth) return;
+  const h=w*CH/CW; x.save(); x.translate(dx,dy); if(flip){x.scale(-1,1);}
+  x.drawImage(spr,(f%5)*CW,Math.floor(f/5)*CH,CW,CH,-w/2,-h,w,h); x.restore();
+}
+function render(now){
+  const W=cv.width,H=cv.height; cx.clearRect(0,0,W,H);
+  const night=mode==='sleep';
+  $('sky').classList.toggle('night',night);
+  if(night){ stars.forEach(s=>{ cx.globalAlpha=.4+.6*Math.abs(Math.sin(now/900+s.p)); cx.fillStyle='#fff6c8'; cx.beginPath(); cx.arc(s.x*W,s.y*H,s.s,0,7); cx.fill(); }); cx.globalAlpha=1;
+    cx.fillStyle='#ffe59a'; cx.beginPath(); cx.arc(W*.82,H*.2,26,0,7); cx.fill(); cx.fillStyle='#262a63'; cx.beginPath(); cx.arc(W*.82+11,H*.2-7,23,0,7); cx.fill();
+  } else {
+    cx.fillStyle='rgba(255,255,255,.7)'; [[.18,.25,1],[.72,.18,.8]].forEach(([a,b,k])=>{ const ox=((now/60000+a)%1.2-.1)*W; cx.beginPath(); cx.arc(ox,b*H,18*k,0,7); cx.arc(ox+20*k,b*H-8*k,22*k,0,7); cx.arc(ox+42*k,b*H,16*k,0,7); cx.fill(); });
+  }
+  // floor bubbles
+  cx.fillStyle='rgba(255,255,255,.35)'; for(let i=0;i<6;i++){ const y=(H+30)-((now/40+i*70)%(H+60)); cx.beginPath(); cx.arc(W*(.1+i*.16),y,3+i%3*2,0,7); cx.fill(); }
+  // hop physics
+  if(mode==='happy'&&hop<=0&&Math.random()<.03){hopV=5.5}
+  hopV-=.35; hop=Math.max(0,hop+hopV); if(hop===0)hopV=0;
+  const bob=mode==='sleep'?Math.sin(now/1200)*2:Math.sin(now/650)*4;
+  const f=frameAt(now);
+  // shadow
+  cx.fillStyle='rgba(60,40,120,.12)'; cx.beginPath(); cx.ellipse(W/2,H*.9,90-hop,12,0,0,7); cx.fill();
+  drawSpr(cx,f,W/2,H*.93+bob-hop,250,false);
+  if(night){ cx.fillStyle='#fff'; cx.font='22px "Mochiy Pop One",sans-serif'; const z=(now/700)%3; for(let i=0;i<3;i++){ cx.globalAlpha=Math.max(0,1-Math.abs(z-i)); cx.fillText('z',W*.66+i*16,H*.42-i*18); } cx.globalAlpha=1; }
+  // hearts
+  hearts=hearts.filter(h=>(h.y-=1.1,h.a-=.012,h.a>0)); hearts.forEach(h=>{cx.globalAlpha=h.a; cx.fillStyle='#ff7aa8'; cx.font='20px sans-serif'; cx.fillText('♥',h.x,h.y);}); cx.globalAlpha=1;
+  if(mode==='happy'&&Math.random()<.04) hearts.push({x:W*(.25+Math.random()*.5),y:H*.6,a:1});
+  // ringing canvas
+  if(!$('ring').hidden){ rx.clearRect(0,0,CW,CH); const j=Math.sin(now/70)*4; rx.save(); rx.translate(j,0); rx.rotate(Math.sin(now/90)*.04); drawSpr(rx,[3,7,8,4][Math.floor(now/350)%4],CW/2,CH-4-Math.abs(Math.sin(now/180))*10,CW*.92,false); rx.restore(); }
+  requestAnimationFrame(render);
+}
+cv.addEventListener('click',()=>{ if(mode!=='sleep'){ hopV=6; hearts.push({x:cv.width/2,y:cv.height*.45,a:1}); say(pick(TAPS)); } else say('むにゃ…まだ よるだよ…'); });
+
+/* ---------- messages ---------- */
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const TAPS=['えへへ','ぷにぷに〜','なあに？','きょうもいい日になるよ','おみず、のんだ？'];
+const MORN=['おはよ〜！きょうもえらい！','おきられたね、すごい！','あさごはん、なにたべる？','きょうもいっしょにがんばろ','ねぐせ、ついてない？'];
+function say(t){ $('bubble').textContent=t; lastBubble=Date.now(); }
+
+/* ---------- alarm logic ---------- */
+let snoozeUntil=0, ringing=false, firedKey='';
+function nextAlarm(from){
+  const [h,m]=st.time.split(':').map(Number); const d=new Date(from); d.setHours(h,m,0,0);
+  if(d<=from) d.setDate(d.getDate()+1); return d;
+}
+function updStatus(now){
+  const s=$('status'), b=$('setBtn');
+  b.classList.toggle('on',st.on); b.textContent=st.on?'セットちゅう（タップでやめる）':'めざましをセット';
+  if(!st.on){ s.textContent='まだセットしてないよ'; return; }
+  const target=snoozeUntil>now.getTime()?new Date(snoozeUntil):nextAlarm(now);
+  const diff=Math.max(0,target-now); const hh=Math.floor(diff/3600000), mm=Math.ceil((diff%3600000)/60000);
+  const left=(hh?hh+'じかん':'')+(mm===60?'':mm+'ふん');
+  s.innerHTML=(snoozeUntil>now.getTime()?'スヌーズちゅう… ':'')+'<b>'+pad(target.getHours())+':'+pad(target.getMinutes())+'</b> におこすね（あと '+left+'）';
+}
+function startRing(){
+  if(ringing) return; ringing=true; mode='happy';
+  $('ring').hidden=false; $('ringMsg').textContent=pick(['あさだよ、ウミミがよんでるよ','おひさま でてるよ〜','おきないと ぷにぷにしちゃうぞ']);
+  try{ startMusic(st.tune); }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([300,200,300,200,300]);
+}
+function stopRing(snooze){
+  ringing=false; stopMusic(); $('ring').hidden=true;
+  if(snooze){ snoozeUntil=Date.now()+5*60000; mode='sleep'; say('あと5ふんだけだよ…？'); }
+  else { snoozeUntil=0; mode='happy'; say(pick(MORN)); setTimeout(()=>{ if(!ringing) mode='idle'; },8000); }
+  tick();
+}
+function tick(){
+  const now=new Date();
+  $('time').innerHTML=pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
+  $('sec').textContent=pad(now.getSeconds());
+  $('date').textContent=(now.getMonth()+1)+'がつ'+now.getDate()+'にち（'+WD[now.getDay()]+'）';
+  if(st.on&&!ringing){
+    const nowMs=now.getTime();
+    if(snoozeUntil&&nowMs>=snoozeUntil){ snoozeUntil=0; startRing(); }
+    else{
+      const [h,m]=st.time.split(':').map(Number); const t=new Date(now); t.setHours(h,m,0,0);
+      const key=t.toDateString()+st.time;
+      // 鳴らす時刻から3分以内なら鳴らす（画面が一瞬止まっていても取りこぼさない）
+      if(nowMs>=t.getTime()&&nowMs-t.getTime()<180000&&firedKey!==key){ firedKey=key; startRing(); }
+    }
+    if(mode==='idle'&&isNight(now)) mode='sleep';
+    if(mode==='sleep'&&!isNight(now)&&!snoozeUntil) mode='idle';
+  } else if(!ringing && mode==='sleep' && !snoozeUntil) mode='idle';
+  updStatus(now);
+  if(!ringing&&Date.now()-lastBubble>15000&&mode==='idle') say(pick(['なにしてるの〜？','きょうもおつかれさま','ぷかぷか〜','めざまし、まかせて！']));
+}
+
+/* ---------- UI ---------- */
+$('alarmTime').value=st.time;
+$('alarmTime').addEventListener('change',e=>{ st.time=e.target.value||'07:00'; snoozeUntil=0; firedKey=''; save(); tick(); if(st.on) say(st.time+' だね、まかせて！'); });
+document.querySelectorAll('.tune').forEach(b=>{ b.setAttribute('aria-pressed',b.dataset.t===st.tune); b.addEventListener('click',()=>{ st.tune=b.dataset.t; save(); document.querySelectorAll('.tune').forEach(x=>x.setAttribute('aria-pressed',x===b)); try{ startMusic(st.tune); setTimeout(()=>{ if(!ringing) stopMusic(); },2200);}catch(e){} }); });
+$('setBtn').addEventListener('click',()=>{
+  st.on=!st.on; save(); ac(); // タップで音を出せるようにしておく
+  if(st.on){ chime(); keepAwake(); firedKey=''; say(st.time+' におこすね。おやすみ〜'); if(isNight(new Date())) mode='sleep'; }
+  else { snoozeUntil=0; if(lock){lock.release().catch(()=>{});} mode='idle'; say('めざまし、おやすみするね'); }
+  tick();
+});
+$('testBtn').addEventListener('click',()=>{ ac(); startRing(); });
+$('stopBtn').addEventListener('click',()=>stopRing(false));
+$('snoozeBtn').addEventListener('click',()=>stopRing(true));
+
+const wasOn=st.on;
+st.on=false; // 開き直したときは、音を出す許可をもらうため一度タップしてもらう
+tick(); setInterval(tick,1000); requestAnimationFrame(render);
+if(wasOn) say('もういちど「セット」をタップしてね');
+})();
+</script>
+
+</body>
+</html>

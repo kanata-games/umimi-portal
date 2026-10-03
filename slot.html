@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ウミミスロット</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* layout: 夜の海のきょうたい（上に ウミミの ステージ → メダル表示 → リール → ムーンランプ → レバーと ストップ）、その下に 設定・データ・配当表 */
+:root{
+  --bg:#141838; --bg2:#1d2255; --cab:#262c6a; --cab2:#323a86; --line:#414a9c; --ink:#f1efff; --sub:#b7b5e6;
+  --moon:#f3c84e; --moon2:#fff1bf; --pop:#ff7aa8; --ok:#5fd3a7; --reel:#fffaf0; --reel2:#efe9da;
+  --display:"Mochiy Pop One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
+  --body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Meiryo",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:var(--body);font-weight:500;font-size:15px;line-height:1.6;padding-inline:12px;padding-block:12px 32px;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;align-items:center;gap:10px}
+.back{font-weight:700;font-size:14px;color:var(--sub);text-decoration:none;padding:4px 2px}
+.back:hover{color:var(--ink)}
+.top h1{font-family:var(--display);font-weight:400;font-size:20px;margin:0;flex:1;text-align:center;color:var(--moon2);letter-spacing:.04em}
+.icon{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;width:38px;height:38px;font-size:17px;cursor:pointer;display:grid;place-items:center}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
+
+.cab{background:linear-gradient(180deg,var(--cab2),var(--cab));border:2px solid var(--line);border-radius:26px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 0 #0d1030}
+.stage{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/7;background:#1b2052}
+#scene{width:100%;height:100%;display:block}
+.bubble{position:absolute;left:12px;top:10px;background:#fff;color:#3a3466;font-family:var(--display);font-size:13.5px;padding:6px 12px;border-radius:14px;max-width:62%;line-height:1.45}
+.bubble::after{content:"";position:absolute;left:22px;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+.banner{position:absolute;inset:auto 0 6px 0;text-align:center;font-family:var(--display);font-size:18px;color:var(--moon2);text-shadow:0 2px 0 #7a4b00,0 0 14px rgba(243,200,78,.8);letter-spacing:.06em}
+
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mt{background:#10132f;border-radius:12px;padding:5px 10px;display:flex;flex-direction:column;align-items:flex-end;border:1.5px solid #2c3274}
+.mt .k{font-size:11px;color:var(--sub);align-self:flex-start;letter-spacing:.06em}
+.mt .v{font-family:var(--display);font-size:22px;line-height:1.15;color:#ffd9e6;font-variant-numeric:tabular-nums}
+.mt.medal .v{color:var(--moon2)}
+
+.reelbox{position:relative;background:#0d1030;border-radius:16px;padding:6px}
+#reels{width:100%;aspect-ratio:3/2;display:block;border-radius:10px;cursor:pointer;touch-action:manipulation}
+.pay{position:absolute;right:14px;top:10px;font-family:var(--display);font-size:20px;color:var(--moon);text-shadow:0 2px 0 #10132f;pointer-events:none;transition:opacity .3s}
+
+.lamprow{display:flex;align-items:center;gap:12px;justify-content:center;min-height:62px}
+.lamp{width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#3a3f7e,#20244f);border:3px solid #4b53a6;display:grid;place-items:center;transition:background .15s, box-shadow .15s}
+.lamp svg{width:40px;height:40px}
+.lamp svg path{fill:#4d5394;transition:fill .15s}
+.lamp.on{background:radial-gradient(circle at 50% 40%,#fff6cf,#f3c84e 70%);border-color:#fff1bf;box-shadow:0 0 22px 6px rgba(243,200,78,.75),0 0 60px 10px rgba(243,200,78,.35)}
+.lamp.on svg path{fill:#c4761a}
+.lamp.flash{animation:peka .5s ease-out 2}
+@keyframes peka{0%{transform:scale(1)}30%{transform:scale(1.18)}100%{transform:scale(1)}}
+.lampTxt{font-family:var(--display);font-size:20px;color:#4d5394;letter-spacing:.06em;min-width:96px}
+.lamp.on + .lampTxt{color:var(--moon2);text-shadow:0 0 10px rgba(243,200,78,.8)}
+
+.ctrl{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:8px;align-items:stretch}
+.lever{font-family:var(--display);font-size:17px;border:0;border-radius:18px;padding:14px 6px;background:var(--pop);color:#fff;box-shadow:0 5px 0 #b44673;cursor:pointer;line-height:1.2}
+.lever small{display:block;font-family:var(--body);font-size:11px;font-weight:700;opacity:.9}
+.stop{font-family:var(--display);font-size:15px;border:0;border-radius:18px;padding:14px 4px;background:#e9e4ff;color:#3a3466;box-shadow:0 5px 0 #8d86c9;cursor:pointer}
+.lever:active:not(:disabled),.stop:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #8d86c9}
+.lever:active:not(:disabled){box-shadow:0 2px 0 #b44673}
+.lever:disabled,.stop:disabled{opacity:.38;cursor:default}
+.stop.hot{background:var(--moon2);box-shadow:0 5px 0 #c4911f}
+.keys{font-size:11.5px;color:var(--sub);text-align:center;margin:-2px 0 0}
+
+.panel{background:var(--bg2);border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.panel h2{font-family:var(--display);font-weight:400;font-size:17px;margin:0;color:var(--moon2)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.tg{border:2px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer;color:var(--sub)}
+.tg[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#0f2a22}
+.note{font-size:12.5px;color:var(--sub);margin:0;line-height:1.7}
+.refill{border:0;border-radius:14px;padding:12px;background:var(--moon);color:#3a2a00;font-weight:700;cursor:pointer;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.st{background:#10132f;border-radius:10px;padding:6px 8px;text-align:center}
+.st .k{font-size:11px;color:var(--sub);display:block}
+.st .v{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.hist{display:flex;gap:5px;flex-wrap:wrap}
+.hb{font-size:12px;font-weight:700;border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.hb.big{background:var(--moon);color:#3a2a00}
+.hb.reg{background:#b9b6ef;color:#2a2660}
+.paytbl{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;font-size:14px}
+.paytbl canvas{width:120px;height:34px}
+.paytbl b{font-family:var(--display);font-weight:400;color:var(--moon2);text-align:right}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#fff;color:#3a3466;padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
+@media (max-width:380px){.lever{font-size:15px}.stop{font-size:13px}.mt .v{font-size:19px}}
+@media (prefers-reduced-motion:reduce){.lamp.flash{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="./">← ポータル</a>
+    <h1>ウミミスロット</h1>
+    <button class="icon" id="sndBtn" type="button" aria-label="音">🔈</button>
+  </div>
+
+  <div class="cab">
+    <div class="stage">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="bubble" id="bubble">レバーを おしてね！</div>
+      <div class="banner" id="banner" hidden></div>
+    </div>
+
+    <div class="meters">
+      <div class="mt medal"><span class="k">メダル</span><span class="v" id="mMedal">0</span></div>
+      <div class="mt"><span class="k" id="mMidK">かくとく</span><span class="v" id="mMid">0</span></div>
+      <div class="mt"><span class="k" id="mGameK">ゲーム数</span><span class="v" id="mGame">0</span></div>
+    </div>
+
+    <div class="reelbox">
+      <canvas id="reels" aria-label="リール"></canvas>
+      <div class="pay" id="payTxt"></div>
+    </div>
+
+    <div class="lamprow">
+      <div class="lamp" id="lamp" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M25 4a16 16 0 1 0 11 27A14 14 0 0 1 25 4z"/></svg></div>
+      <div class="lampTxt" id="lampTxt">ムーン</div>
+    </div>
+
+    <div class="ctrl">
+      <button class="lever" id="lever" type="button">スタート<small id="betTxt">3まい</small></button>
+      <button class="stop" type="button" data-r="0" disabled>ストップ</button>
+      <button class="stop" type="button" data-r="1" disabled>ストップ</button>
+      <button class="stop" type="button" data-r="2" disabled>ストップ</button>
+    </div>
+    <p class="keys">キー：スペースで スタート、1・2・3（Z・X・C）で ストップ。リールを タップしても とまるよ</p>
+  </div>
+
+  <div class="panel" id="refillBox" hidden>
+    <h2>メダルが なくなっちゃった</h2>
+    <p class="note">ウミミが 海の そこから メダルを ひろってきてくれるよ。</p>
+    <button class="refill" id="refill" type="button">メダルを 100まい ひろってもらう</button>
+  </div>
+
+  <div class="panel">
+    <h2>せってい</h2>
+    <div class="opts">
+      <button class="tg" id="assistBtn" type="button" aria-pressed="true">目押し アシスト</button>
+      <button class="tg" id="autoBtn" type="button" aria-pressed="false">オート</button>
+    </div>
+    <p class="note">アシストが オンだと、当たった 役は どこで おしても そろうよ。オフにすると 本気の 目押し（4コマまでしか すべらないので、イルカや ウミガメ、ボーナスを とりこぼすことも）。オートは ランプが ついたら とまります。</p>
+  </div>
+
+  <div class="panel">
+    <h2>データ</h2>
+    <div class="stats">
+      <div class="st"><span class="k">ゲーム数</span><span class="v" id="sGames">0</span></div>
+      <div class="st"><span class="k">月光</span><span class="v" id="sBig">0</span></div>
+      <div class="st"><span class="k">ウミミ</span><span class="v" id="sReg">0</span></div>
+      <div class="st"><span class="k">ボーナス</span><span class="v" id="sRate">-</span></div>
+    </div>
+    <div class="hist" id="hist"></div>
+    <p class="note" id="shardNote"></p>
+  </div>
+
+  <div class="panel">
+    <h2>はいとう</h2>
+    <div class="paytbl" id="paytbl"></div>
+    <p class="note">まんなかの 1ラインだけ。ヒトデは 左リールの まんなかに とまれば OK。月光ボーナスは 20ゲーム、ウミミボーナスは 8ゲーム、毎回 15まい もらえるよ。ボーナスの おわりに つきのかけら（ウミミ帳）も もらえます（1日 200こ まで）。</p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="core.js"></script>
+<script>
+(()=>{
+'use strict';
+const $ = id => document.getElementById(id);
+const {TAU, drawUmi, drawVis, fitCanvas} = UMI;
+
+/* ---------- リールと 役 ---------- */
+// M=三日月(月光ボーナス) U=ウミミ(ウミミボーナス) D=イルカ T=ウミガメ J=クラゲ R=フグ(リプレイ) S=ヒトデ
+const STRIPS = ['JTURJMTSRJDURMJSJRJDR', 'RUDSJRJTSRMJSURJDTMRJ', 'JUJDRMTJRUDSJRSRMJTSR'].map(s=>s.split(''));
+const N = 21;
+const SYM = {M:'三日月', U:'ウミミ', D:'イルカ', T:'ウミガメ', J:'クラゲ', R:'リプレイ', S:'ヒトデ'};
+const ROLE_SYM = {BIG:'M', REG:'U', D:'D', T:'T', J:'J', R:'R'};
+const PAY = {D:15, T:10, J:8, S:2};
+// 1ゲームの 抽選（ボーナスが 当たっている間は BIG/REG は 抽選しない）
+const LOT = [['BIG',1/240],['REG',1/360],['D',1/120],['T',1/60],['S',1/36],['J',1/8],['R',1/7.3]];
+const BONUS = {BIG:{name:'月光ボーナス', games:20, shard:30}, REG:{name:'ウミミボーナス', games:8, shard:10}};
+const SHARD_CAP = 200, SAVE_KEY = 'umimi-slot-v1', BET = 3;
+
+function lineOf(a,b,c){
+  if(a===b && b===c){ return a==='M' ? 'BIG' : a==='U' ? 'REG' : a==='S' ? 'S' : a; }
+  return a==='S' ? 'S' : null;
+}
+
+/* ---------- セーブ ---------- */
+function today(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function defaults(){ return {medals:300, games:0, sinceBonus:0, big:0, reg:0, flag:null, bonus:null, replay:false, best:300, refills:0, hist:[], day:'', shardToday:0, assist:true, sound:true, pos:[0,7,14]}; }
+function load(){
+  let s=null; try{ s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){}
+  const d=defaults(); if(!s||typeof s!=='object') return d;
+  Object.keys(d).forEach(k=>{ if(s[k]===undefined||s[k]===null && d[k]!==null) s[k]=d[k]; });
+  if(!Array.isArray(s.hist)) s.hist=[];
+  if(!Array.isArray(s.pos)||s.pos.length!==3) s.pos=d.pos;
+  return s;
+}
+const S = load();
+function save(){ try{ S.pos = reels.map(r=>((Math.round(r.p)%N)+N)%N); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- 音（Web Audio、ファイルなし） ---------- */
+let AC=null, master=null;
+function ac(){ if(!S.sound) return null; if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); master.gain.value=.32; master.connect(AC.destination); }catch(e){ return null; } } if(AC.state==='suspended') AC.resume(); return AC; }
+const mtof = m => 440*Math.pow(2,(m-69)/12);
+function tone(m, at, dur, type, vol){
+  const a=ac(); if(!a) return; const t=a.currentTime+(at||0);
+  const o=a.createOscillator(), g=a.createGain(); o.type=type||'triangle'; o.frequency.value=mtof(m);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol||.4,t+.006); g.gain.exponentialRampToValueAtTime(.0005,t+(dur||.15));
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+(dur||.15)+.05);
+}
+const sfx = {
+  lever(){ tone(79,0,.06,'square',.18); tone(86,.04,.08,'square',.14); },
+  stop(){ tone(50,0,.07,'square',.22); tone(62,0,.05,'triangle',.25); },
+  win(){ [84,88,91].forEach((m,i)=>tone(m,i*.07,.18,'triangle',.35)); },
+  replay(){ tone(79,0,.1,'triangle',.3); tone(84,.08,.16,'triangle',.3); },
+  peka(){ tone(96,0,.5,'sine',.45); tone(103,.02,.7,'sine',.3); tone(91,0,.3,'triangle',.2); },
+  fan(){ [72,76,79,84,79,84,88,91,96].forEach((m,i)=>tone(m,i*.11,i===8?.9:.2,i%2?'square':'triangle',i%2?.12:.38)); [48,55,60].forEach((m,i)=>tone(m,i*.33,.4,'triangle',.3)); },
+  jingle(){ [84,88,91,88].forEach((m,i)=>tone(m,i*.08,.12,'square',.1)); },
+  end(){ [91,88,84,79,84].forEach((m,i)=>tone(m,i*.14,i===4?.8:.2,'triangle',.35)); },
+  coin(i){ tone(98+(i%3)*2,0,.05,'square',.06); },
+};
+
+/* ---------- 絵：リールの コマ ---------- */
+const rc = $('reels'), rx = rc.getContext('2d');
+let TILE = {}, tileKey = '';
+function makeTiles(w, h){
+  const key = w+'x'+h+(UMI.SPR.ready?'s':'')+(UMI.VIS.ready?'v':''); if(key===tileKey) return; tileKey = key; TILE = {};
+  Object.keys(SYM).forEach(k=>{
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const c=cv.getContext('2d');
+    const cx=w/2, cy=h/2, sz=Math.min(w,h);
+    if(k==='M'){
+      c.save(); c.translate(cx,cy);
+      c.shadowColor='rgba(243,180,40,.7)'; c.shadowBlur=sz*.12;
+      const r=sz*.36; const g=c.createLinearGradient(-r,-r,r,r); g.addColorStop(0,'#fff1a8'); g.addColorStop(.5,'#f3c84e'); g.addColorStop(1,'#d48a19');
+      c.fillStyle=g; c.beginPath(); c.arc(0,0,r,0,TAU); c.fill(); c.shadowBlur=0;
+      c.globalCompositeOperation='destination-out'; c.beginPath(); c.arc(r*.42,-r*.28,r*.86,0,TAU); c.fill();
+      c.globalCompositeOperation='source-over'; c.strokeStyle='#a8610a'; c.lineWidth=sz*.02;
+      c.fillStyle='#fffbe0'; [[-r*.9,-r*.85,.07],[r*.7,r*.75,.05]].forEach(([x,y,s])=>{ c.beginPath(); for(let i=0;i<8;i++){ const a=i*TAU/8, rr=i%2?sz*s*.35:sz*s; c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr); } c.fill(); });
+      c.restore();
+    } else if(k==='U'){
+      drawUmi(c,'lavender',0,cx+sz*.02,cy+sz*.36,sz/250,-1,'');
+    } else {
+      const v = {D:'dolphin',T:'turtle',J:'jelly',R:'puffer',S:'star'}[k];
+      drawVis(c, v, cx, k==='R'?cy-sz*.06:cy, sz*(k==='D'?.92:k==='S'?.7:.78), 0, -1);
+      if(k==='R'){ c.font=`${Math.round(sz*.15)}px "Mochiy Pop One",sans-serif`; c.textAlign='center'; c.lineWidth=sz*.04; c.strokeStyle='#fffaf0'; c.strokeText('REPLAY',cx,cy+sz*.4); c.fillStyle='#4f7fc9'; c.fillText('REPLAY',cx,cy+sz*.4); }
+    }
+    TILE[k]=cv;
+  });
+}
+
+/* ---------- リールの 動き ---------- */
+const SPEED = 17; // コマ/秒
+const reels = [0,1,2].map(i=>({p:S.pos[i]||0, spin:false, stopAt:null, bounce:0}));
+let state = 'idle'; // idle | spin | pay
+let target = null;  // このゲームで そろえたい 役
+let lastT = performance.now(), dirty = true;
+
+function symAt(r, idx){ return STRIPS[r][((idx%N)+N)%N]; }
+function finalSym(r){ const R=reels[r]; return R.stopAt===null ? null : symAt(r, R.stopAt); }
+
+function chooseStop(r){
+  const R = reels[r], base = Math.ceil(R.p - 1e-6);
+  const assist = S.assist || !!S.bonus;
+  const want = target && target!=='S' ? ROLE_SYM[target] : null;
+  const others = [0,1,2].filter(i=>i!==r).map(i=>finalSym(i));
+  const valid = c => {
+    const s = symAt(r,c);
+    if(r===0 && s==='S' && target!=='S') return false;
+    if(others.every(o=>o!==null)){
+      const line = [0,1,2].map(i=> i===r ? s : finalSym(i));
+      const res = lineOf(line[0],line[1],line[2]);
+      if(res!==null && res!==target) return false;
+    }
+    return true;
+  };
+  const prefer = c => { const s = symAt(r,c); if(target==='S') return r===0 && s==='S'; return want!==null && s===want; };
+  const reach = (target && assist) ? N-1 : 4;
+  // そろえたい役が すでに 外れていたら 狙わない
+  const alive = want===null || others.every(o=>o===null||o===want);
+  if(target && alive){ for(let k=0;k<=reach;k++){ if(prefer(base+k) && valid(base+k)) return base+k; } }
+  for(let k=0;k<=4;k++){ if(valid(base+k)) return base+k; }
+  return base;
+}
+
+function lever(){
+  if(state!=='idle') return;
+  if(!S.replay && S.medals < BET){ showRefill(); return; }
+  ac(); sfx.lever();
+  if(S.replay){ S.replay=false; } else { S.medals -= BET; }
+  // 抽選
+  if(S.bonus){ target = 'D'; sfx.jingle(); }
+  else {
+    S.games++; S.sinceBonus++;
+    let x = Math.random(), hit = null;
+    for(const [k,p] of LOT){ if(S.flag && (k==='BIG'||k==='REG')) continue; if(x < p){ hit=k; break; } x -= p; }
+    if(hit==='BIG'||hit==='REG'){ S.flag = hit; target = null; if(Math.random() < .3) lampOn(true); }
+    else target = hit;
+    if(!target && S.flag) target = S.flag;
+  }
+  reels.forEach(R=>{ R.spin=true; R.stopAt=null; R.bounce=0; });
+  state = 'spin'; $('payTxt').textContent='';
+  if(!S.bonus) hint();
+  save(); ui();
+}
+
+function pressStop(r){
+  if(state!=='spin') return;
+  const R = reels[r]; if(!R.spin || R.stopAt!==null) return;
+  ac(); R.stopAt = chooseStop(r); ui();
+}
+
+function onReelStopped(r){
+  sfx.stop(); dirty = true;
+  if(reels.every(R=>!R.spin)) settle();
+}
+
+let payAnim = null;
+function settle(){
+  const line = [0,1,2].map(i=>symAt(i, reels[i].p));
+  const res = lineOf(line[0],line[1],line[2]);
+  const wasBonus = !!S.bonus;
+  state = 'pay';
+  let pay = 0, msg = null;
+  if(res==='BIG' || res==='REG'){
+    S.flag = null; lampOff();
+    const B = BONUS[res];
+    S.bonus = {type:res, left:B.games, got:0};
+    if(res==='BIG') S.big++; else S.reg++;
+    S.hist.unshift({t:res, g:S.sinceBonus}); S.hist = S.hist.slice(0,12); S.sinceBonus = 0;
+    sfx.fan(); mood('bonus');
+    banner(B.name+'！'); say(res==='BIG' ? '月光ボーナス！！ いっしょに およご〜！' : 'ウミミボーナス！ やった〜！');
+    setAuto(false);
+  } else if(res==='R'){
+    S.replay = true; sfx.replay(); msg='リプレイ';
+  } else if(res){
+    pay = PAY[res];
+  }
+  if(pay){
+    if(wasBonus) S.bonus.got += pay;
+    S.medals += pay; S.best = Math.max(S.best, S.medals);
+    $('payTxt').textContent = '+' + pay; sfx.win();
+    if(!S.bonus){ mood('happy'); say(winLine(res)); }
+  } else if(msg){ $('payTxt').textContent = msg; }
+  if(wasBonus) S.bonus.left--;
+  // ペカッ（あとから）
+  if(S.flag && !lampLit){ lampOn(false); }
+  // ボーナスの おわり
+  if(S.bonus && S.bonus.left<=0){
+    const b = S.bonus; S.bonus = null;
+    const got = giveShards(BONUS[b.type].shard);
+    setTimeout(()=>{ sfx.end(); banner(''); mood('happy'); say(`${BONUS[b.type].name} おわり！ ${b.got}まい かくとく${got?`、つきのかけら +${got}`:''}！`); if(got) toast(`つきのかけら +${got}（ウミミ帳に いれたよ）`); ui(); }, 500);
+  }
+  target = null; save(); ui();
+  setTimeout(()=>{ state='idle'; ui(); if(auto) autoNext(); }, pay ? 420 : 160);
+}
+
+function giveShards(n){
+  if(S.day!==today()){ S.day=today(); S.shardToday=0; }
+  const g = Math.max(0, Math.min(n, SHARD_CAP - S.shardToday)); if(!g) return 0;
+  S.shardToday += g; const B = UMI.loadBook(); B.shards += g; UMI.saveBook(B); return g;
+}
+
+/* ---------- ムーンランプ ---------- */
+let lampLit = false;
+function lampOn(early){
+  if(lampLit) return; lampLit = true; const L=$('lamp');
+  L.classList.add('on'); L.classList.remove('flash'); void L.offsetWidth; L.classList.add('flash');
+  $('lampTxt').textContent = 'ペカッ！'; sfx.peka(); mood('lamp');
+  say(S.assist ? 'ペカッ！ どこで おしても そろうよ！' : 'ペカッ！ 三日月か ウミミを ねらってね！');
+  setAuto(false); save();
+}
+function lampOff(){ lampLit=false; $('lamp').classList.remove('on','flash'); $('lampTxt').textContent='ムーン'; }
+
+/* ---------- ウミミの ステージ ---------- */
+const sc = $('scene'), sx = sc.getContext('2d');
+let moodNow = 'idle', moodUntil = 0, dress = '';
+const bubbles = [...Array(7)].map((_,i)=>({x:Math.random(), s:2+i%3*1.5, sp:.04+Math.random()*.05, o:Math.random()}));
+const stars = [...Array(18)].map(()=>({x:Math.random(), y:Math.random()*.5, p:Math.random()*6}));
+const swimmers = [];
+function mood(m){
+  moodNow = m; moodUntil = m==='happy' ? performance.now()+1800 : 0;
+  if(m==='bonus'){ const own = Object.keys(UMI.loadBook().dresses||{}); dress = own.length ? own[Math.floor(Math.random()*own.length)] : ''; }
+  if(m==='bonus' && !swimmers.length){ ['dolphin','turtle','jelly'].forEach((v,i)=>swimmers.push({v, x:-.2-i*.35, y:.35+i*.18, sp:.07+i*.015})); }
+}
+function drawScene(now){
+  const {w,h} = fitCanvas(sc, 1.25), c = sx, t = now/1000;
+  const bon = !!S.bonus;
+  const g = c.createLinearGradient(0,0,0,h);
+  if(bon){ g.addColorStop(0,'#2a1d5c'); g.addColorStop(1,'#5b3c8f'); } else { g.addColorStop(0,'#1b2052'); g.addColorStop(1,'#34418f'); }
+  c.fillStyle = g; c.fillRect(0,0,w,h);
+  stars.forEach(s=>{ c.fillStyle=`rgba(255,250,220,${.3+.35*Math.sin(t*1.6+s.p)})`; c.fillRect(s.x*w, s.y*h, 2, 2); });
+  const mr = h*.16, mx = w*.86, my = h*.26;
+  if(lampLit || bon){ c.fillStyle='rgba(243,200,78,.18)'; c.beginPath(); c.arc(mx,my,mr*1.6,0,TAU); c.fill(); }
+  c.fillStyle = lampLit||bon ? '#ffe68a' : 'rgba(251,239,200,.92)'; c.beginPath(); c.arc(mx,my,mr,0,TAU); c.fill();
+  c.fillStyle = bon ? '#33236a' : '#232a6a'; c.beginPath(); c.arc(mx+mr*.45,my-mr*.3,mr*.88,0,TAU); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.25)';
+  bubbles.forEach(b=>{ const y = h*(1.05 - ((t*b.sp + b.o)%1.1)); c.beginPath(); c.arc(b.x*w, y, b.s, 0, TAU); c.fill(); });
+  if(bon){ swimmers.forEach(s=>{ s.x += s.sp/30; if(s.x>1.25) s.x=-.25; drawVis(c, s.v, s.x*w, s.y*h + Math.sin(t*2+s.y*9)*3, h*.32, Math.floor(t*3)%2, 1); }); }
+  else swimmers.length = 0;
+  if(moodNow==='happy' && now>moodUntil) moodNow = lampLit ? 'lamp' : 'idle';
+  let f = 0, gx = w*.42, gy = h*.92, face = -1;
+  if(bon){ f = 2 + (Math.floor(t*2.6)%2); gx = w*(.42 + Math.sin(t*.7)*.14); gy = h*.86 + Math.sin(t*1.8)*h*.03; face = Math.cos(t*.7)>0 ? 1 : -1; }
+  else if(moodNow==='lamp' || moodNow==='happy'){ f = [7,8,9,8][Math.floor(t*4)%4]; gy -= Math.abs(Math.sin(t*6))*h*.04; }
+  else { f = (Math.floor(t*1.4)%10===9) ? 1 : 0; gy += Math.sin(t*1.5)*h*.015; }
+  c.fillStyle='rgba(0,0,20,.18)'; c.beginPath(); c.ellipse(gx, h*.95, h*.32, h*.04, 0, 0, TAU); c.fill();
+  drawUmi(c, 'lavender', f, gx, gy, h/330, face, bon ? dress : '');
+}
+
+/* ---------- リールを 描く ---------- */
+function drawReels(){
+  const {w,h} = fitCanvas(rc, 2), c = rx;
+  const gap = Math.round(w*.02), rw = (w - gap*4)/3, rh = h/3;
+  makeTiles(Math.round(rw), Math.round(rh));
+  c.clearRect(0,0,w,h);
+  for(let r=0;r<3;r++){
+    const x0 = gap + r*(rw+gap), R = reels[r];
+    const g = c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#cfc8b2'); g.addColorStop(.18,'#fffaf0'); g.addColorStop(.82,'#fffaf0'); g.addColorStop(1,'#cfc8b2');
+    c.save(); c.beginPath(); c.roundRect ? c.roundRect(x0,0,rw,h,rw*.06) : c.rect(x0,0,rw,h); c.fillStyle=g; c.fill(); c.clip();
+    const p = R.p + R.bounce, b = Math.floor(p);
+    for(let d=-2; d<=2; d++){
+      const idx = b + d, y = h/2 + (p - idx)*rh - rh/2;
+      if(y > h || y + rh < 0) continue;
+      const tile = TILE[symAt(r, idx)]; if(tile){ c.globalAlpha = R.spin && R.stopAt===null ? .82 : 1; c.drawImage(tile, x0, y, rw, rh); }
+    }
+    c.globalAlpha = 1;
+    const sh = c.createLinearGradient(0,0,0,h); sh.addColorStop(0,'rgba(20,24,56,.45)'); sh.addColorStop(.25,'rgba(20,24,56,0)'); sh.addColorStop(.75,'rgba(20,24,56,0)'); sh.addColorStop(1,'rgba(20,24,56,.45)');
+    c.fillStyle = sh; c.fillRect(x0,0,rw,h);
+    c.restore();
+  }
+  // まんなかの ライン
+  const lit = state==='idle' || state==='pay';
+  c.strokeStyle = lampLit ? 'rgba(243,200,78,.95)' : 'rgba(255,122,168,.75)'; c.lineWidth = Math.max(2, h*.012);
+  c.beginPath(); c.moveTo(gap*.4, h/2); c.lineTo(gap*1.4, h/2); c.moveTo(w-gap*1.4, h/2); c.lineTo(w-gap*.4, h/2); c.stroke();
+  c.setLineDash([h*.03,h*.03]); c.globalAlpha = lit ? .55 : .25; c.beginPath(); c.moveTo(gap, h/2); c.lineTo(w-gap, h/2); c.stroke(); c.setLineDash([]); c.globalAlpha=1;
+}
+
+/* ---------- ループ ---------- */
+let lastScene = 0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min(.05, (now-lastT)/1000); lastT = now;
+  if(document.hidden) return;
+  let moving = false;
+  reels.forEach((R,i)=>{
+    if(R.spin){
+      moving = true; R.p += SPEED*dt;
+      if(R.stopAt!==null && R.p >= R.stopAt){ R.p = R.stopAt; R.spin = false; R.bounce = -.12; onReelStopped(i); }
+    } else if(R.bounce){ moving = true; R.bounce *= .7; if(Math.abs(R.bounce)<.004) R.bounce = 0; }
+  });
+  if(moving || dirty){ drawReels(); dirty = false; }
+  if(now - lastScene > 40){ lastScene = now; drawScene(now); }
+}
+
+/* ---------- ことば ---------- */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function say(t){ $('bubble').textContent = t; }
+function banner(t){ $('banner').textContent = t; $('banner').hidden = !t; }
+function winLine(r){ return {D:'イルカ そろった！ 15まい！', T:'ウミガメさん こんにちは〜', J:'クラゲ ぷかぷか〜', S:'ヒトデ〜！ ちょっぴり ゲット'}[r] || 'やった！'; }
+let quiet = 0;
+function hint(){
+  if(lampLit) return;
+  if(++quiet < 5 && Math.random() < .7) return; quiet = 0;
+  const gasa = S.flag && Math.random()<.35;
+  say(gasa ? pick(['…なにか ひかった？','月が ちかい きがする…','どきどき…']) : pick(['ぷかぷか〜','きょうは 月が きれい…','ペカッて ひかるかな？','三日月 そろえたいな〜','クラゲさん いっぱい','…なにか ひかった？']));
+}
+
+/* ---------- 画面 ---------- */
+function ui(){
+  $('mMedal').textContent = S.medals;
+  if(S.bonus){ $('mMidK').textContent = BONUS[S.bonus.type].name.replace('ボーナス',''); $('mMid').textContent = 'のこり'+S.bonus.left; $('mGameK').textContent='かくとく'; $('mGame').textContent = S.bonus.got||0; }
+  else { $('mMidK').textContent = 'さいこう'; $('mMid').textContent = S.best; $('mGameK').textContent='ゲーム数'; $('mGame').textContent = S.sinceBonus; }
+  $('lever').disabled = state!=='idle';
+  $('betTxt').textContent = S.replay ? 'リプレイ' : S.bonus ? `${BONUS[S.bonus.type].name.replace('ボーナス','')} のこり${S.bonus.left}` : '3まい';
+  document.querySelectorAll('.stop').forEach(b=>{ const R = reels[+b.dataset.r]; b.disabled = !(state==='spin' && R.spin && R.stopAt===null); b.classList.toggle('hot', lampLit && !b.disabled); });
+  $('refillBox').hidden = !(S.medals < BET && !S.replay && state==='idle');
+  $('assistBtn').setAttribute('aria-pressed', S.assist); $('autoBtn').setAttribute('aria-pressed', auto);
+  $('sndBtn').textContent = S.sound ? '🔈' : '🔇';
+  $('sGames').textContent = S.games; $('sBig').textContent = S.big; $('sReg').textContent = S.reg;
+  $('sRate').textContent = (S.big+S.reg) ? '1/' + Math.round(S.games/(S.big+S.reg)) : '-';
+  $('hist').innerHTML = S.hist.map(h=>`<span class="hb ${h.t==='BIG'?'big':'reg'}">${h.t==='BIG'?'月光':'ウミミ'} ${h.g}G</span>`).join('');
+  if(S.day!==today()){ S.day=today(); S.shardToday=0; }
+  $('shardNote').textContent = `きょう もらった つきのかけら：${S.shardToday} / ${SHARD_CAP}`;
+  if(S.bonus){ banner(BONUS[S.bonus.type].name + ' のこり ' + S.bonus.left); }
+  dirty = true;
+}
+let toastT = 0;
+function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 2600); }
+function showRefill(){ $('refillBox').hidden=false; say('メダル なくなっちゃった… ひろってくるね！'); setAuto(false); }
+
+/* ---------- オート ---------- */
+let auto = false, autoT = 0, autoStops = [];
+function setAuto(v){ auto = v; clearTimeout(autoT); autoStops.forEach(clearTimeout); autoStops = []; $('autoBtn').setAttribute('aria-pressed', auto); if(auto && state==='idle') autoNext(); }
+function autoNext(){
+  clearTimeout(autoT); if(!auto) return;
+  autoT = setTimeout(()=>{
+    if(!auto || state!=='idle') return; lever(); if(state!=='spin') return;
+    autoStops = [0,1,2].map((r,i)=>setTimeout(()=>{ if(auto) pressStop(r); }, 450 + i*260 + Math.random()*180));
+  }, S.bonus ? 350 : 250);
+}
+
+/* ---------- はいとう表 ---------- */
+function drawPaytbl(){
+  const rows = [['M','月光ボーナス'],['U','ウミミボーナス'],['D','15まい'],['T','10まい'],['J','8まい'],['R','リプレイ'],['S','2まい']];
+  $('paytbl').innerHTML = rows.map(([k,v])=>`<canvas data-sym="${k}" aria-label="${SYM[k]}"></canvas><span>${SYM[k]}${k==='S'?'（左だけ）':''}</span><b>${v}</b>`).join('');
+  $('paytbl').querySelectorAll('canvas').forEach(cv=>{
+    const {w,h} = fitCanvas(cv, 2), c = cv.getContext('2d'), k = cv.dataset.sym, tw = w/3;
+    const tc = document.createElement('canvas'); tc.width = Math.round(tw); tc.height = h;
+    const save = TILE, sk = tileKey; tileKey=''; makeTiles(Math.round(tw), h); const t = TILE[k]; TILE = save; tileKey = sk;
+    for(let i=0;i<3;i++){ if(k==='S' && i>0){ c.fillStyle='rgba(183,181,230,.5)'; c.font=`${Math.round(h*.4)}px sans-serif`; c.textAlign='center'; c.fillText('—', tw*i+tw/2, h*.65); continue; } c.drawImage(t, tw*i, 0, tw, h); }
+  });
+}
+
+/* ---------- 入力 ---------- */
+$('lever').addEventListener('click', lever);
+document.querySelectorAll('.stop').forEach(b=>b.addEventListener('click', ()=>pressStop(+b.dataset.r)));
+rc.addEventListener('pointerdown', e=>{
+  if(state==='idle'){ lever(); return; }
+  const r = rc.getBoundingClientRect(); const i = Math.min(2, Math.max(0, Math.floor((e.clientX - r.left)/r.width*3))); pressStop(i);
+});
+window.addEventListener('keydown', e=>{
+  if(e.target.closest && e.target.closest('button,a') && (e.key===' '||e.key==='Enter')) return;
+  const k = e.key.toLowerCase();
+  if(k===' ' || k==='enter' || k==='arrowdown'){ e.preventDefault(); if(state==='idle') lever(); else { const i = reels.findIndex(R=>R.spin && R.stopAt===null); if(i>=0) pressStop(i); } }
+  else if(k==='1'||k==='z') pressStop(0); else if(k==='2'||k==='x') pressStop(1); else if(k==='3'||k==='c') pressStop(2);
+});
+$('assistBtn').addEventListener('click', ()=>{ S.assist = !S.assist; save(); ui(); toast(S.assist ? 'アシスト オン：ランプが ついたら かならず そろうよ' : 'アシスト オフ：本気の 目押しモード！'); });
+$('autoBtn').addEventListener('click', ()=>{ ac(); setAuto(!auto); if(auto && lampLit) { setAuto(false); toast('ランプが ついてるよ！ じぶんで そろえてね'); } });
+$('sndBtn').addEventListener('click', ()=>{ S.sound = !S.sound; save(); ui(); if(S.sound) sfx.replay(); });
+$('refill').addEventListener('click', ()=>{ S.medals += 100; S.refills++; save(); ui(); mood('happy'); say('はい、メダル 100まい！ ひろってきたよ〜'); });
+
+UMI.onAssets(()=>{ tileKey=''; dirty=true; drawPaytbl(); });
+let rt=0; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ dirty=true; drawPaytbl(); }, 150); });
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) save(); lastT = performance.now(); });
+window.addEventListener('pagehide', save);
+
+// つづきから
+if(S.flag){ lampLit = true; $('lamp').classList.add('on'); $('lampTxt').textContent='ペカッ！'; moodNow='lamp'; say('ランプ ついたままだよ！ そろえてね'); }
+if(S.bonus){ mood('bonus'); }
+ui(); drawPaytbl(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

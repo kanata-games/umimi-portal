@@ -14,9 +14,9 @@
 ## 進め方（毎回これ）
 1. 新しい会話では、このリポジトリを読み込んでから作業する。アーティファクトの最新版と食い違うときは、`Artifact` の read で本番を読んで合わせる
 2. 変更したら `python3 build.py`（index.html と handoff.md を作る）
-3. アーティファクトを公開しなおす：本体は `source/index.html`、`files` に core.js・derby.html・alarm.html（ほかのゲームの html も）・png 3つ・handoff.md（contentType は "text/markdown"）。別の会話からは本番の URL を `url` に渡して更新する（先に read が必要）
+3. アーティファクトを公開しなおす：本体は `source/index.html`、`files` に core.js・derby.html・alarm.html・slot.html（ほかのゲームの html も）・png 3つ・handoff.md（contentType は "text/markdown"）。別の会話からは本番の URL を `url` に渡して更新する（先に read が必要）
 4. 公開したら、このリポジトリにもコミットして push する
-5. セーブ互換を守る：ウミミ帳 `umimi-book-v1`、ダービー `umimi-derby-v1`。項目を足すときは読み込み時に初期値を入れる
+5. セーブ互換を守る：ウミミ帳 `umimi-book-v1`、ダービー `umimi-derby-v1`、スロット `umimi-slot-v1`。項目を足すときは読み込み時に初期値を入れる
 
 ## 概要
 - ユーザー：kanata-games（返答は必ず日本語で）。Windows。PCは古めなので軽さを優先する
@@ -34,6 +34,7 @@
 | core.js | 全ゲーム共通の部品。`window.UMI` に入っている |
 | derby.html | ウミミダービー（16週の育成レース） |
 | alarm.html | ウミミめざまし（めざまし時計。Web Audio で音を鳴らす。設定は localStorage `umimi-alarm-v1`。ページを開いたままでないと鳴らない） |
+| slot.html | ウミミスロット（ジャグラー風。ムーンランプがペカると月光BIG(20G)/ウミミREG(8G)。セーブ `umimi-slot-v1`。目押しアシストONで出玉率約100%、OFFだと取りこぼしで約88%。ボーナス終了で つきのかけら BIG+30/REG+10、1日200まで） |
 | umimi-sprites.png | ウミミ10コマ（セル 245x222） |
 | costumes.png | 勝負服の絵（箱庭の衣装シートと同じ。セル 240x208、8列） |
 | visitors.png | 海のなかま10種×2コマ |

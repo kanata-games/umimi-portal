@@ -34,6 +34,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .lcd{position:absolute;left:16.5%;top:16.33%;width:67%;height:38%;pointer-events:none;container-type:size}
 .cut{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--display);font-size:30px;font-size:12.5cqw;line-height:1.15;padding:0 4%;color:#fff;text-shadow:0 3px 0 #2a1d5c,0 0 16px rgba(255,255,255,.7);animation:cut .28s ease-out}
 .cut .sm{font-size:.55em}
+.cut .ch{display:inline-block;animation:chpop .5s cubic-bezier(.18,1.6,.4,1) both;animation-delay:calc(var(--i)*38ms)}
+.cut.red .ch,.cut.gold .ch{animation:chpop .5s cubic-bezier(.18,1.6,.4,1) both,jit .07s linear infinite alternate;animation-delay:calc(var(--i)*38ms),calc(var(--i)*38ms + .5s)}
+.cut.out{animation:cutout .22s ease-in forwards!important}
+@keyframes chpop{0%{transform:translateY(-.7em) scale(2.6) rotate(-14deg);opacity:0}55%{opacity:1}100%{transform:none;opacity:1}}
+@keyframes jit{from{transform:translate(-.03em,.02em)}to{transform:translate(.03em,-.02em)}}
+@keyframes cutout{to{opacity:0;transform:scale(1.35)}}
 .cut.blue{text-shadow:0 3px 0 #1f3f8a,0 0 18px rgba(90,168,255,.95)}
 .cut.green{text-shadow:0 3px 0 #1f6b3a,0 0 18px rgba(95,211,138,.95)}
 .cut.red{color:#fff;text-shadow:0 3px 0 #8a1238,0 0 20px rgba(255,77,125,1),0 0 40px rgba(255,77,125,.6)}
@@ -100,7 +106,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .spec{margin:0;padding-left:1.2em;font-size:13px;line-height:1.8}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#fff;color:#3a3466;padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
 @media (max-width:380px){.shoot{font-size:15px}.push{width:60px;height:60px;font-size:13px}.mt .v{font-size:18px}.top h1{font-size:16px}}
-@media (prefers-reduced-motion:reduce){.cut,.cue,.push.go{animation:none}}
+@media (prefers-reduced-motion:reduce){.cut,.cue,.push.go,.cut .ch{animation:none}}
 </style>
 </head>
 <body>
@@ -152,8 +158,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
     <div class="opts">
       <button class="tg" id="autoRBtn" type="button" aria-pressed="true">右打ち じどう</button>
       <button class="tg" id="autoPBtn" type="button" aria-pressed="true">PUSH じどう</button>
+      <button class="tg" id="fxBtn" type="button" aria-pressed="true">えんしゅつ もりもり</button>
     </div>
-    <p class="note">右打ち じどう：大当たりや ラッシュの ときに、つよさを かってに 右打ちへ かえて、おわったら 左打ちに もどすよ。PUSH じどう：ボタンを おさなくても 3〜4びょうで かってに すすむよ。</p>
+    <p class="note">右打ち じどう：大当たりや ラッシュの ときに、つよさを かってに 右打ちへ かえて、おわったら 左打ちに もどすよ。PUSH じどう：ボタンを おさなくても 3〜4びょうで かってに すすむよ。えんしゅつ：パソコンが おもいときは「かるめ」に すると、花火や 光の すじを へらすよ。</p>
   </div>
 
   <div class="panel">
@@ -308,7 +315,7 @@ const POW_L = 20, POW_R = 82, RIGHT_AT = 52, FIRE = .26;
 
 /* ---------- セーブ ---------- */
 function today(){ const d = new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-function defaults(){ return {balls:1000, best:1000, refills:0, day:'', shardToday:0, sound:true, autoRight:true, autoPush:true, power:POW_L,
+function defaults(){ return {balls:1000, best:1000, refills:0, day:'', shardToday:0, sound:true, autoRight:true, autoPush:true, fx:'high', power:POW_L,
   mode:'normal', left:0, holds:[], cur:null, bonus:null, chain:0, chainBalls:0, since:0, total:0, hits:0, rushIn:0, maxChain:0, hist:[]}; }
 function load(){
   let s = null; try{ s = JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){}
@@ -374,6 +381,8 @@ const sfx = {
   zen(){ for(let i=0;i<16;i++) tone(84+(i%8)*2,i*.06,.12,i%2?'square':'triangle',.12); sweep(400,3000,.9,.6,'sine',.25); },
   serif(c){ const m = {white:84,blue:86,green:88,red:91,rainbow:96}[c]||84; tone(m,0,.16,'sine',.22); if(c==='red'||c==='rainbow') tone(m+7,.1,.3,'sine',.24); },
   pon(){ tone(79,0,.08,'triangle',.15); },
+  pop(){ noise(0,.18,.16,2500); tone(96+rint(6),0,.12,'sine',.12); },
+  whoosh(){ noise(0,.35,.22,4500); sweep(300,1400,0,.3,'sawtooth',.06); },
 };
 // BGM（ラッシュと 大当たりの とき）
 const SONGS = {
@@ -398,23 +407,46 @@ const RL = [0,1,2].map(()=>({pos:rint(9), spin:false, speed:0, anim:null, over:n
 const L = {bg:'sea', mini:0, miniTo:0, cShow:true, zen:false, mood:'idle', led:'normal', fx:[], push:null, step:null, gim:null, shake:0,
   reef:null, race:null, moon:null, round:0, pops:[], dress:''};
 let curHold = null, busy = false, shooting = false, shootAcc = 0;
+
+/* ---------- モーショングラフィックス（つぶ・わっか・カメラ） ---------- */
+const PT = [], PTB = [];                 // PT＝液晶の なか、PTB＝盤面ぜんたい
+const CAM = {z:1, v:0};
+const lite = () => S.fx==='low';
+const RAINBOW = ['#ff9ab5','#ffcf8a','#fff1a8','#9ee6b8','#8fc8ee','#c7a6ff'];
+function emit(list, o){ if(list.length > (lite()?70:240)) return; list.push(Object.assign({x:0,y:0,vx:0,vy:0,g:0,life:0,max:.8,size:2,col:'#fff',type:'spark',rot:0,vr:0,drag:.97,r:60}, o)); }
+function burst(x, y, n, cols, sp, o, list){ n = Math.max(1, Math.round(n*(lite()?.35:1))); for(let i=0;i<n;i++){ const a = Math.random()*TAU, v = sp*(.35+Math.random()*.65); emit(list||PT, Object.assign({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, max:.45+Math.random()*.6, size:1.4+Math.random()*2.4, col:pick(cols), rot:Math.random()*TAU, vr:(Math.random()-.5)*12}, o||{})); } }
+function ring(x, y, col, r, dur, w, list){ emit(list||PT, {x, y, type:'ring', col, size:w||3, max:dur||.5, r:r||70}); }
+function punch(a){ CAM.z += a*(lite()?.5:1); }
+function updPT(list, dt){ for(let i=list.length-1;i>=0;i--){ const p = list[i]; p.life += dt; if(p.life>=p.max){ list.splice(i,1); continue; } p.vy += p.g*dt; const d = Math.pow(p.drag, dt*60); p.vx *= d; p.vy *= d; p.x += p.vx*dt; p.y += p.vy*dt; p.rot += p.vr*dt; } }
+function drawPT(c, list){
+  if(!list.length) return; c.save(); c.globalCompositeOperation = 'lighter';
+  for(const p of list){ const k = p.life/p.max; c.globalAlpha = 1-k;
+    if(p.type==='ring'){ c.strokeStyle = p.col; c.lineWidth = p.size*(1-k)+.4; c.beginPath(); c.arc(p.x, p.y, p.r*(1-Math.pow(1-k,3)), 0, TAU); c.stroke(); }
+    else if(p.type==='star'){ c.fillStyle = p.col; c.save(); c.translate(p.x,p.y); c.rotate(p.rot); star5(c, 0, 0, p.size*1.7*(1-k*.5)); c.restore(); }
+    else if(p.type==='dot'){ c.fillStyle = p.col; c.beginPath(); c.arc(p.x, p.y, p.size*(1-k*.6), 0, TAU); c.fill(); }
+    else { c.strokeStyle = p.col; c.lineWidth = p.size; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(p.x-p.vx*.035, p.y-p.vy*.035); c.stroke(); } }
+  c.restore();
+}
+function fireworks(n){ for(let i=0;i<n;i++) setTimeout(()=>{ const x = 60+Math.random()*280, y = 40+Math.random()*300, cols = pick([RAINBOW, ['#fff1a8','#ffd34d','#fff'], ['#ff9ab5','#fff','#ff4d7d'], ['#8fc8ee','#fff','#c7a6ff']]);
+  burst(x, y, 34, cols, 240, {g:160, drag:.96, max:.9+Math.random()*.5}, PTB); ring(x, y, '#fff', 60, .5, 2, PTB); if(!lite()) burst(x, y, 8, ['#fff'], 120, {type:'star', g:60}, PTB); sfx.pop(); }, i*230+Math.random()*120); }
 function digitAt(n){ return ((Math.round(n)%9)+9)%9+1; }
 function rdig(){ return 1+rint(9); }
 function fx(type, dur, o){ L.fx.push(Object.assign({type, t0:performance.now(), dur}, o||{})); }
 function spinAll(speed){ RL.forEach(R=>{ R.spin = true; R.speed = speed||13; R.anim = null; R.over = null; }); }
-function stopAt(i, d, over){ const R = RL[i]; R.spin = false; R.anim = null; let n = Math.ceil(R.pos)+1; while(digitAt(n)!==d) n++; R.pos = n; R.bounce = .16; R.over = over||null; sfx.stop(); }
+function stopAt(i, d, over){ const R = RL[i]; R.spin = false; R.anim = null; let n = Math.ceil(R.pos)+1; while(digitAt(n)!==d) n++; R.pos = n; R.bounce = .16; R.over = over||null; R.flash = performance.now(); sfx.stop(); const sp = reelSpot(i); if(sp.a>.3){ burst(sp.x, sp.y, 7, ['#fff','#fff1bf'], 140*sp.s, {max:.35}); if(S.mode==='normal') punch(.018); } }
 function roll(i, d, steps, ms){
   return new Promise(res=>{ const R = RL[i]; R.spin = false; let n = Math.ceil(R.pos)+steps; while(digitAt(n)!==d) n++;
     R.anim = {from:R.pos, to:n, t0:performance.now(), dur:ms, res}; });
 }
 function modeBg(){ return S.bonus ? 'bonus' : S.mode==='rush' ? 'rush' : S.mode==='jitan' ? 'jitan' : 'sea'; }
 function modeLed(){ return S.bonus ? 'rainbow' : S.mode==='rush' ? 'rush' : S.mode==='jitan' ? 'jitan' : 'normal'; }
-function resetScene(){ L.bg = modeBg(); L.led = modeLed(); L.miniTo = 0; L.cShow = true; L.zen = false; L.reef = null; L.race = null; L.moon = null; L.mood = 'idle'; }
+function resetScene(){ L.tenpai = false; L.win = 0; L.fire = false; L.bg = modeBg(); L.led = modeLed(); L.miniTo = 0; L.cShow = true; L.zen = false; L.reef = null; L.race = null; L.moon = null; L.mood = 'idle'; }
 function pickDress(){ const own = Object.keys(UMI.loadBook().dresses||{}); L.dress = own.length ? pick(own) : ''; }
 
 /* ---------- ことば ---------- */
 let cutT = 0, bubT = 0, toastT = 0;
-function cut(html, cls, ms){ const e = $('cut'); e.innerHTML = html; e.className = 'cut'+(cls?' '+cls:''); e.hidden = false; e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; clearTimeout(cutT); cutT = setTimeout(()=>{ e.hidden = true; }, ms||1400); }
+function charify(el){ let i = 0; const walk = n=>{ [...n.childNodes].forEach(ch=>{ if(ch.nodeType===3){ const f = document.createDocumentFragment(); for(const x of ch.textContent){ if(x===' '){ f.append(' '); continue; } const sp = document.createElement('span'); sp.className = 'ch'; sp.style.setProperty('--i', i++); sp.textContent = x; f.append(sp); } ch.replaceWith(f); } else if(ch.nodeType===1) walk(ch); }); }; walk(el); }
+function cut(html, cls, ms){ const e = $('cut'); e.innerHTML = `<div>${html}</div>`; charify(e); e.className = 'cut'+(cls?' '+cls:''); e.hidden = false; e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; clearTimeout(cutT); cutT = setTimeout(()=>{ e.classList.add('out'); cutT = setTimeout(()=>{ e.hidden = true; }, 230); }, ms||1400); }
 function say(t, col, ms){ const e = $('bub'); clearTimeout(bubT); if(!t){ e.hidden = true; return; } e.textContent = t; e.className = 'bub'+(col && col!=='white' ? ' c-'+col : ''); e.hidden = false; if(ms) bubT = setTimeout(()=>{ e.hidden = true; }, ms); }
 function toast(m){ const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>t.hidden = true, 2600); }
 const SERIF = {
@@ -431,7 +463,7 @@ function pushPrompt(ms, kind){
   return new Promise(res=>{
     L.push = {t0:performance.now(), ms:S.autoPush ? ms : 1e9, kind:kind||''};
     const b = $('push'); b.className = 'push go'+(kind?' '+kind:''); sfx.push();
-    pushRes = ()=>{ L.push = null; b.className = 'push'; pushRes = null; sfx.press(); L.shake = performance.now()+180; res(); };
+    pushRes = ()=>{ L.push = null; b.className = 'push'; pushRes = null; sfx.press(); L.shake = performance.now()+180; const py = SC.y+SC.h-46; ring(200, py, '#fff', 150, .6, 7); ring(200, py, kind==='red'?'#ff4d7d':'#ffd34d', 100, .45, 5); burst(200, py, 26, kind==='rainbow'?RAINBOW:['#fff','#fff1bf',kind==='red'?'#ff4d7d':'#ffd34d'], 260); fx('lines', 650, {col:'#ffffff'}); punch(.12); res(); };
   });
 }
 function pressPush(){ ac(); if(pushRes) pushRes(); else sfx.pon(); }
@@ -446,7 +478,7 @@ function addHold(src){
     if(m==='normal'){ h.kaku = chance(.3); h.rounds = h.kaku ? 10 : 4; h.promote = !h.kaku && chance(.286); }
     else { h.kaku = true; h.rounds = chance(.6) ? 10 : 4; }
   }
-  if(m==='normal' && !S.bonus){ h.col = preColor(hit); if(h.col!=='white'){ sfx.hold(h.col); fx('flash',260,{col:'rgba(255,255,255,.35)'}); } }
+  if(m==='normal' && !S.bonus){ h.col = preColor(hit); if(h.col!=='white'){ sfx.hold(h.col); fx('flash',260,{col:'rgba(255,255,255,.35)'}); const hx = SC.x+44+S.holds.length*20, hy = SC.y+SC.h-14, hc = h.col==='rainbow' ? RAINBOW : [HCOL[h.col],'#fff']; ring(hx, hy, hc[0], 34, .5, 3); burst(hx, hy, 14, hc, 110, {type:'star'}); } }
   S.holds.push(h); mark();
 }
 function planNormal(h){
@@ -491,7 +523,7 @@ async function runSpin(h){
   spinAll(fast ? 20 : 13); sfx.start();
   if(fast) return fastSpin(h, p);
   L.mood = 'idle';
-  if(p.tc){ await wait(380); h.col = p.tc; sfx.hold(h.col); fx('flash',300,{col:'rgba(255,255,255,.45)'}); say(h.col==='gold' ? 'きんいろ…！！' : h.col==='red' ? 'あかく なった…！' : '保留の 色が かわった！', h.col==='gold'?'rainbow':h.col==='red'?'red':'blue', 1600); }
+  if(p.tc){ await wait(380); h.col = p.tc; sfx.hold(h.col); fx('flash',300,{col:'rgba(255,255,255,.45)'}); { const hc = h.col==='rainbow' ? RAINBOW : [HCOL[h.col],'#fff']; ring(SC.x+22, SC.y+SC.h-14, hc[0], 50, .6, 4); burst(SC.x+22, SC.y+SC.h-14, 20, hc, 150, {type:'star'}); punch(.03); } say(h.col==='gold' ? 'きんいろ…！！' : h.col==='red' ? 'あかく なった…！' : '保留の 色が かわった！', h.col==='gold'?'rainbow':h.col==='red'?'red':'blue', 1600); }
   if(p.btn){ await wait(450); say('ボタンを おしてね！','blue'); await pushPrompt(2600); if(p.btnHit){ cut('チャンス！','red',1100); sfx.cut(); L.led = 'hot'; } else say('…なにも おきなかった', '', 1200); await wait(800); }
   if(p.step) await stepUp(p.step);
   if(p.school){ fx('school',2600,{list:schoolList()}); sfx.school(); say('みんな きたよ〜！','green',2200); await wait(1500); }
@@ -502,6 +534,7 @@ async function runSpin(h){
   for(let k=2;k<=p.giji;k++){
     stopAt(0, rdig()); await wait(180); stopAt(2, rdig()); await wait(220); stopAt(1, 1, 'N');
     fx('flash',380,{col:'rgba(255,241,191,.8)'}); cut(`つぎ ×${k}`, k>=4?'rainbow':k>=3?'red':'blue', 950); sfx.giji(k); L.led = k>=3 ? 'hot' : 'reach';
+    ring(200, 200, k>=3?'#ff4d7d':'#5aa8ff', 120+k*20, .6, 6); burst(200, 200, 12+k*6, k>=4?RAINBOW:['#fff','#fff1bf'], 200+k*30); punch(.04+k*.02); if(k>=3) fx('lines', 900, {col:'#ff4d7d'});
     await wait(1000); spinAll(13); await wait(800);
   }
   stopAt(0, p.d[0]); await wait(420);
@@ -511,24 +544,32 @@ async function runSpin(h){
   return result(h, p);
 }
 async function stepUp(n){
-  for(let i=1;i<=n;i++){ L.step = {n:i, t0:performance.now()}; sfx.step(i); if(i>=4) L.led = 'hot'; await wait(i===n ? 1000 : 560); }
+  for(let i=1;i<=n;i++){ L.step = {n:i, t0:performance.now()}; sfx.step(i); if(i>=4) L.led = 'hot';
+    const sc = ['#fff','#ffffff','#5aa8ff','#5fd38a','#ff4d6d','#ffd34d'][i]; ring(200, 196, sc, 90+i*12, .45, 3+i); burst(200, 196, 6+i*4, [sc,'#fff'], 120+i*30, {type:i>=4?'star':'spark'}); punch(.012*i);
+    if(i===5){ fx('rays', 1200, {mode:'gold', under:true}); fx('lines', 900, {col:'#ffd34d'}); }
+    await wait(i===n ? 1000 : 560); }
   L.step = null;
 }
-function cutin(col){ fx('cutin',1400,{col}); sfx.cut(); const t = {blue:'チャンス', green:'チャンス！', red:'激アツ！', gold:'超 激アツ！！'}[col]; cut(t, col==='gold'?'gold':col, 1300); if(col==='red'||col==='gold'){ L.led = col==='gold'?'gold':'hot'; sfx.gek(); } }
+function cutin(col){ fx('cutin',1400,{col}); sfx.cut(); fx('lines', 1100, {col:{blue:'#8fc8ee',green:'#9ee6b8',red:'#ff4d7d',gold:'#ffd34d'}[col]}); punch(.07); if(col==='red'||col==='gold'){ fx('vignette', 3000, {col:col==='gold'?'255,190,40':'255,40,90'}); L.fire = true; } const t = {blue:'チャンス', green:'チャンス！', red:'激アツ！', gold:'超 激アツ！！'}[col]; cut(t, col==='gold'?'gold':col, 1300); if(col==='red'||col==='gold'){ L.led = col==='gold'?'gold':'hot'; sfx.gek(); } }
 function schoolList(){ const ks = ['dolphin','turtle','jelly','penguin','otter','octopus','crab','puffer','seahorse','star']; return [...Array(16)].map(()=>({v:pick(ks), y:SC.y+20+Math.random()*(SC.h-50), d:Math.random()*.45, s:22+Math.random()*16})); }
 async function gimmick(){
   L.gim = {t0:performance.now()}; await wait(280); sfx.gim(); L.shake = performance.now()+450;
-  fx('flash',420,{col:'rgba(255,215,90,.75)'}); cut('激アツ！','gold',1300); L.led = 'gold'; await wait(1500);
+  fx('flash',420,{col:'rgba(255,215,90,.75)'}); cut('激アツ！','gold',1300); L.led = 'gold'; L.fire = true;
+  ring(200, 162, '#ffd34d', 220, .7, 8, PTB); ring(200, 162, '#fff', 150, .5, 4, PTB); burst(200, 162, 40, ['#ffd34d','#fff1bf','#fff'], 320, {g:200}, PTB); punch(.16); fx('vignette', 2600, {col:'255,190,40'});
+  await wait(1500);
 }
 async function reachSeq(h, p){
   const hit = h.hit;
-  L.led = 'reach'; cut('リーチ！','',1000); sfx.reach(); L.mood = 'excited';
+  L.led = 'reach'; cut('リーチ！','',1000); sfx.reach(); L.mood = 'excited'; L.tenpai = true;
+  fx('lines', 1300, {col:'#ffffff'}); punch(.08); [0,2].forEach(i=>{ const sp = reelSpot(i); ring(sp.x, sp.y, '#fff', 80, .5, 4); burst(sp.x, sp.y, 12, ['#fff','#fff1bf','#8fc8ee'], 180); });
   if(p.reach==='zenkai') return zenkai(p);
   await wait(950);
   if(p.reach==='normal'){ say(pick(['そろって〜！','おねがい…！','どきどき…']),'',2600); await roll(1, p.d[1], 6+rint(3), 3700); sfx.stop(); return; }
   RL[1].speed = 7; await wait(1100);
   const nm = {nakama:['なかまリーチ','green'], selene:['セレネリーチ','red'], moon:['満月リーチ','gold']}[p.reach];
-  L.cShow = false; L.miniTo = 1; sfx.dev(); fx('flash',350,{col:'#fff'}); cut(`発展！<br><span class="sm">${nm[0]}</span>`, nm[1], 1500);
+  sfx.whoosh(); fx('wipe', 760, {cols:{green:['#5fd38a','#d3f5cf','#1f8f8a'], red:['#ff4d7d','#ffd0db','#8a1238'], gold:['#ffd34d','#fff6cf','#c4761a']}[nm[1]]}); await wait(360);
+  L.cShow = false; L.mini = 1; L.miniTo = 1; sfx.dev(); fx('flash',350,{col:'#fff'}); cut(`発展！<br><span class="sm">${nm[0]}</span>`, nm[1], 1500); punch(.1); fx('lines', 1000, {col:'#ffffff'});
+  if(p.reach==='moon'){ fx('rays', 5200, {mode:'moon', under:true}); L.fire = true; fx('vignette', 6000, {col:'255,190,40'}); }
   if(p.reach==='nakama'){
     const v = {3:'dolphin',7:'turtle'}[p.d[0]] || DC[p.d[0]]; L.bg = 'reef'; L.reef = {v, t0:performance.now(), end:null}; L.led = 'reach';
     await wait(1500); say(`${UMI.CREA[v]||'なかま'}さんが きてくれるかな…`, 'green');
@@ -540,17 +581,17 @@ async function reachSeq(h, p){
     await wait(1400); say('ライバルの セレネと きょうそう！ まけないよ〜！','red');
     await wait(3000); say('ゴールまで あと すこし…！','red'); L.race.slow = true;
     await pushPrompt(3500, 'red');
-    L.race.fin = performance.now(); L.race.win = hit ? 'u' : 's'; await wait(900);
+    L.race.fin = performance.now(); L.race.win = hit ? 'u' : 's'; fx('lines', 900, {col:hit?'#fff1a8':'#c7a6ff'}); await wait(900);
     say(hit ? 'かった〜！！' : 'セレネの かち…', hit ? 'rainbow' : '', 1600);
   } else {
     L.bg = 'fullmoon'; L.moon = {t0:performance.now(), shine:0, cloud:0}; L.led = 'gold'; sfx.gek();
     await wait(1400); say('おつきさま… おねがい…','red');
     await wait(2800); L.mood = 'pray';
     await pushPrompt(4000, 'rainbow');
-    if(hit){ L.moon.shine = performance.now(); fx('flash',700,{col:'#fff'}); } else L.moon.cloud = performance.now();
+    if(hit){ L.moon.shine = performance.now(); fx('flash',700,{col:'#fff'}); fx('rays', 2000, {mode:'rainbow', under:true}); } else L.moon.cloud = performance.now();
     await wait(900);
   }
-  L.cShow = true; stopAt(1, p.d[1]); L.shake = performance.now()+150;
+  L.cShow = true; stopAt(1, p.d[1]); L.shake = performance.now()+150; ring(200, 200, '#fff', 140, .55, 6); punch(.1);
 }
 async function zenkai(p){
   await wait(500); fx('flash',600,{col:'#fff'}); cut('全回転！！','rainbow',2200); sfx.zen(); L.bg = 'zenkai'; L.led = 'rainbow'; L.zen = true;
@@ -562,17 +603,21 @@ async function zenkai(p){
 async function result(h, p){
   if(h.hit) return atari(h, p);
   sfx.miss();
+  if(p.reach && p.reach!=='normal'){ fx('dim', 1300); L.fire = false; }
   if(p.reach){ L.mood = 'sad'; if(p.reach!=='normal') await wait(400); say(pick(['ざんねん…','おしかった〜','つぎこそ！']), '', 1500); await wait(p.reach==='normal' ? 900 : 1500); }
   else await wait(220);
   resetScene();
 }
+function rushFx(){ fx('tunnel', 2400, {under:true}); fx('rays', 2400, {mode:'sunset', under:true}); punch(.14); ring(200, 200, '#ffcf8a', 220, .8, 8); burst(200, 200, 40, ['#ff9ab5','#ffcf8a','#fff'], 340, {type:'star'}); }
 async function atari(h, p){
   const d = p.d[0];
   L.led = 'rainbow'; fx('flash',600,{col:'#fff'}); fx('confetti',4000,{list:confetti()}); sfx.atari(); L.mood = 'happy'; L.shake = performance.now()+300;
+  L.tenpai = false; L.fire = false; L.win = performance.now(); fx('rays', 4800, {mode:'rainbow', under:true}); fx('lines', 900, {col:'#fff1a8'}); punch(.22);
+  ring(200, 200, '#fff', 200, .8, 9); ring(200, 200, '#ffd34d', 150, .6, 6); burst(200, 200, 60, RAINBOW, 380, {g:120}); fireworks(lite() ? 3 : 8);
   cut(`<span class="sm">${d} ${d} ${d}</span><br>大当たり！`, 'gold', 2400); say(d===7 ? 'ななの そろい！！ すご〜い！' : 'やった〜〜！！','rainbow',2400);
   await wait(2500);
   const first = S.mode==='normal';
-  if(h.kaku && first){ cut('ウミミラッシュ<br>確定！','rainbow',1800); sfx.rushIn(); await wait(1900); }
+  if(h.kaku && first){ cut('ウミミラッシュ<br>確定！','rainbow',1800); sfx.rushIn(); rushFx(); await wait(1900); }
   if(first){ S.chain = 1; S.chainBalls = 0; } else S.chain++;
   S.hits++; S.hist.unshift({g:S.since, r:h.rounds, m:first?'n':'r'}); S.hist = S.hist.slice(0,14); S.since = 0;
   S.bonus = {rounds:h.rounds, done:0, kaku:!!h.kaku, promote:!!h.promote, first, cnt:0, pay:0, started:false};
@@ -610,7 +655,7 @@ async function runBonus(){
   if(!b.started){ cut(`${b.rounds}R 大当たり<br><span class="sm">右打ちで アタッカーを ねらってね</span>`,'gold',2000); b.started = true; save(); await wait(2100); }
   else { say('大当たりの つづきだよ！','rainbow',2000); await wait(1200); }
   while(b.done < b.rounds){
-    L.round = b.done+1; L.roundT = performance.now(); b.cnt = 0; sfx.round(); if(b.done+1===b.rounds) say('さいごの ラウンド！','rainbow',1800); await wait(900);
+    L.round = b.done+1; L.roundT = performance.now(); b.cnt = 0; sfx.round(); ring(200, 168, '#fff1bf', 130, .5, 5); burst(200, 168, 18, ['#fff1bf','#ffd34d','#fff'], 220, {type:'star'}); punch(.06); if(b.done+1===b.rounds) say('さいごの ラウンド！','rainbow',1800); await wait(900);
     GATE.atk = true; let tt = 0;
     while(b.cnt < COUNT && tt < 15000){ await wait(100); if(shooting && !document.hidden) tt += 100; else if(!shooting && b.cnt===0 && tt===0 && S.balls>0) say('うってね〜！','',1500); }
     GATE.atk = false; b.done++; save(); await wait(650);
@@ -621,15 +666,15 @@ async function runBonus(){
     L.bg = 'fullmoon'; L.moon = {t0:performance.now(), shine:0, cloud:0}; L.led = 'gold';
     cut('昇格チャレンジ！','red',1600); say('ボタンで ラッシュを つかめ！','red'); sfx.gek(); await wait(2600);
     await pushPrompt(4000, 'red');
-    if(b.promote){ L.moon.shine = performance.now(); fx('flash',700,{col:'#fff'}); fx('confetti',3000,{list:confetti()}); cut('ウミミラッシュ<br>突入！！','rainbow',2400); sfx.rushIn(); toRush = true; say('やった〜〜！！','rainbow',2200); }
-    else { L.moon.cloud = performance.now(); cut('つきあかりタイムへ','blue',2000); sfx.miss(); say('つきあかりタイムで ひきもどそう！','blue',2400); }
+    if(b.promote){ L.moon.shine = performance.now(); fx('flash',700,{col:'#fff'}); fx('confetti',3000,{list:confetti()}); cut('ウミミラッシュ<br>突入！！','rainbow',2400); sfx.rushIn(); rushFx(); fireworks(lite()?2:6); toRush = true; say('やった〜〜！！','rainbow',2200); }
+    else { L.moon.cloud = performance.now(); fx('dim', 1200); cut('つきあかりタイムへ','blue',2000); sfx.miss(); say('つきあかりタイムで ひきもどそう！','blue',2400); }
     await wait(2500);
   }
   const got = giveShards(b.rounds>=10 ? 20 : 8);
   if(toRush){
     if(b.first) S.rushIn++;
     S.mode = 'rush'; S.left = RUSH_N; bgmPlay('rush');
-    cut(`ウミミラッシュ<br><span class="sm">${RUSH_N}回 ${S.chain}連目</span>`,'rainbow',1800); if(b.kaku && b.first) sfx.rushIn();
+    cut(`ウミミラッシュ<br><span class="sm">${RUSH_N}回 ${S.chain}連目</span>`,'rainbow',1800); rushFx(); if(b.kaku && b.first) sfx.rushIn();
   } else { S.mode = 'jitan'; S.left = JITAN_N; cut(`つきあかりタイム<br><span class="sm">${JITAN_N}回</span>`,'blue',1800); }
   if(got) toast(`つきのかけら +${got}`);
   S.bonus = null; save(); resetScene(); updMode(); await wait(1500);
@@ -642,7 +687,8 @@ function onCatch(kind, b){
   if(kind==='heso'){ S.balls += PAY.heso; sfx.heso(); addHold('heso'); pop(200,392,'+3'); }
   else if(kind==='chu'){ S.balls += PAY.chu; sfx.heso(); addHold('chu'); }
   else if(kind==='pocket'){ S.balls += PAY.pocket; sfx.coin(); pop(POCKET.x, POCKET.y-8, '+3'); }
-  else if(kind==='atk'){ S.balls += PAY.atk; S.chainBalls += PAY.atk; sfx.coin(); pop(b.x, 470, '+10');
+  else if(kind==='atk'){ S.balls += PAY.atk; S.chainBalls += PAY.atk; sfx.coin(); pop(b.x, 470, '+10'); burst(b.x, 480, 8, ['#ffd34d','#fff1bf','#ff9ab5'], 150, {g:-60}, PTB);
+    if(S.bonus){ const ci = S.bonus.cnt; const cxp = 200+(ci-(COUNT-1)/2)*20; ring(cxp, 216, '#ffd34d', 20, .4, 3); }
     const B = S.bonus; if(B){ B.cnt++; B.pay += PAY.atk; if(B.cnt >= COUNT) GATE.atk = false; } }
   if(S.balls > S.best) S.best = S.balls;
   mark();
@@ -743,14 +789,24 @@ function drawReels(c, t){
   for(let i=0;i<3;i++){
     const R = RL[i], sp = reelSpot(i); if(sp.a<=0.01) continue;
     const SP = 84*sp.s, fastSpin = R.spin && R.speed>9;
+    if(R.anim && !lite()){ const v = Math.abs(R.anim.to-R.pos); if(v>.6){ c.save(); c.globalAlpha = .18; drawDigit(c, digitAt(Math.round(R.pos-1)), sp.x, sp.y+SP*.35, sp.s, 1); c.restore(); } }
     c.save(); c.beginPath(); c.rect(sp.x-44*sp.s, sp.y-64*sp.s, 88*sp.s, 128*sp.s); c.clip();
     const p = R.pos + R.bounce*.6, b = Math.floor(p);
     for(let k=-1;k<=2;k++){
       const idx = b+k, y = sp.y + (p-idx)*SP;
       if(Math.abs(y-sp.y) > SP*1.3) continue;
       const fade = sp.a * (1 - Math.min(1, Math.abs(y-sp.y)/(SP*1.1))*.75);
-      if(R.over==='N' && idx===Math.round(R.pos) && !R.spin) drawNext(c, sp.x, y, sp.s, t);
-      else if(fastSpin){ c.save(); c.translate(sp.x, y); c.scale(1,1.25); drawDigit(c, digitAt(idx), 0, 0, sp.s, fade*.8); c.restore(); }
+      const center = idx===Math.round(R.pos) && !R.spin && !R.anim;
+      if(R.over==='N' && center) drawNext(c, sp.x, y, sp.s, t);
+      else if(fastSpin){ c.save(); c.translate(sp.x, y); c.scale(1,1.25); if(!lite()){ drawDigit(c, digitAt(idx), 0, -SP*.18, sp.s, fade*.25); } drawDigit(c, digitAt(idx), 0, 0, sp.s, fade*.8); c.restore(); }
+      else if(center){
+        let sc = sp.s, yy = y;
+        if(L.win){ const w = (performance.now()-L.win)/1000 - i*.12; sc *= 1 + .16*Math.max(0, Math.sin(w*7)); }
+        else if(L.tenpai && i!==1){ sc *= 1 + .06*Math.sin(t*9); const gr = c.createRadialGradient(sp.x, y, 4, sp.x, y, 58*sp.s); gr.addColorStop(0, L.fire ? 'rgba(255,90,120,.55)' : 'rgba(255,255,255,.4)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(sp.x-60*sp.s, y-60*sp.s, 120*sp.s, 120*sp.s); }
+        else if(!busy && !S.bonus) yy += Math.sin(t*2+i*1.3)*2;
+        drawDigit(c, digitAt(idx), sp.x, yy, sc, fade);
+        const fk = (performance.now()-(R.flash||0))/220; if(fk<1){ c.save(); c.globalCompositeOperation = 'lighter'; drawDigit(c, digitAt(idx), sp.x, yy, sc*(1+fk*.25), (1-fk)*.7); c.restore(); }
+      }
       else drawDigit(c, digitAt(idx), sp.x, y, sp.s, fade);
     }
     c.restore();
@@ -845,7 +901,14 @@ function drawFx(c, t, now){
   for(let i=L.fx.length-1;i>=0;i--){
     const f = L.fx[i], k = (now-f.t0)/f.dur;
     if(k>=1){ L.fx.splice(i,1); continue; }
+    if(f.under) continue;
     if(f.type==='flash'){ c.globalAlpha = (1-k)*.9; c.fillStyle = f.col; c.fillRect(SC.x,SC.y,SC.w,SC.h); c.globalAlpha = 1; }
+    else if(f.type==='lines'){ if(lite()) continue; c.save(); c.globalAlpha = Math.min(1,(1-k)*2.5)*.75; c.fillStyle = f.col;
+      for(let j=0;j<36;j++){ const a = Math.random()*TAU, w = .012+Math.random()*.02, r0 = 70+Math.random()*60; c.beginPath(); c.moveTo(200+Math.cos(a)*r0, 212+Math.sin(a)*r0); c.lineTo(200+Math.cos(a-w)*320, 212+Math.sin(a-w)*320); c.lineTo(200+Math.cos(a+w)*320, 212+Math.sin(a+w)*320); c.closePath(); c.fill(); } c.restore(); }
+    else if(f.type==='wipe'){ const cols = f.cols||['#fff','#ccc','#888']; c.save(); for(let j=0;j<3;j++){ const x = SC.x-260+(k*1.25-j*.09)*(SC.w+520); c.fillStyle = cols[j]; c.beginPath(); c.moveTo(x,SC.y-10); c.lineTo(x+150,SC.y-10); c.lineTo(x+70,SC.y+SC.h+10); c.lineTo(x-80,SC.y+SC.h+10); c.closePath(); c.fill(); } c.restore(); }
+    else if(f.type==='vignette'){ const a = (.35+.25*Math.sin(t*9))*Math.min(1,k*5,(1-k)*3); const g = c.createRadialGradient(200,212,70,200,212,190); g.addColorStop(0,`rgba(${f.col},0)`); g.addColorStop(1,`rgba(${f.col},${a})`); c.fillStyle = g; c.fillRect(SC.x,SC.y,SC.w,SC.h); }
+    else if(f.type==='dim'){ c.fillStyle = `rgba(5,6,25,${.55*Math.min(1,k*4,(1-k)*2)})`; c.fillRect(SC.x,SC.y,SC.w,SC.h); }
+    else if(f.type==='shine'){ c.save(); const x = SC.x-80+k*(SC.w+160); const g = c.createLinearGradient(x-40,0,x+40,0); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,.18)'); g.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle = g; c.transform(1,0,-.4,1,85,0); c.fillRect(x-40,SC.y,80,SC.h); c.restore(); }
     else if(f.type==='school'){ f.list.forEach(o=>{ const kk = (k-o.d)/(1-o.d)*1.6; if(kk<0||kk>1) return; drawVis(c, o.v, SC.x+SC.w+30-kk*(SC.w+60), o.y+Math.sin(kk*12+o.y)*3, o.s, Math.floor(t*6)%2, -1); }); }
     else if(f.type==='cutin'){
       const col = {blue:'#5aa8ff', green:'#5fd38a', red:'#ff4d6d', gold:'#ffd34d'}[f.col]||'#fff', e = Math.min(1,k*5);
@@ -924,12 +987,24 @@ function drawPushIcon(c, now){
   if(P2.ms<1e8){ c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 3; c.beginPath(); c.arc(x,y,r+5,-Math.PI/2,-Math.PI/2+TAU*(1-k)); c.stroke(); }
   c.font = '13px "Mochiy Pop One",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff'; c.strokeStyle = '#3a1a00'; c.lineWidth = 3; c.strokeText('PUSH',x,y+1); c.fillText('PUSH',x,y+1);
 }
+function drawUnder(c, t, now){
+  for(const f of L.fx){ if(!f.under) continue; const k = (now-f.t0)/f.dur; if(k>=1) continue; const env = Math.min(1, k*6, (1-k)*4);
+    if(f.type==='rays'){ if(lite()) continue; c.save(); c.translate(200,200); c.rotate(t*(f.mode==='moon'?.25:.8)); c.globalAlpha = env*(f.mode==='moon'?.35:.5);
+      for(let j=0;j<18;j++){ c.fillStyle = f.mode==='rainbow' ? `hsl(${(j*20+t*120)%360},95%,70%)` : f.mode==='sunset' ? (j%2?'#ffcf8a':'#ff9ab5') : (j%2?'#fff1bf':'#ffd34d'); if(j%2 && f.mode!=='rainbow') continue;
+        c.beginPath(); c.moveTo(0,0); c.arc(0,0,300,j/18*TAU,(j+.55)/18*TAU); c.closePath(); c.fill(); } c.restore(); }
+    else if(f.type==='tunnel'){ if(lite()) continue; c.save(); c.globalAlpha = env*.7; c.lineWidth = 6;
+      for(let j=0;j<9;j++){ const q = ((t*1.4+j/9)%1); c.strokeStyle = `hsl(${(j*40+t*200)%360},90%,70%)`; c.beginPath(); c.ellipse(200,200,q*q*340,q*q*280,0,0,TAU); c.stroke(); } c.restore(); }
+  }
+}
 function drawLCD(c, now){
   const t = now/1000;
   c.save(); rr(c, SC.x, SC.y, SC.w, SC.h, 6); c.clip();
+  const z = Math.max(1, CAM.z); if(z>1.0005){ c.translate(200,212); c.scale(z,z); c.translate(-200,-212); }
   drawBG(c, t, now);
+  drawUnder(c, t, now);
   if(!S.bonus) drawReels(c, t);
   drawFx(c, t, now);
+  drawPT(c, PT);
   drawStep(c, now);
   drawHolds(c, t);
   drawInfo(c, t);
@@ -1001,7 +1076,10 @@ function render(now){
   drawLeds(c, t);
   drawGimmick(c, now);
   drawBalls(c);
+  drawPT(c, PTB);
   drawPops(c, now);
+  if(L.led==='rainbow' || L.led==='gold' || L.led==='hot' || L.led==='rush'){ const col = L.led==='rainbow' ? `hsl(${(t*300)%360},95%,65%)` : L.led==='gold' ? '#ffd34d' : L.led==='rush' ? '#ffcf8a' : '#ff4d6d';
+    c.save(); c.globalAlpha = .45+.35*Math.sin(t*10); c.strokeStyle = col; c.lineWidth = 3; rr(c, SC.x-3, SC.y-3, SC.w+6, SC.h+6, 8); c.stroke(); c.restore(); }
 }
 
 /* ---------- ループ ---------- */
@@ -1024,6 +1102,11 @@ function loop(now){
   });
   if(L.zen){ RL[1].pos = RL[2].pos = RL[0].pos; }
   L.mini += (L.miniTo-L.mini)*Math.min(1, dt*7);
+  updPT(PT, dt); updPT(PTB, dt);
+  { const acc = -170*(CAM.z-1) - 15*CAM.v; CAM.v += acc*dt; CAM.z += CAM.v*dt; }
+  if(L.fire && !lite() && Math.random() < dt*40) emit(PT, {x:SC.x+Math.random()*SC.w, y:SC.y+SC.h+4, vx:(Math.random()-.5)*20, vy:-70-Math.random()*90, size:3+Math.random()*4, max:.9+Math.random()*.6, col:pick(['#ff4d2e','#ffb02e','#ff2050','#ffd34d']), type:'dot', drag:.99});
+  if(S.mode==='rush' && !S.bonus && !lite() && Math.random() < dt*6) emit(PT, {x:SC.x+SC.w+10, y:SC.y+20+Math.random()*(SC.h-60), vx:-380-Math.random()*200, vy:0, size:1.5, max:.9, col:'#fff6cf', drag:1});
+  if(!busy && !S.bonus && now-(L.shineT||0) > 7000){ L.shineT = now; fx('shine', 900); }
   if(L.push && now-L.push.t0 > L.push.ms && pushRes) pushRes();
   // 抽選の じゅんばん
   if(!busy){
@@ -1049,7 +1132,7 @@ function ui(){
   else { $('mMidK').textContent = '回転数'; $('mMid').textContent = S.since; }
   $('mHitK').textContent = S.chain ? '連チャン' : '大当たり'; $('mHit').textContent = S.chain ? S.chain : S.hits;
   $('sndBtn').textContent = S.sound ? '🔈' : '🔇';
-  $('autoRBtn').setAttribute('aria-pressed', S.autoRight); $('autoPBtn').setAttribute('aria-pressed', S.autoPush);
+  $('autoRBtn').setAttribute('aria-pressed', S.autoRight); $('fxBtn').setAttribute('aria-pressed', S.fx!=='low'); $('fxBtn').textContent = S.fx==='low' ? 'えんしゅつ かるめ' : 'えんしゅつ もりもり'; $('autoPBtn').setAttribute('aria-pressed', S.autoPush);
   $('refillBox').hidden = !(S.balls<=0 && !shooting);
   const st = [['総回転', S.total], ['大当たり', S.hits], ['ラッシュ', S.rushIn+'回'], ['さいこう連', Math.max(S.maxChain, S.chain)], ['玉 さいこう', S.best], ['かりた 回数', S.refills]];
   $('stats').innerHTML = st.map(([k,v])=>`<div class="st"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
@@ -1075,6 +1158,7 @@ window.addEventListener('keydown', e=>{
 });
 $('sndBtn').addEventListener('click', ()=>{ S.sound = !S.sound; if(!S.sound) bgmStop(); else if(S.mode==='rush' && !S.bonus) bgmPlay('rush'); mark(); ui(); if(S.sound) sfx.pon(); });
 $('autoRBtn').addEventListener('click', ()=>{ S.autoRight = !S.autoRight; mark(); ui(); toast(S.autoRight ? '右打ち じどう オン' : '右打ち じどう オフ：じぶんで つよさを かえてね'); });
+$('fxBtn').addEventListener('click', ()=>{ S.fx = S.fx==='low' ? 'high' : 'low'; mark(); ui(); toast(S.fx==='low' ? 'えんしゅつ かるめ：花火や 光を へらすよ' : 'えんしゅつ もりもり！'); });
 $('autoPBtn').addEventListener('click', ()=>{ S.autoPush = !S.autoPush; mark(); ui(); toast(S.autoPush ? 'PUSH じどう オン' : 'PUSH じどう オフ：ボタンを おすまで まつよ'); });
 $('refill').addEventListener('click', ()=>{ S.balls += LEND; S.refills++; save(); ui(); $('refillBox').hidden = true; say('はい、玉 500こ！ ひろってきたよ〜','', 2400); });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) save(); lastT = performance.now(); });

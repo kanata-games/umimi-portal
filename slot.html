@@ -7,10 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
 <style>
-/* layout: 夜の海のきょうたい（上に ウミミの ステージ → メダル表示 → リール → ムーンランプ → レバーと ストップ）、その下に 設定・データ・配当表 */
+/* layout: 最初は 台えらび（台のカードがたて にならぶ）。台を えらぶと 夜の海の きょうたい（ステージ → メダル表示 → リール → ランプ/モード → レバーと ストップ）、その下に 設定・データ・配当表 */
 :root{
   --bg:#141838; --bg2:#1d2255; --cab:#262c6a; --cab2:#323a86; --line:#414a9c; --ink:#f1efff; --sub:#b7b5e6;
-  --moon:#f3c84e; --moon2:#fff1bf; --pop:#ff7aa8; --ok:#5fd3a7; --reel:#fffaf0; --reel2:#efe9da;
+  --moon:#f3c84e; --moon2:#fff1bf; --pop:#ff7aa8; --ok:#5fd3a7; --sun1:#ff9ab5; --sun2:#ffcf8a;
   --display:"Mochiy Pop One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
   --body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Meiryo",sans-serif;
   color-scheme:dark;
@@ -20,30 +20,59 @@
 html,body{background:var(--bg)}
 body{margin:0;color:var(--ink);font-family:var(--body);font-weight:500;font-size:15px;line-height:1.6;padding-inline:12px;padding-block:12px 32px;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-.top{display:flex;align-items:center;gap:10px}
-.back{font-weight:700;font-size:14px;color:var(--sub);text-decoration:none;padding:4px 2px}
+.top{display:flex;align-items:center;gap:8px}
+.back{font-weight:700;font-size:14px;color:var(--sub);text-decoration:none;padding:4px 2px;white-space:nowrap}
 .back:hover{color:var(--ink)}
-.top h1{font-family:var(--display);font-weight:400;font-size:20px;margin:0;flex:1;text-align:center;color:var(--moon2);letter-spacing:.04em}
-.icon{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;width:38px;height:38px;font-size:17px;cursor:pointer;display:grid;place-items:center}
+.top h1{font-family:var(--display);font-weight:400;font-size:19px;margin:0;flex:1;text-align:center;color:var(--moon2);letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;min-width:38px;height:38px;font-size:17px;cursor:pointer;display:grid;place-items:center;padding:0 10px}
+.icon.txt{font-size:12.5px;font-weight:700;color:var(--sub)}
 button{font:inherit;color:inherit}
 button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offset:2px}
 
+/* 台えらび */
+.sel h2{font-family:var(--display);font-weight:400;font-size:18px;margin:0;color:var(--moon2)}
+.sel .lead{color:var(--sub);font-size:13.5px;margin:2px 0 0}
+.mach{background:linear-gradient(180deg,var(--cab2),var(--cab));border:2px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 6px 0 #0d1030}
+.mach canvas{width:100%;aspect-ratio:16/7;display:block}
+.mach .mb{padding:12px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.mach h3{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.mach p{margin:0;font-size:13.5px;color:var(--sub)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11.5px;font-weight:700;border-radius:7px;padding:1px 9px;background:#10132f;color:var(--sub)}
+.tag.kind{background:var(--moon2);color:#5a3d00}
+.tag.live{background:var(--pop);color:#fff}
+.tag.last{background:#2c3274;color:var(--moon2)}
+.mach .go{margin-top:6px;font-family:var(--display);font-size:17px;border:0;border-radius:16px;padding:12px;background:var(--pop);color:#fff;box-shadow:0 5px 0 #b44673;cursor:pointer}
+.mach .go:active{transform:translateY(3px);box-shadow:0 2px 0 #b44673}
+.medalLine{text-align:center;color:var(--sub);font-size:14px;margin:0}
+.medalLine b{font-family:var(--display);font-weight:400;color:var(--moon2);font-size:18px}
+
+/* きょうたい */
 .cab{background:linear-gradient(180deg,var(--cab2),var(--cab));border:2px solid var(--line);border-radius:26px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 0 #0d1030}
 .stage{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/7;background:#1b2052}
 #scene{width:100%;height:100%;display:block}
-.bubble{position:absolute;left:12px;top:10px;background:#fff;color:#3a3466;font-family:var(--display);font-size:13.5px;padding:6px 12px;border-radius:14px;max-width:62%;line-height:1.45}
-.bubble::after{content:"";position:absolute;left:22px;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
-.banner{position:absolute;inset:auto 0 6px 0;text-align:center;font-family:var(--display);font-size:18px;color:var(--moon2);text-shadow:0 2px 0 #7a4b00,0 0 14px rgba(243,200,78,.8);letter-spacing:.06em}
+.bubble{position:absolute;left:12px;top:10px;background:#fff;color:#3a3466;font-family:var(--display);font-size:13.5px;padding:6px 12px;border-radius:14px;max-width:62%;line-height:1.45;border:2px solid transparent}
+.bubble::after{content:"";position:absolute;left:22px;bottom:-7px;border:6px solid transparent;border-top-color:var(--bt,#fff);border-bottom:0}
+.bubble.c-blue{background:#cfe4ff;--bt:#cfe4ff;color:#1f4f9a}
+.bubble.c-green{background:#d3f5cf;--bt:#d3f5cf;color:#25733a}
+.bubble.c-red{background:#ffd0db;--bt:#ffd0db;color:#c0244f;border-color:#ff7aa8}
+.bubble.c-rainbow{background:linear-gradient(90deg,#ffd1dc,#fff1bf,#d3f5cf,#cfe4ff,#e3d6ff);--bt:#e3d6ff;color:#5a2a8a;border-color:#fff;animation:glow 1s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 6px #fff}to{box-shadow:0 0 18px #fff1bf}}
+.banner{position:absolute;inset:auto 0 6px 0;text-align:center;font-family:var(--display);font-size:18px;color:var(--moon2);text-shadow:0 2px 0 #7a4b00,0 0 14px rgba(243,200,78,.8);letter-spacing:.06em;pointer-events:none}
+.cutin{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--display);font-size:clamp(26px,9vw,40px);text-align:center;line-height:1.2;padding:0 10px;color:#fff;text-shadow:0 3px 0 #7a4b00,0 0 18px rgba(243,200,78,.9);background:radial-gradient(ellipse at center,rgba(255,241,191,.45),rgba(255,241,191,0) 70%);animation:cut .25s ease-out}
+.cutin.red{text-shadow:0 3px 0 #8a1238,0 0 18px rgba(255,122,168,.9);background:radial-gradient(ellipse at center,rgba(255,122,168,.45),rgba(255,122,168,0) 70%)}
+.cutin.rainbow{color:#fff;text-shadow:0 3px 0 #5a2a8a,0 0 22px #fff;background:radial-gradient(ellipse at center,rgba(255,255,255,.6),rgba(227,214,255,.2) 50%,rgba(227,214,255,0) 75%)}
+@keyframes cut{from{transform:scale(1.8);opacity:0}to{transform:scale(1);opacity:1}}
 
 .meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.mt{background:#10132f;border-radius:12px;padding:5px 10px;display:flex;flex-direction:column;align-items:flex-end;border:1.5px solid #2c3274}
-.mt .k{font-size:11px;color:var(--sub);align-self:flex-start;letter-spacing:.06em}
-.mt .v{font-family:var(--display);font-size:22px;line-height:1.15;color:#ffd9e6;font-variant-numeric:tabular-nums}
+.mt{background:#10132f;border-radius:12px;padding:5px 10px;display:flex;flex-direction:column;align-items:flex-end;border:1.5px solid #2c3274;min-width:0}
+.mt .k{font-size:11px;color:var(--sub);align-self:flex-start;letter-spacing:.06em;white-space:nowrap}
+.mt .v{font-family:var(--display);font-size:22px;line-height:1.15;color:#ffd9e6;font-variant-numeric:tabular-nums;white-space:nowrap}
 .mt.medal .v{color:var(--moon2)}
 
 .reelbox{position:relative;background:#0d1030;border-radius:16px;padding:6px}
 #reels{width:100%;aspect-ratio:3/2;display:block;border-radius:10px;cursor:pointer;touch-action:manipulation}
-.pay{position:absolute;right:14px;top:10px;font-family:var(--display);font-size:20px;color:var(--moon);text-shadow:0 2px 0 #10132f;pointer-events:none;transition:opacity .3s}
+.pay{position:absolute;right:14px;top:10px;font-family:var(--display);font-size:20px;color:var(--moon);text-shadow:0 2px 0 #10132f;pointer-events:none}
 
 .lamprow{display:flex;align-items:center;gap:12px;justify-content:center;min-height:62px}
 .lamp{width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#3a3f7e,#20244f);border:3px solid #4b53a6;display:grid;place-items:center;transition:background .15s, box-shadow .15s}
@@ -55,15 +84,21 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offse
 @keyframes peka{0%{transform:scale(1)}30%{transform:scale(1.18)}100%{transform:scale(1)}}
 .lampTxt{font-family:var(--display);font-size:20px;color:#4d5394;letter-spacing:.06em;min-width:96px}
 .lamp.on + .lampTxt{color:var(--moon2);text-shadow:0 0 10px rgba(243,200,78,.8)}
+.mode{font-family:var(--display);font-size:18px;border-radius:999px;padding:8px 22px;background:#10132f;color:var(--sub);border:2px solid #2c3274;letter-spacing:.05em}
+.mode.cz{background:#fff1bf;color:#7a4b00;border-color:#f3c84e;box-shadow:0 0 16px rgba(243,200,78,.6)}
+.mode.at{background:linear-gradient(90deg,var(--sun1),var(--sun2));color:#7a2140;border-color:#fff;box-shadow:0 0 16px rgba(255,154,181,.6)}
+.mode.bonus{background:#5b3c8f;color:var(--moon2);border-color:#b9b6ef}
+.mode.ready{background:var(--moon);color:#5a3d00;border-color:#fff1bf;animation:peka .8s ease-in-out infinite}
 
 .ctrl{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:8px;align-items:stretch}
 .lever{font-family:var(--display);font-size:17px;border:0;border-radius:18px;padding:14px 6px;background:var(--pop);color:#fff;box-shadow:0 5px 0 #b44673;cursor:pointer;line-height:1.2}
-.lever small{display:block;font-family:var(--body);font-size:11px;font-weight:700;opacity:.9}
+.lever small{display:block;font-family:var(--body);font-size:11px;font-weight:700;opacity:.9;white-space:nowrap}
 .stop{font-family:var(--display);font-size:15px;border:0;border-radius:18px;padding:14px 4px;background:#e9e4ff;color:#3a3466;box-shadow:0 5px 0 #8d86c9;cursor:pointer}
-.lever:active:not(:disabled),.stop:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #8d86c9}
-.lever:active:not(:disabled){box-shadow:0 2px 0 #b44673}
+.lever:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #b44673}
+.stop:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #8d86c9}
 .lever:disabled,.stop:disabled{opacity:.38;cursor:default}
 .stop.hot{background:var(--moon2);box-shadow:0 5px 0 #c4911f}
+.stop.chance{background:#ff4d7d;color:#fff;box-shadow:0 5px 0 #a3163e;opacity:1!important}
 .keys{font-size:11.5px;color:var(--sub);text-align:center;margin:-2px 0 0}
 
 .panel{background:var(--bg2);border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
@@ -75,38 +110,52 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offse
 .refill{border:0;border-radius:14px;padding:12px;background:var(--moon);color:#3a2a00;font-weight:700;cursor:pointer;font-size:15px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .st{background:#10132f;border-radius:10px;padding:6px 8px;text-align:center}
-.st .k{font-size:11px;color:var(--sub);display:block}
+.st .k{font-size:11px;color:var(--sub);display:block;white-space:nowrap}
 .st .v{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
 .hist{display:flex;gap:5px;flex-wrap:wrap}
 .hb{font-size:12px;font-weight:700;border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
 .hb.big{background:var(--moon);color:#3a2a00}
 .hb.reg{background:#b9b6ef;color:#2a2660}
+.hb.at{background:linear-gradient(90deg,var(--sun1),var(--sun2));color:#7a2140}
 .paytbl{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;font-size:14px}
 .paytbl canvas{width:120px;height:34px}
 .paytbl b{font-family:var(--display);font-weight:400;color:var(--moon2);text-align:right}
+.yk{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;align-items:center}
+.yk .sw{font-family:var(--display);font-size:12px;border-radius:9px;padding:2px 10px;text-align:center;color:#3a3466;background:#fff}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#fff;color:#3a3466;padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
-@media (max-width:380px){.lever{font-size:15px}.stop{font-size:13px}.mt .v{font-size:19px}}
-@media (prefers-reduced-motion:reduce){.lamp.flash{animation:none}}
+@media (max-width:380px){.lever{font-size:15px}.stop{font-size:13px}.mt .v{font-size:18px}.top h1{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.lamp.flash,.mode.ready,.bubble.c-rainbow,.cutin{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <a class="back" href="./">← ポータル</a>
-    <h1>ウミミスロット</h1>
+    <h1 id="ttl">ウミミスロット</h1>
+    <button class="icon txt" id="chgBtn" type="button" hidden>台を かえる</button>
     <button class="icon" id="sndBtn" type="button" aria-label="音">🔈</button>
   </div>
 
+  <!-- 台えらび -->
+  <section class="sel wrap" id="selScr" style="gap:12px;margin:0;width:100%">
+    <div><h2>台を えらぶ</h2><p class="lead">メダルは どの台でも いっしょ。とちゅうで 台を かえても、その台の つづきから あそべるよ。</p></div>
+    <div id="machList" style="display:flex;flex-direction:column;gap:14px"></div>
+    <p class="medalLine">いまの メダル <b id="selMedal">0</b> まい</p>
+  </section>
+
+  <!-- あそぶ -->
+  <div id="playScr" class="wrap" style="margin:0;width:100%" hidden>
   <div class="cab">
     <div class="stage">
       <canvas id="scene" aria-hidden="true"></canvas>
       <div class="bubble" id="bubble">レバーを おしてね！</div>
       <div class="banner" id="banner" hidden></div>
+      <div class="cutin" id="cutin" hidden></div>
     </div>
 
     <div class="meters">
       <div class="mt medal"><span class="k">メダル</span><span class="v" id="mMedal">0</span></div>
-      <div class="mt"><span class="k" id="mMidK">かくとく</span><span class="v" id="mMid">0</span></div>
+      <div class="mt"><span class="k" id="mMidK">さいこう</span><span class="v" id="mMid">0</span></div>
       <div class="mt"><span class="k" id="mGameK">ゲーム数</span><span class="v" id="mGame">0</span></div>
     </div>
 
@@ -118,6 +167,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offse
     <div class="lamprow">
       <div class="lamp" id="lamp" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M25 4a16 16 0 1 0 11 27A14 14 0 0 1 25 4z"/></svg></div>
       <div class="lampTxt" id="lampTxt">ムーン</div>
+      <div class="mode" id="modeTag" hidden>つうじょう</div>
     </div>
 
     <div class="ctrl">
@@ -141,25 +191,33 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offse
       <button class="tg" id="assistBtn" type="button" aria-pressed="true">目押し アシスト</button>
       <button class="tg" id="autoBtn" type="button" aria-pressed="false">オート</button>
     </div>
-    <p class="note">アシストが オンだと、当たった 役は どこで おしても そろうよ。オフにすると 本気の 目押し（4コマまでしか すべらないので、イルカや ウミガメ、ボーナスを とりこぼすことも）。オートは ランプが ついたら とまります。</p>
+    <p class="note" id="setNote"></p>
   </div>
 
   <div class="panel">
     <h2>データ</h2>
-    <div class="stats">
-      <div class="st"><span class="k">ゲーム数</span><span class="v" id="sGames">0</span></div>
-      <div class="st"><span class="k">月光</span><span class="v" id="sBig">0</span></div>
-      <div class="st"><span class="k">ウミミ</span><span class="v" id="sReg">0</span></div>
-      <div class="st"><span class="k">ボーナス</span><span class="v" id="sRate">-</span></div>
-    </div>
+    <div class="stats" id="stats"></div>
     <div class="hist" id="hist"></div>
-    <p class="note" id="shardNote"></p>
+    <p class="note" id="dataNote"></p>
+  </div>
+
+  <div class="panel" id="ykPanel" hidden>
+    <h2>よこくの みかた</h2>
+    <div class="yk">
+      <span class="sw">しろ</span><span>ふつう。ほとんど ハズレ</span>
+      <span class="sw" style="background:#cfe4ff;color:#1f4f9a">あお</span><span>ちょっと チャンス</span>
+      <span class="sw" style="background:#d3f5cf;color:#25733a">みどり</span><span>チャンス！</span>
+      <span class="sw" style="background:#ffd0db;color:#c0244f">あか</span><span>大チャンス！！</span>
+      <span class="sw" style="background:linear-gradient(90deg,#ffd1dc,#fff1bf,#d3f5cf,#cfe4ff,#e3d6ff);color:#5a2a8a">にじ</span><span>月光ボーナス 確定（プレミア）</span>
+    </div>
+    <p class="note">ほかにも、流れ星・なかまの 行進・赤い ストップボタンが 出たら チャンス。重なるほど あつい！</p>
   </div>
 
   <div class="panel">
     <h2>はいとう</h2>
     <div class="paytbl" id="paytbl"></div>
-    <p class="note">まんなかの 1ラインだけ。ヒトデは 左リールの まんなかに とまれば OK。月光ボーナスは 20ゲーム、ウミミボーナスは 8ゲーム、毎回 15まい もらえるよ。ボーナスの おわりに つきのかけら（ウミミ帳）も もらえます（1日 200こ まで）。</p>
+    <p class="note" id="payNote"></p>
+  </div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -170,37 +228,49 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--moon);outline-offse
 'use strict';
 const $ = id => document.getElementById(id);
 const {TAU, drawUmi, drawVis, fitCanvas} = UMI;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function pickW(o){ let x = Math.random()*Object.values(o).reduce((a,b)=>a+b,0); for(const k in o){ if(x < o[k]) return k; x -= o[k]; } return Object.keys(o)[0]; }
 
-/* ---------- リールと 役 ---------- */
+/* ---------- リールと 役（2台とも 同じ リール） ---------- */
 // M=三日月(月光ボーナス) U=ウミミ(ウミミボーナス) D=イルカ T=ウミガメ J=クラゲ R=フグ(リプレイ) S=ヒトデ
 const STRIPS = ['JTURJMTSRJDURMJSJRJDR', 'RUDSJRJTSRMJSURJDTMRJ', 'JUJDRMTJRUDSJRSRMJTSR'].map(s=>s.split(''));
 const N = 21;
 const SYM = {M:'三日月', U:'ウミミ', D:'イルカ', T:'ウミガメ', J:'クラゲ', R:'リプレイ', S:'ヒトデ'};
 const ROLE_SYM = {BIG:'M', REG:'U', D:'D', T:'T', J:'J', R:'R'};
 const PAY = {D:15, T:10, J:8, S:2};
-// 1ゲームの 抽選（ボーナスが 当たっている間は BIG/REG は 抽選しない）
-const LOT = [['BIG',1/240],['REG',1/360],['D',1/120],['T',1/60],['S',1/36],['J',1/8],['R',1/7.3]];
-const BONUS = {BIG:{name:'月光ボーナス', games:20, shard:30}, REG:{name:'ウミミボーナス', games:8, shard:10}};
+const SMALL = [['D',1/120],['T',1/60],['S',1/36],['J',1/8],['R',1/7.3]];
+const BONUS = {BIG:{name:'月光ボーナス', short:'月光', games:20, shard:30}, REG:{name:'ウミミボーナス', short:'ウミミ', games:8, shard:10}};
 const SHARD_CAP = 200, SAVE_KEY = 'umimi-slot-v1', BET = 3;
-
+// ウミミタイム台
+const CEIL = 800, CZ_GAMES = 10, AT_J = .45, AT_UWA = 1/50, AT_START = 30, AT_SHARD = 20;
+const UWA = {5:45, 10:30, 20:15, 30:7, 100:3};
+function roll(table, skip){ let x = Math.random(); for(const [k,p] of table){ if(skip && skip.includes(k)) continue; if(x < p) return k; x -= p; } return null; }
 function lineOf(a,b,c){
   if(a===b && b===c){ return a==='M' ? 'BIG' : a==='U' ? 'REG' : a==='S' ? 'S' : a; }
   return a==='S' ? 'S' : null;
 }
 
-/* ---------- セーブ ---------- */
+/* ---------- セーブ（メダルは 全台 共通、台ごとの データは S.m[台]） ---------- */
+const MKEYS = ['moon','time'];
 function today(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-function defaults(){ return {medals:300, games:0, sinceBonus:0, big:0, reg:0, flag:null, bonus:null, replay:false, best:300, refills:0, hist:[], day:'', shardToday:0, assist:true, sound:true, pos:[0,7,14]}; }
+function machDefault(){ return {games:0, sinceBonus:0, big:0, reg:0, flag:null, ann:false, bonus:null, replay:false, hist:[], pos:[0,7,14], mode:'normal', czLeft:0, cz:0, czWin:0, at:null, atN:0, atBest:0}; }
+function defaults(){ return {medals:300, best:300, refills:0, day:'', shardToday:0, assist:true, sound:true, last:'', m:{}}; }
 function load(){
   let s=null; try{ s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){}
-  const d=defaults(); if(!s||typeof s!=='object') return d;
-  Object.keys(d).forEach(k=>{ if(s[k]===undefined||s[k]===null && d[k]!==null) s[k]=d[k]; });
-  if(!Array.isArray(s.hist)) s.hist=[];
-  if(!Array.isArray(s.pos)||s.pos.length!==3) s.pos=d.pos;
+  const d=defaults(); if(!s||typeof s!=='object') s = {};
+  if(!s.m || typeof s.m!=='object'){ // 1台だったころの セーブを ムーンランプ台へ
+    const mo = {}; ['games','sinceBonus','big','reg','flag','bonus','replay','hist','pos'].forEach(k=>{ if(s[k]!==undefined){ mo[k]=s[k]; delete s[k]; } });
+    s.m = {moon:mo}; if(mo.games && !s.last) s.last = 'moon';
+  }
+  Object.keys(d).forEach(k=>{ if(s[k]===undefined||s[k]===null) s[k]=d[k]; });
+  MKEYS.forEach(k=>{ const md = machDefault(), x = (s.m[k] && typeof s.m[k]==='object') ? s.m[k] : {};
+    Object.keys(md).forEach(f=>{ if(x[f]===undefined || (x[f]===null && md[f]!==null)) x[f]=md[f]; });
+    if(!Array.isArray(x.hist)) x.hist=[]; if(!Array.isArray(x.pos)||x.pos.length!==3) x.pos=md.pos.slice(); s.m[k]=x; });
   return s;
 }
 const S = load();
-function save(){ try{ S.pos = reels.map(r=>((Math.round(r.p)%N)+N)%N); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+let MK = null, G = null; // いまの 台
+function save(){ try{ if(G) G.pos = reels.map(r=>((Math.round(r.p)%N)+N)%N); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
 
 /* ---------- 音（Web Audio、ファイルなし） ---------- */
 let AC=null, master=null;
@@ -220,8 +290,15 @@ const sfx = {
   peka(){ tone(96,0,.5,'sine',.45); tone(103,.02,.7,'sine',.3); tone(91,0,.3,'triangle',.2); },
   fan(){ [72,76,79,84,79,84,88,91,96].forEach((m,i)=>tone(m,i*.11,i===8?.9:.2,i%2?'square':'triangle',i%2?.12:.38)); [48,55,60].forEach((m,i)=>tone(m,i*.33,.4,'triangle',.3)); },
   jingle(){ [84,88,91,88].forEach((m,i)=>tone(m,i*.08,.12,'square',.1)); },
+  atJingle(){ [79,84,88,84].forEach((m,i)=>tone(m,i*.07,.1,'triangle',.18)); },
   end(){ [91,88,84,79,84].forEach((m,i)=>tone(m,i*.14,i===4?.8:.2,'triangle',.35)); },
-  coin(i){ tone(98+(i%3)*2,0,.05,'square',.06); },
+  chance(){ tone(86,0,.12,'square',.16); tone(93,.08,.18,'square',.16); },
+  yokoku(c){ const m = {white:84,blue:86,green:88,red:91,rainbow:96}[c]||84; tone(m,0,.18,'sine',.25); if(c==='red'||c==='rainbow') tone(m+7,.1,.3,'sine',.25); },
+  star(){ [100,96,103].forEach((m,i)=>tone(m,i*.06,.4,'sine',.15)); },
+  cut(){ [88,91,96,100].forEach((m,i)=>tone(m,i*.06,.25,'square',.12)); tone(100,.24,.7,'sine',.38); },
+  uwa(n){ const k = n>=100?8:n>=30?6:n>=20?5:4; for(let i=0;i<k;i++) tone(84+i*2,i*.06,.18,'square',.12); tone(84+k*2,k*.06,.6,'sine',.35); },
+  cz(){ [79,83,86,91,95].forEach((m,i)=>tone(m,i*.08,.3,'triangle',.3)); },
+  fail(){ [76,72,69].forEach((m,i)=>tone(m,i*.16,.3,'triangle',.25)); },
 };
 
 /* ---------- 絵：リールの コマ ---------- */
@@ -232,18 +309,9 @@ function makeTiles(w, h){
   Object.keys(SYM).forEach(k=>{
     const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const c=cv.getContext('2d');
     const cx=w/2, cy=h/2, sz=Math.min(w,h);
-    if(k==='M'){
-      c.save(); c.translate(cx,cy);
-      c.shadowColor='rgba(243,180,40,.7)'; c.shadowBlur=sz*.12;
-      const r=sz*.36; const g=c.createLinearGradient(-r,-r,r,r); g.addColorStop(0,'#fff1a8'); g.addColorStop(.5,'#f3c84e'); g.addColorStop(1,'#d48a19');
-      c.fillStyle=g; c.beginPath(); c.arc(0,0,r,0,TAU); c.fill(); c.shadowBlur=0;
-      c.globalCompositeOperation='destination-out'; c.beginPath(); c.arc(r*.42,-r*.28,r*.86,0,TAU); c.fill();
-      c.globalCompositeOperation='source-over'; c.strokeStyle='#a8610a'; c.lineWidth=sz*.02;
-      c.fillStyle='#fffbe0'; [[-r*.9,-r*.85,.07],[r*.7,r*.75,.05]].forEach(([x,y,s])=>{ c.beginPath(); for(let i=0;i<8;i++){ const a=i*TAU/8, rr=i%2?sz*s*.35:sz*s; c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr); } c.fill(); });
-      c.restore();
-    } else if(k==='U'){
-      drawUmi(c,'lavender',0,cx+sz*.02,cy+sz*.36,sz/250,-1,'');
-    } else {
+    if(k==='M') drawMoon(c, cx, cy, sz*.36, true);
+    else if(k==='U') drawUmi(c,'lavender',0,cx+sz*.02,cy+sz*.36,sz/250,-1,'');
+    else {
       const v = {D:'dolphin',T:'turtle',J:'jelly',R:'puffer',S:'star'}[k];
       drawVis(c, v, cx, k==='R'?cy-sz*.06:cy, sz*(k==='D'?.92:k==='S'?.7:.78), 0, -1);
       if(k==='R'){ c.font=`${Math.round(sz*.15)}px "Mochiy Pop One",sans-serif`; c.textAlign='center'; c.lineWidth=sz*.04; c.strokeStyle='#fffaf0'; c.strokeText('REPLAY',cx,cy+sz*.4); c.fillStyle='#4f7fc9'; c.fillText('REPLAY',cx,cy+sz*.4); }
@@ -251,12 +319,23 @@ function makeTiles(w, h){
     TILE[k]=cv;
   });
 }
+function drawMoon(c, x, y, r, sparkle){
+  c.save(); c.translate(x,y);
+  c.shadowColor='rgba(243,180,40,.7)'; c.shadowBlur=r*.33;
+  const g=c.createLinearGradient(-r,-r,r,r); g.addColorStop(0,'#fff1a8'); g.addColorStop(.5,'#f3c84e'); g.addColorStop(1,'#d48a19');
+  c.fillStyle=g; c.beginPath(); c.arc(0,0,r,0,TAU); c.fill(); c.shadowBlur=0;
+  c.globalCompositeOperation='destination-out'; c.beginPath(); c.arc(r*.42,-r*.28,r*.86,0,TAU); c.fill();
+  c.globalCompositeOperation='source-over';
+  if(sparkle){ c.fillStyle='#fffbe0'; [[-r*.9,-r*.85,.19],[r*.7,r*.75,.14]].forEach(([sx,sy,s])=>{ c.beginPath(); for(let i=0;i<8;i++){ const a=i*TAU/8, rr=i%2?r*s*.35:r*s; c.lineTo(sx+Math.cos(a)*rr,sy+Math.sin(a)*rr); } c.fill(); }); }
+  c.restore();
+}
 
 /* ---------- リールの 動き ---------- */
 const SPEED = 17; // コマ/秒
-const reels = [0,1,2].map(i=>({p:S.pos[i]||0, spin:false, stopAt:null, bounce:0}));
+const reels = [0,1,2].map(i=>({p:0, spin:false, stopAt:null, bounce:0}));
 let state = 'idle'; // idle | spin | pay
 let target = null;  // このゲームで そろえたい 役
+let fx = {};        // このゲームの 演出
 let lastT = performance.now(), dirty = true;
 
 function symAt(r, idx){ return STRIPS[r][((idx%N)+N)%N]; }
@@ -264,7 +343,7 @@ function finalSym(r){ const R=reels[r]; return R.stopAt===null ? null : symAt(r,
 
 function chooseStop(r){
   const R = reels[r], base = Math.ceil(R.p - 1e-6);
-  const assist = S.assist || !!S.bonus;
+  const assist = S.assist || !!G.bonus || !!G.at;
   const want = target && target!=='S' ? ROLE_SYM[target] : null;
   const others = [0,1,2].filter(i=>i!==r).map(i=>finalSym(i));
   const valid = c => {
@@ -279,38 +358,31 @@ function chooseStop(r){
   };
   const prefer = c => { const s = symAt(r,c); if(target==='S') return r===0 && s==='S'; return want!==null && s===want; };
   const reach = (target && assist) ? N-1 : 4;
-  // そろえたい役が すでに 外れていたら 狙わない
-  const alive = want===null || others.every(o=>o===null||o===want);
+  const alive = want===null || others.every(o=>o===null||o===want); // そろえたい役が もう 外れていたら 狙わない
   if(target && alive){ for(let k=0;k<=reach;k++){ if(prefer(base+k) && valid(base+k)) return base+k; } }
   for(let k=0;k<=4;k++){ if(valid(base+k)) return base+k; }
   return base;
 }
 
 function lever(){
-  if(state!=='idle') return;
-  if(!S.replay && S.medals < BET){ showRefill(); return; }
+  if(state!=='idle' || !G) return;
+  if(!G.replay && S.medals < BET){ showRefill(); return; }
   ac(); sfx.lever();
-  if(S.replay){ S.replay=false; } else { S.medals -= BET; }
-  // 抽選
-  if(S.bonus){ target = 'D'; sfx.jingle(); }
-  else {
-    S.games++; S.sinceBonus++;
-    let x = Math.random(), hit = null;
-    for(const [k,p] of LOT){ if(S.flag && (k==='BIG'||k==='REG')) continue; if(x < p){ hit=k; break; } x -= p; }
-    if(hit==='BIG'||hit==='REG'){ S.flag = hit; target = null; if(Math.random() < .3) lampOn(true); }
-    else target = hit;
-    if(!target && S.flag) target = S.flag;
-  }
+  if(G.replay){ G.replay=false; } else { S.medals -= BET; }
+  fx = {}; bubbleColor(''); $('payTxt').textContent='';
+  if(G.bonus){ target = 'D'; sfx.jingle(); }
+  else target = MACH[MK].lever();
   reels.forEach(R=>{ R.spin=true; R.stopAt=null; R.bounce=0; });
-  state = 'spin'; $('payTxt').textContent='';
-  if(!S.bonus) hint();
+  state = 'spin';
   save(); ui();
 }
 
 function pressStop(r){
   if(state!=='spin') return;
   const R = reels[r]; if(!R.spin || R.stopAt!==null) return;
-  ac(); R.stopAt = chooseStop(r); ui();
+  ac(); R.stopAt = chooseStop(r);
+  if(fx.stopChance && !fx.stopShown){ fx.stopShown = true; const b = document.querySelector(`.stop[data-r="${r}"]`); b.classList.add('chance'); sfx.chance(); setTimeout(()=>b.classList.remove('chance'), 900); }
+  ui();
 }
 
 function onReelStopped(r){
@@ -318,44 +390,41 @@ function onReelStopped(r){
   if(reels.every(R=>!R.spin)) settle();
 }
 
-let payAnim = null;
 function settle(){
   const line = [0,1,2].map(i=>symAt(i, reels[i].p));
   const res = lineOf(line[0],line[1],line[2]);
-  const wasBonus = !!S.bonus;
+  const wasBonus = !!G.bonus, wasAT = !!G.at && !wasBonus;
   state = 'pay';
-  let pay = 0, msg = null;
-  if(res==='BIG' || res==='REG'){
-    S.flag = null; lampOff();
-    const B = BONUS[res];
-    S.bonus = {type:res, left:B.games, got:0};
-    if(res==='BIG') S.big++; else S.reg++;
-    S.hist.unshift({t:res, g:S.sinceBonus}); S.hist = S.hist.slice(0,12); S.sinceBonus = 0;
-    sfx.fan(); mood('bonus');
-    banner(B.name+'！'); say(res==='BIG' ? '月光ボーナス！！ いっしょに およご〜！' : 'ウミミボーナス！ やった〜！');
-    setAuto(false);
-  } else if(res==='R'){
-    S.replay = true; sfx.replay(); msg='リプレイ';
-  } else if(res){
-    pay = PAY[res];
-  }
+  let pay = 0, wait = 160;
+  if(res==='BIG' || res==='REG') startBonus(res);
+  else if(res==='R'){ G.replay = true; sfx.replay(); $('payTxt').textContent = 'リプレイ'; }
+  else if(res) pay = PAY[res];
   if(pay){
-    if(wasBonus) S.bonus.got += pay;
+    if(wasBonus) G.bonus.got += pay; if(wasAT) G.at.got += pay;
     S.medals += pay; S.best = Math.max(S.best, S.medals);
-    $('payTxt').textContent = '+' + pay; sfx.win();
-    if(!S.bonus){ mood('happy'); say(winLine(res)); }
-  } else if(msg){ $('payTxt').textContent = msg; }
-  if(wasBonus) S.bonus.left--;
-  // ペカッ（あとから）
-  if(S.flag && !lampLit){ lampOn(false); }
-  // ボーナスの おわり
-  if(S.bonus && S.bonus.left<=0){
-    const b = S.bonus; S.bonus = null;
-    const got = giveShards(BONUS[b.type].shard);
-    setTimeout(()=>{ sfx.end(); banner(''); mood('happy'); say(`${BONUS[b.type].name} おわり！ ${b.got}まい かくとく${got?`、つきのかけら +${got}`:''}！`); if(got) toast(`つきのかけら +${got}（ウミミ帳に いれたよ）`); ui(); }, 500);
+    $('payTxt').textContent = '+' + pay; sfx.win(); wait = 420;
+    if(!wasBonus && !wasAT){ mood('happy'); say(winLine(res)); }
+  }
+  if(wasBonus){
+    G.bonus.left--;
+    if(G.bonus.left<=0){ const b = G.bonus; G.bonus = null; wait = Math.max(wait, MACH[MK].bonusEnd(b)); }
+  } else {
+    wait = Math.max(wait, MACH[MK].after(res, wasAT) || 0);
   }
   target = null; save(); ui();
-  setTimeout(()=>{ state='idle'; ui(); if(auto) autoNext(); }, pay ? 420 : 160);
+  setTimeout(()=>{ state='idle'; ui(); if(auto) autoNext(); }, wait);
+}
+
+function startBonus(res){
+  G.flag = null; G.ann = false; lampOff();
+  const B = BONUS[res];
+  G.bonus = {type:res, left:B.games, got:0};
+  if(res==='BIG') G.big++; else G.reg++;
+  G.hist.unshift({t:res, g:G.at ? 0 : G.sinceBonus}); G.hist = G.hist.slice(0,12);
+  if(!G.at) G.sinceBonus = 0;
+  if(G.mode==='cz'){ G.mode='normal'; G.czLeft=0; }
+  sfx.fan(); mood('bonus');
+  say(res==='BIG' ? '月光ボーナス！！ いっしょに およご〜！' : 'ウミミボーナス！ やった〜！');
 }
 
 function giveShards(n){
@@ -363,10 +432,168 @@ function giveShards(n){
   const g = Math.max(0, Math.min(n, SHARD_CAP - S.shardToday)); if(!g) return 0;
   S.shardToday += g; const B = UMI.loadBook(); B.shards += g; UMI.saveBook(B); return g;
 }
+function bonusOverMsg(b){
+  const got = giveShards(BONUS[b.type].shard);
+  if(got) toast(`つきのかけら +${got}（ウミミ帳に いれたよ）`);
+  return `${BONUS[b.type].name} おわり！ ${b.got}まい${got?`、かけら +${got}`:''}！`;
+}
+
+/* ---------- 台ごとの きまり ---------- */
+const MACH = {
+  // ① ムーンランプ：シンプル。ランプが ペカッと ひかったら ボーナス
+  moon:{
+    name:'ムーンランプ', kind:'シンプル',
+    desc:'ランプが ペカッと ひかったら ボーナス。えんしゅつは ひかえめ、ドキドキは ランプ ひとつに。',
+    LOT:[['BIG',1/240],['REG',1/360],...SMALL],
+    lever(){
+      G.games++; G.sinceBonus++;
+      const hit = roll(this.LOT, G.flag ? ['BIG','REG'] : null);
+      let t = null;
+      if(hit==='BIG'||hit==='REG'){ G.flag = hit; if(Math.random() < .3) lampOn(); }
+      else t = hit;
+      if(!t && G.flag) t = G.flag;
+      hint();
+      return t;
+    },
+    after(){ if(G.flag && !lampLit) lampOn(); return 0; },
+    bonusEnd(b){
+      const msg = bonusOverMsg(b);
+      setTimeout(()=>{ sfx.end(); mood('happy'); say(msg); ui(); }, 500);
+      return 600;
+    },
+    setNote:'アシストが オンだと、当たった 役は どこで おしても そろうよ。オフにすると 本気の 目押し（4コマまでしか すべらないので、イルカや ウミガメ、ボーナスを とりこぼすことも）。オートは ランプが ついたら とまります。',
+    payNote:'まんなかの 1ラインだけ。ヒトデは 左リールの まんなかに とまれば OK。月光ボーナスは 20ゲーム、ウミミボーナスは 8ゲーム、毎回 15まい。ボーナスの おわりに つきのかけら（ウミミ帳）も もらえます（全台で 1日 200こ まで）。',
+  },
+  // ② ウミミタイム：予告・満月チャンス・ボーナス後の ウミミタイム（上乗せ）・天井・プレミア
+  time:{
+    name:'ウミミタイム', kind:'えんしゅつ もりもり',
+    desc:'セリフの 色や 流れ星で 当たりを よかん。満月チャンス、ボーナスの あとの ウミミタイム（上乗せ）、天井つき。',
+    LOT:[['BIG',1/600],['REG',1/800],['CZ',1/220],...SMALL],
+    LOT_CZ:[['BIG',1/20],['REG',1/28],...SMALL],
+    LOT_AT:[['BIG',1/400],['REG',1/600]],
+    lever(){
+      if(G.at){ // ウミミタイム中
+        sfx.atJingle();
+        if(G.flag && G.ann) return G.flag;
+        if(G.flag) fx.newFlag = true; // 告知の まえに とじた とき
+        if(!G.flag){ const h = roll(this.LOT_AT); if(h){ G.flag = h; fx.newFlag = true; } }
+        if(Math.random() < AT_UWA) fx.uwa = +pickW(UWA);
+        const t = Math.random() < AT_J ? 'J' : roll(SMALL, ['J']);
+        if(fx.newFlag || fx.uwa){ if(Math.random()<.6) yokokuBubble(fx.uwa>=30||fx.newFlag ? pickW({green:40,red:60}) : pickW({blue:60,green:40})); }
+        else if(Math.random()<.04) yokokuBubble('blue');
+        return t;
+      }
+      G.games++; G.sinceBonus++;
+      if(G.flag && G.ann) return G.flag;
+      let t = null;
+      if(G.flag){ fx.newFlag = true; } // 告知の まえに とじた とき
+      else if(G.sinceBonus >= CEIL){ G.flag = 'BIG'; fx.newFlag = true; fx.ceil = true; }
+      else {
+        const cz = G.mode==='cz';
+        if(cz) G.czLeft--;
+        const skip = G.flag ? ['BIG','REG','CZ'] : (G.mode!=='normal' ? ['CZ'] : null);
+        const hit = roll(cz ? this.LOT_CZ : this.LOT, skip);
+        if(hit==='BIG'||hit==='REG'){ G.flag = hit; fx.newFlag = true; }
+        else if(hit==='CZ') fx.czIn = true;
+        else t = hit;
+      }
+      yokoku();
+      return t;
+    },
+    after(res, wasAT){
+      let wait = 0;
+      if(res==='BIG'||res==='REG') return 0;
+      if(wasAT){
+        if(fx.uwa){ G.at.left += fx.uwa; G.at.total += fx.uwa; uwaCut(fx.uwa); wait = 1000; }
+        G.at.left--;
+      }
+      if(fx.newFlag){ announce(); wait = Math.max(wait, 1200); }
+      else if(fx.czIn && G.mode==='normal'){
+        G.mode = 'cz'; G.czLeft = CZ_GAMES; G.cz++;
+        cutin('満月チャンス！', ''); sfx.cz(); say('満月が のぼった！ 10ゲームの あいだに 当てよう！'); setAuto(false); wait = Math.max(wait, 1100);
+      }
+      else if(G.mode==='cz' && G.czLeft<=0 && !G.flag){ G.mode = 'normal'; sfx.fail(); say('満月チャンス しっぱい… また こんど！'); wait = Math.max(wait, 600); }
+      else if(fx.hot && !wasAT){ say(pick(['ざんねん…','あれ〜？','つぎこそ…！'])); }
+      if(wasAT && G.at.left<=0){
+        const a = G.at; G.at = null; G.atBest = Math.max(G.atBest, a.total);
+        G.hist.unshift({t:'AT', g:a.total}); G.hist = G.hist.slice(0,12);
+        const got = giveShards(AT_SHARD); if(got) toast(`つきのかけら +${got}（ウミミ帳に いれたよ）`);
+        setTimeout(()=>{ sfx.end(); mood('happy'); cutin(`ウミミタイム おわり<br>${a.total}G・${a.got}まい`, ''); say(`${a.total}ゲーム つづいたよ！ ${a.got}まい ゲット${got?`、かけら +${got}`:''}！`); ui(); }, wait + 200);
+        wait += 1400;
+      }
+      return wait;
+    },
+    bonusEnd(b){
+      const msg = bonusOverMsg(b);
+      if(G.at){ // ウミミタイム中の ボーナス → 上乗せ
+        const add = b.type==='BIG' ? 30 : 10; G.at.left += add; G.at.total += add;
+        setTimeout(()=>{ sfx.uwa(add); cutin(`ウミミタイム<br>+${add}G`, 'red'); say(msg + ' タイムも つづくよ！'); ui(); }, 500);
+        return 1500;
+      }
+      if(b.type==='BIG' || Math.random() < .5){
+        G.at = {left:AT_START, got:0, total:AT_START}; G.atN++;
+        setTimeout(()=>{ sfx.cut(); mood('at'); cutin('ウミミタイム<br>とつにゅう！', 'rainbow'); say(msg + ' つぎは ウミミタイム！ クラゲを いっぱい そろえるよ'); ui(); }, 500);
+        return 1700;
+      }
+      setTimeout(()=>{ sfx.end(); mood('happy'); say(msg + ' タイムは また こんど…'); ui(); }, 500);
+      return 600;
+    },
+    setNote:'アシストが オンだと、当たった 役は どこで おしても そろうよ（ボーナス中と ウミミタイム中は いつも アシスト）。オートは ボーナス確定や 満月チャンスで とまります。',
+    payNote:'まんなかの 1ラインだけ。ボーナスは 2台とも おなじ。ボーナスの あとは ウミミタイム（月光なら かならず、ウミミボーナスなら はんぶんの かくりつ）。30ゲーム、クラゲが よく そろって メダルが ふえていく。ときどき「上乗せ」で ゲーム数が ふえるよ。ボーナスから 800ゲーム 当たらないと 天井で 月光ボーナス。',
+  },
+};
+
+/* ---------- ウミミタイム台の 演出 ---------- */
+function yokoku(){
+  const hot = !!fx.newFlag, czHot = !!fx.czIn, inCz = G.mode==='cz';
+  let bub = null;
+  if(fx.ceil){ bub = 'rainbow'; }
+  else if(hot){
+    if(G.flag==='BIG' && Math.random() < .08) bub = 'rainbow';
+    else bub = pickW({none:10, white:8, blue:20, green:26, red:36});
+    if(Math.random() < .35) fx.star = true;
+    if(Math.random() < .3) fx.parade = true;
+    if(Math.random() < .3) fx.stopChance = true;
+  } else if(czHot){
+    bub = pickW({none:30, blue:35, green:28, red:7}); if(Math.random() < .4) fx.parade = true;
+  } else if(inCz){
+    if(Math.random() < .4) bub = pickW({white:50, blue:35, green:15});
+  } else {
+    if(Math.random() < .14) bub = pickW({white:62, blue:25, green:11.5, red:1.5});
+    if(Math.random() < .02) fx.star = true;
+    if(Math.random() < .015) fx.parade = true;
+    if(Math.random() < .01) fx.stopChance = true;
+  }
+  if(bub && bub!=='none') yokokuBubble(bub);
+  if(fx.star){ scenefx.star = performance.now(); setTimeout(()=>sfx.star(), 150); }
+  if(fx.parade){ scenefx.parade = performance.now(); }
+  fx.hot = (bub && bub!=='none' && bub!=='white') || fx.star || fx.parade || fx.stopChance;
+}
+const YK_TEXT = {
+  white:['ぷかぷか〜','きょうも いい なみ','クラゲさん こんにちは','のんびり いこ〜'],
+  blue:['なにか くるかも？','なみが ざわざわ…','きらっ？'],
+  green:['あつい なみ…！','月が ちかい きがする！','どきどき してきた！'],
+  red:['ぜったい くる…！！','月が よんでる！！','いけ〜〜っ！！'],
+  rainbow:['★ 月光の ひかり ★'],
+};
+function yokokuBubble(c){ bubbleColor(c); say(pick(YK_TEXT[c])); sfx.yokoku(c); }
+function bubbleColor(c){ $('bubble').className = 'bubble' + (c && c!=='white' ? ' c-'+c : ''); }
+function announce(){
+  G.ann = true; lampLit = true;
+  const czOk = G.mode==='cz';
+  if(czOk){ G.czWin++; G.mode = 'normal'; G.czLeft = 0; }
+  sfx.peka(); setTimeout(()=>sfx.cut(), 120);
+  cutin(fx.ceil ? '天井！<br>ボーナス確定！' : czOk ? '満月チャンス<br>せいこう！' : 'ボーナス確定！', fx.ceil||czOk ? 'rainbow' : '');
+  mood('lamp'); bubbleColor(''); say(S.assist || G.at ? 'つぎの ゲームで そろえてね！' : '三日月か ウミミを ねらってね！');
+  setAuto(false);
+}
+function uwaCut(n){ sfx.uwa(n); cutin(`上乗せ<br>+${n}G`, n>=100 ? 'rainbow' : n>=30 ? 'red' : ''); mood('happy'); say(n>=100 ? 'すご〜い！！ 100ゲーム！！' : n>=30 ? 'いっぱい ふえた〜！' : 'ふえた〜！'); }
+let cutT = 0;
+function cutin(html, kind){ const c = $('cutin'); c.innerHTML = html; c.className = 'cutin' + (kind ? ' '+kind : ''); c.hidden = false; void c.offsetWidth; clearTimeout(cutT); cutT = setTimeout(()=>{ c.hidden = true; }, 1500); }
 
 /* ---------- ムーンランプ ---------- */
-let lampLit = false;
-function lampOn(early){
+let lampLit = false; // ボーナス まち（ムーンランプ台は ランプ点灯、ウミミタイム台は 確定告知ずみ）
+function lampOn(){
   if(lampLit) return; lampLit = true; const L=$('lamp');
   L.classList.add('on'); L.classList.remove('flash'); void L.offsetWidth; L.classList.add('flash');
   $('lampTxt').textContent = 'ペカッ！'; sfx.peka(); mood('lamp');
@@ -378,36 +605,61 @@ function lampOff(){ lampLit=false; $('lamp').classList.remove('on','flash'); $('
 /* ---------- ウミミの ステージ ---------- */
 const sc = $('scene'), sx = sc.getContext('2d');
 let moodNow = 'idle', moodUntil = 0, dress = '';
+const scenefx = {star:0, parade:0};
 const bubbles = [...Array(7)].map((_,i)=>({x:Math.random(), s:2+i%3*1.5, sp:.04+Math.random()*.05, o:Math.random()}));
 const stars = [...Array(18)].map(()=>({x:Math.random(), y:Math.random()*.5, p:Math.random()*6}));
 const swimmers = [];
 function mood(m){
   moodNow = m; moodUntil = m==='happy' ? performance.now()+1800 : 0;
-  if(m==='bonus'){ const own = Object.keys(UMI.loadBook().dresses||{}); dress = own.length ? own[Math.floor(Math.random()*own.length)] : ''; }
+  if(m==='bonus' || m==='at'){ const own = Object.keys(UMI.loadBook().dresses||{}); dress = own.length ? own[Math.floor(Math.random()*own.length)] : ''; }
   if(m==='bonus' && !swimmers.length){ ['dolphin','turtle','jelly'].forEach((v,i)=>swimmers.push({v, x:-.2-i*.35, y:.35+i*.18, sp:.07+i*.015})); }
 }
 function drawScene(now){
   const {w,h} = fitCanvas(sc, 1.25), c = sx, t = now/1000;
-  const bon = !!S.bonus;
+  const bon = !!(G && G.bonus), at = !!(G && G.at) && !bon, cz = !!(G && G.mode==='cz') && !bon;
   const g = c.createLinearGradient(0,0,0,h);
-  if(bon){ g.addColorStop(0,'#2a1d5c'); g.addColorStop(1,'#5b3c8f'); } else { g.addColorStop(0,'#1b2052'); g.addColorStop(1,'#34418f'); }
+  if(bon){ g.addColorStop(0,'#2a1d5c'); g.addColorStop(1,'#5b3c8f'); }
+  else if(at){ g.addColorStop(0,'#5a3d8f'); g.addColorStop(.55,'#e27aa0'); g.addColorStop(1,'#ffc58a'); }
+  else if(cz){ g.addColorStop(0,'#141a4a'); g.addColorStop(1,'#2c3a86'); }
+  else { g.addColorStop(0,'#1b2052'); g.addColorStop(1,'#34418f'); }
   c.fillStyle = g; c.fillRect(0,0,w,h);
   stars.forEach(s=>{ c.fillStyle=`rgba(255,250,220,${.3+.35*Math.sin(t*1.6+s.p)})`; c.fillRect(s.x*w, s.y*h, 2, 2); });
-  const mr = h*.16, mx = w*.86, my = h*.26;
-  if(lampLit || bon){ c.fillStyle='rgba(243,200,78,.18)'; c.beginPath(); c.arc(mx,my,mr*1.6,0,TAU); c.fill(); }
-  c.fillStyle = lampLit||bon ? '#ffe68a' : 'rgba(251,239,200,.92)'; c.beginPath(); c.arc(mx,my,mr,0,TAU); c.fill();
-  c.fillStyle = bon ? '#33236a' : '#232a6a'; c.beginPath(); c.arc(mx+mr*.45,my-mr*.3,mr*.88,0,TAU); c.fill();
+  if(cz){ // 満月
+    const r = h*.3, x = w*.74, y = h*.38;
+    c.fillStyle = 'rgba(255,241,191,.18)'; c.beginPath(); c.arc(x,y,r*(1.45+.08*Math.sin(t*3)),0,TAU); c.fill();
+    const mg = c.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r); mg.addColorStop(0,'#fffbe6'); mg.addColorStop(1,'#f3d27a');
+    c.fillStyle = mg; c.beginPath(); c.arc(x,y,r,0,TAU); c.fill();
+    c.fillStyle='rgba(200,160,70,.25)'; [[-.3,.1,.16],[.25,-.2,.11],[.1,.35,.09]].forEach(([a,b,s])=>{ c.beginPath(); c.arc(x+a*r,y+b*r,s*r,0,TAU); c.fill(); });
+  } else if(at){
+    const r = h*.2, x = w*.82, y = h*.62; c.fillStyle='rgba(255,236,170,.9)'; c.beginPath(); c.arc(x,y,r,0,TAU); c.fill();
+    c.fillStyle='rgba(255,255,255,.35)'; for(let i=0;i<4;i++){ c.fillRect(w*.55, y + r*.6 + i*h*.06, w*.45*(1-i*.2), 2); }
+  } else {
+    const mr = h*.16, mx = w*.86, my = h*.26;
+    if(lampLit || bon){ c.fillStyle='rgba(243,200,78,.18)'; c.beginPath(); c.arc(mx,my,mr*1.6,0,TAU); c.fill(); }
+    c.fillStyle = lampLit||bon ? '#ffe68a' : 'rgba(251,239,200,.92)'; c.beginPath(); c.arc(mx,my,mr,0,TAU); c.fill();
+    c.fillStyle = bon ? '#33236a' : '#232a6a'; c.beginPath(); c.arc(mx+mr*.45,my-mr*.3,mr*.88,0,TAU); c.fill();
+  }
+  // 流れ星
+  const st = (now - scenefx.star)/1000;
+  if(scenefx.star && st < 1.3){ const k = st/1.3, x = w*(.95 - k*.9), y = h*(.05 + k*.45);
+    const lg = c.createLinearGradient(x,y,x+w*.22,y-h*.11); lg.addColorStop(0,'rgba(255,255,230,1)'); lg.addColorStop(1,'rgba(255,255,230,0)');
+    c.strokeStyle = lg; c.lineWidth = 3; c.beginPath(); c.moveTo(x,y); c.lineTo(x+w*.22,y-h*.11); c.stroke();
+    c.fillStyle='#fffbe6'; c.beginPath(); c.arc(x,y,4,0,TAU); c.fill(); }
   c.fillStyle = 'rgba(255,255,255,.25)';
   bubbles.forEach(b=>{ const y = h*(1.05 - ((t*b.sp + b.o)%1.1)); c.beginPath(); c.arc(b.x*w, y, b.s, 0, TAU); c.fill(); });
   if(bon){ swimmers.forEach(s=>{ s.x += s.sp/30; if(s.x>1.25) s.x=-.25; drawVis(c, s.v, s.x*w, s.y*h + Math.sin(t*2+s.y*9)*3, h*.32, Math.floor(t*3)%2, 1); }); }
   else swimmers.length = 0;
-  if(moodNow==='happy' && now>moodUntil) moodNow = lampLit ? 'lamp' : 'idle';
-  let f = 0, gx = w*.42, gy = h*.92, face = -1;
-  if(bon){ f = 2 + (Math.floor(t*2.6)%2); gx = w*(.42 + Math.sin(t*.7)*.14); gy = h*.86 + Math.sin(t*1.8)*h*.03; face = Math.cos(t*.7)>0 ? 1 : -1; }
+  // なかまの 行進
+  const pt = (now - scenefx.parade)/1000;
+  if(scenefx.parade && pt < 2.2){ ['otter','penguin','crab','octopus'].forEach((v,i)=>{ const x = w*(1.15 - pt*.75 + i*.16); drawVis(c, v, x, h*.62 - Math.abs(Math.sin(pt*8+i))*h*.06, h*.3, Math.floor(pt*6)%2, -1); }); }
+  if(moodNow==='happy' && now>moodUntil) moodNow = lampLit ? 'lamp' : at ? 'at' : 'idle';
+  let f = 0, gx = w*.42, gy = h*.92, face = -1, out = '';
+  if(bon){ f = 2 + (Math.floor(t*2.6)%2); gx = w*(.42 + Math.sin(t*.7)*.14); gy = h*.86 + Math.sin(t*1.8)*h*.03; face = Math.cos(t*.7)>0 ? 1 : -1; out = dress; }
+  else if(at){ f = [7,8,9,8][Math.floor(t*3)%4]; gx = w*(.38 + Math.sin(t*1.1)*.06); gy -= Math.abs(Math.sin(t*4))*h*.05; face = Math.sin(t*1.1)>0 ? 1 : -1; out = dress; }
   else if(moodNow==='lamp' || moodNow==='happy'){ f = [7,8,9,8][Math.floor(t*4)%4]; gy -= Math.abs(Math.sin(t*6))*h*.04; }
   else { f = (Math.floor(t*1.4)%10===9) ? 1 : 0; gy += Math.sin(t*1.5)*h*.015; }
   c.fillStyle='rgba(0,0,20,.18)'; c.beginPath(); c.ellipse(gx, h*.95, h*.32, h*.04, 0, 0, TAU); c.fill();
-  drawUmi(c, 'lavender', f, gx, gy, h/330, face, bon ? dress : '');
+  drawUmi(c, 'lavender', f, gx, gy, h/330, face, out);
 }
 
 /* ---------- リールを 描く ---------- */
@@ -431,7 +683,6 @@ function drawReels(){
     c.fillStyle = sh; c.fillRect(x0,0,rw,h);
     c.restore();
   }
-  // まんなかの ライン
   const lit = state==='idle' || state==='pay';
   c.strokeStyle = lampLit ? 'rgba(243,200,78,.95)' : 'rgba(255,122,168,.75)'; c.lineWidth = Math.max(2, h*.012);
   c.beginPath(); c.moveTo(gap*.4, h/2); c.lineTo(gap*1.4, h/2); c.moveTo(w-gap*1.4, h/2); c.lineTo(w-gap*.4, h/2); c.stroke();
@@ -443,7 +694,7 @@ let lastScene = 0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt = Math.min(.05, (now-lastT)/1000); lastT = now;
-  if(document.hidden) return;
+  if(document.hidden || !G) return;
   let moving = false;
   reels.forEach((R,i)=>{
     if(R.spin){
@@ -456,35 +707,47 @@ function loop(now){
 }
 
 /* ---------- ことば ---------- */
-const pick = a => a[Math.floor(Math.random()*a.length)];
 function say(t){ $('bubble').textContent = t; }
 function banner(t){ $('banner').textContent = t; $('banner').hidden = !t; }
 function winLine(r){ return {D:'イルカ そろった！ 15まい！', T:'ウミガメさん こんにちは〜', J:'クラゲ ぷかぷか〜', S:'ヒトデ〜！ ちょっぴり ゲット'}[r] || 'やった！'; }
 let quiet = 0;
-function hint(){
+function hint(){ // ムーンランプ台の ひとりごと
   if(lampLit) return;
   if(++quiet < 5 && Math.random() < .7) return; quiet = 0;
-  const gasa = S.flag && Math.random()<.35;
+  const gasa = G.flag && Math.random()<.35;
   say(gasa ? pick(['…なにか ひかった？','月が ちかい きがする…','どきどき…']) : pick(['ぷかぷか〜','きょうは 月が きれい…','ペカッて ひかるかな？','三日月 そろえたいな〜','クラゲさん いっぱい','…なにか ひかった？']));
 }
 
 /* ---------- 画面 ---------- */
 function ui(){
-  $('mMedal').textContent = S.medals;
-  if(S.bonus){ $('mMidK').textContent = BONUS[S.bonus.type].name.replace('ボーナス',''); $('mMid').textContent = 'のこり'+S.bonus.left; $('mGameK').textContent='かくとく'; $('mGame').textContent = S.bonus.got||0; }
-  else { $('mMidK').textContent = 'さいこう'; $('mMid').textContent = S.best; $('mGameK').textContent='ゲーム数'; $('mGame').textContent = S.sinceBonus; }
-  $('lever').disabled = state!=='idle';
-  $('betTxt').textContent = S.replay ? 'リプレイ' : S.bonus ? `${BONUS[S.bonus.type].name.replace('ボーナス','')} のこり${S.bonus.left}` : '3まい';
-  document.querySelectorAll('.stop').forEach(b=>{ const R = reels[+b.dataset.r]; b.disabled = !(state==='spin' && R.spin && R.stopAt===null); b.classList.toggle('hot', lampLit && !b.disabled); });
-  $('refillBox').hidden = !(S.medals < BET && !S.replay && state==='idle');
-  $('assistBtn').setAttribute('aria-pressed', S.assist); $('autoBtn').setAttribute('aria-pressed', auto);
   $('sndBtn').textContent = S.sound ? '🔈' : '🔇';
-  $('sGames').textContent = S.games; $('sBig').textContent = S.big; $('sReg').textContent = S.reg;
-  $('sRate').textContent = (S.big+S.reg) ? '1/' + Math.round(S.games/(S.big+S.reg)) : '-';
-  $('hist').innerHTML = S.hist.map(h=>`<span class="hb ${h.t==='BIG'?'big':'reg'}">${h.t==='BIG'?'月光':'ウミミ'} ${h.g}G</span>`).join('');
+  if(!G) return;
+  const M = MACH[MK], isTime = MK==='time';
+  $('mMedal').textContent = S.medals;
+  if(G.bonus){ $('mMidK').textContent = BONUS[G.bonus.type].short; $('mMid').textContent = 'のこり'+G.bonus.left; $('mGameK').textContent='かくとく'; $('mGame').textContent = G.bonus.got||0; }
+  else if(G.at){ $('mMidK').textContent = 'タイム'; $('mMid').textContent = 'のこり'+G.at.left; $('mGameK').textContent='かくとく'; $('mGame').textContent = G.at.got||0; }
+  else if(isTime && G.mode==='cz'){ $('mMidK').textContent = '満月チャンス'; $('mMid').textContent = 'のこり'+G.czLeft; $('mGameK').textContent='ゲーム数'; $('mGame').textContent = G.sinceBonus; }
+  else if(isTime){ $('mMidK').textContent = '天井まで'; $('mMid').textContent = Math.max(0, CEIL - G.sinceBonus); $('mGameK').textContent='ゲーム数'; $('mGame').textContent = G.sinceBonus; }
+  else { $('mMidK').textContent = 'さいこう'; $('mMid').textContent = S.best; $('mGameK').textContent='ゲーム数'; $('mGame').textContent = G.sinceBonus; }
+  $('lever').disabled = state!=='idle';
+  $('betTxt').textContent = G.replay ? 'リプレイ' : G.bonus ? `${BONUS[G.bonus.type].short} のこり${G.bonus.left}` : G.at ? `タイム のこり${G.at.left}` : '3まい';
+  document.querySelectorAll('.stop').forEach(b=>{ const R = reels[+b.dataset.r]; b.disabled = !(state==='spin' && R.spin && R.stopAt===null); b.classList.toggle('hot', lampLit && !b.disabled); });
+  $('refillBox').hidden = !(S.medals < BET && !G.replay && state==='idle');
+  $('assistBtn').setAttribute('aria-pressed', S.assist); $('autoBtn').setAttribute('aria-pressed', auto);
+  // ランプ / モード
+  $('lamp').hidden = isTime; $('lampTxt').hidden = isTime; $('modeTag').hidden = !isTime;
+  if(isTime){ const m = $('modeTag');
+    const [cls, txt] = G.bonus ? ['bonus', `${BONUS[G.bonus.type].name} のこり ${G.bonus.left}`] : (G.flag && G.ann) ? ['ready', 'ボーナス確定！'] : G.at ? ['at', `ウミミタイム のこり ${G.at.left}G`] : G.mode==='cz' ? ['cz', `満月チャンス のこり ${G.czLeft}`] : ['', 'つうじょう'];
+    m.className = 'mode' + (cls ? ' '+cls : ''); m.textContent = txt; }
+  // バナー
+  banner(!isTime && G.bonus ? `${BONUS[G.bonus.type].name} のこり ${G.bonus.left}` : ''); // ウミミタイム台は 下の モード表示に まとめる
+  // データ
+  const rate = (G.big+G.reg) ? '1/' + Math.round(G.games/(G.big+G.reg)) : '-';
+  const cells = isTime ? [['ゲーム数',G.games],['月光',G.big],['ウミミ',G.reg],['タイム',G.atN]] : [['ゲーム数',G.games],['月光',G.big],['ウミミ',G.reg],['ボーナス',rate]];
+  $('stats').innerHTML = cells.map(([k,v])=>`<div class="st"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  $('hist').innerHTML = G.hist.map(h=> h.t==='AT' ? `<span class="hb at">タイム ${h.g}G</span>` : `<span class="hb ${h.t==='BIG'?'big':'reg'}">${BONUS[h.t].short} ${h.g}G</span>`).join('');
   if(S.day!==today()){ S.day=today(); S.shardToday=0; }
-  $('shardNote').textContent = `きょう もらった つきのかけら：${S.shardToday} / ${SHARD_CAP}`;
-  if(S.bonus){ banner(BONUS[S.bonus.type].name + ' のこり ' + S.bonus.left); }
+  $('dataNote').textContent = (isTime ? `ボーナス 1回あたり ${rate}・満月チャンス せいこう ${G.czWin}/${G.cz}・タイム さいこう ${G.atBest}G。` : '') + `きょう もらった つきのかけら：${S.shardToday} / ${SHARD_CAP}（全台）`;
   dirty = true;
 }
 let toastT = 0;
@@ -499,7 +762,7 @@ function autoNext(){
   autoT = setTimeout(()=>{
     if(!auto || state!=='idle') return; lever(); if(state!=='spin') return;
     autoStops = [0,1,2].map((r,i)=>setTimeout(()=>{ if(auto) pressStop(r); }, 450 + i*260 + Math.random()*180));
-  }, S.bonus ? 350 : 250);
+  }, G.bonus||G.at ? 350 : 250);
 }
 
 /* ---------- はいとう表 ---------- */
@@ -507,14 +770,74 @@ function drawPaytbl(){
   const rows = [['M','月光ボーナス'],['U','ウミミボーナス'],['D','15まい'],['T','10まい'],['J','8まい'],['R','リプレイ'],['S','2まい']];
   $('paytbl').innerHTML = rows.map(([k,v])=>`<canvas data-sym="${k}" aria-label="${SYM[k]}"></canvas><span>${SYM[k]}${k==='S'?'（左だけ）':''}</span><b>${v}</b>`).join('');
   $('paytbl').querySelectorAll('canvas').forEach(cv=>{
+    const r = cv.getBoundingClientRect(); if(!r.width) return;
     const {w,h} = fitCanvas(cv, 2), c = cv.getContext('2d'), k = cv.dataset.sym, tw = w/3;
-    const tc = document.createElement('canvas'); tc.width = Math.round(tw); tc.height = h;
-    const save = TILE, sk = tileKey; tileKey=''; makeTiles(Math.round(tw), h); const t = TILE[k]; TILE = save; tileKey = sk;
+    const keep = TILE, kk = tileKey; tileKey=''; makeTiles(Math.round(tw), h); const t = TILE[k]; TILE = keep; tileKey = kk;
     for(let i=0;i<3;i++){ if(k==='S' && i>0){ c.fillStyle='rgba(183,181,230,.5)'; c.font=`${Math.round(h*.4)}px sans-serif`; c.textAlign='center'; c.fillText('—', tw*i+tw/2, h*.65); continue; } c.drawImage(t, tw*i, 0, tw, h); }
   });
 }
 
+/* ---------- 台えらび ---------- */
+function machStatus(g){ return g.bonus ? 'ボーナス中' : g.at ? 'ウミミタイム中' : g.flag ? 'ボーナス まち' : g.mode==='cz' ? '満月チャンス中' : ''; }
+function renderSelect(){
+  $('selMedal').textContent = S.medals;
+  $('machList').innerHTML = MKEYS.map(k=>{
+    const M = MACH[k], g = S.m[k], live = machStatus(g);
+    return `<article class="mach"><canvas data-thumb="${k}" aria-hidden="true"></canvas><div class="mb">
+      <div class="tags"><span class="tag kind">${M.kind}</span>${S.last===k?'<span class="tag last">まえに あそんだ台</span>':''}${live?`<span class="tag live">${live}</span>`:''}</div>
+      <h3>${M.name}</h3><p>${M.desc}</p>
+      <p>あそんだ ${g.games}ゲーム・ボーナス ${g.big+g.reg}回${k==='time'?`・タイム ${g.atN}回`:''}</p>
+      <button class="go" type="button" data-go="${k}">この台で あそぶ</button></div></article>`;
+  }).join('');
+  drawThumbs();
+}
+function drawThumbs(){
+  document.querySelectorAll('canvas[data-thumb]').forEach(cv=>{
+    const r = cv.getBoundingClientRect(); if(!r.width) return;
+    const {w,h} = fitCanvas(cv, 1.5), c = cv.getContext('2d'), k = cv.dataset.thumb;
+    const g = c.createLinearGradient(0,0,0,h);
+    if(k==='moon'){ g.addColorStop(0,'#1b2052'); g.addColorStop(1,'#34418f'); } else { g.addColorStop(0,'#5a3d8f'); g.addColorStop(.6,'#e27aa0'); g.addColorStop(1,'#ffc58a'); }
+    c.fillStyle = g; c.fillRect(0,0,w,h);
+    for(let i=0;i<16;i++){ c.fillStyle='rgba(255,250,220,.5)'; c.fillRect((i*137.7)%w, (i*61.3)%(h*.5), 2, 2); }
+    const rw = h*.36, y0 = h*.16;
+    const mc = document.createElement('canvas'); mc.width = Math.ceil(rw); mc.height = Math.ceil(rw); drawMoon(mc.getContext('2d'), rw/2, rw/2, rw*.3, false);
+    for(let i=0;i<3;i++){ const x = w*.06 + i*(rw+h*.04); c.fillStyle='#fffaf0'; c.fillRect(x,y0,rw,h*.5); c.drawImage(mc, x, y0+h*.25-rw/2); }
+    c.strokeStyle='#ff7aa8'; c.lineWidth=Math.max(2,h*.015); c.beginPath(); c.moveTo(w*.04,y0+h*.25); c.lineTo(w*.06+3*rw+h*.12,y0+h*.25); c.stroke();
+    if(k==='moon'){
+      const lx = w*.06+1.5*rw+h*.04, ly = h*.84;
+      c.fillStyle='rgba(243,200,78,.35)'; c.beginPath(); c.arc(lx,ly,h*.11,0,TAU); c.fill(); c.fillStyle='#f3c84e'; c.beginPath(); c.arc(lx,ly,h*.065,0,TAU); c.fill();
+      drawUmi(c,'lavender',8,w*.82,h*.95,h/300,-1,'');
+    } else {
+      c.font = `${Math.round(h*.16)}px "Mochiy Pop One",sans-serif`; c.textAlign='center'; c.lineWidth = h*.03; c.strokeStyle='#7a2140'; c.strokeText('+30G', w*.34, h*.9); c.fillStyle='#fff1bf'; c.fillText('+30G', w*.34, h*.9);
+      drawUmi(c,'lavender',9,w*.82,h*.95,h/300,-1,'');
+    }
+  });
+}
+function enter(k){
+  MK = k; G = S.m[k]; S.last = k;
+  reels.forEach((R,i)=>{ R.p = G.pos[i]||0; R.spin=false; R.stopAt=null; R.bounce=0; });
+  state = 'idle'; target = null; fx = {}; lampOff(); bubbleColor(''); $('cutin').hidden = true; $('payTxt').textContent='';
+  $('ttl').textContent = MACH[k].name; $('chgBtn').hidden = false;
+  $('selScr').hidden = true; $('playScr').hidden = false;
+  $('setNote').textContent = MACH[k].setNote; $('payNote').textContent = MACH[k].payNote; $('ykPanel').hidden = k!=='time';
+  moodNow = 'idle';
+  if(G.flag && (k==='moon' || G.ann)){ lampLit = true; if(k==='moon'){ $('lamp').classList.add('on'); $('lampTxt').textContent='ペカッ！'; } moodNow='lamp'; say(k==='moon' ? 'ランプ ついたままだよ！ そろえてね' : 'ボーナス確定 してるよ！ そろえてね'); }
+  else if(G.bonus){ mood('bonus'); say('ボーナスの つづきだよ！'); }
+  else if(G.at){ mood('at'); say('ウミミタイムの つづきだよ！'); }
+  else if(G.mode==='cz'){ say('満月チャンスの つづきだよ！'); }
+  else say(k==='moon' ? 'ランプが ペカッたら ボーナスだよ！' : 'セリフの 色に ちゅうもく！');
+  save(); ui(); drawPaytbl(); window.scrollTo(0,0);
+}
+function leave(){
+  if(state!=='idle') return;
+  setAuto(false); save(); G = null; MK = null;
+  $('ttl').textContent = 'ウミミスロット'; $('chgBtn').hidden = true;
+  $('playScr').hidden = true; $('selScr').hidden = false; renderSelect(); window.scrollTo(0,0);
+}
+
 /* ---------- 入力 ---------- */
+$('machList').addEventListener('click', e=>{ const b = e.target.closest('[data-go]'); if(b){ ac(); enter(b.dataset.go); } });
+$('chgBtn').addEventListener('click', ()=>{ if(state!=='idle'){ toast('リールが とまってから かえてね'); return; } leave(); });
 $('lever').addEventListener('click', lever);
 document.querySelectorAll('.stop').forEach(b=>b.addEventListener('click', ()=>pressStop(+b.dataset.r)));
 rc.addEventListener('pointerdown', e=>{
@@ -522,25 +845,23 @@ rc.addEventListener('pointerdown', e=>{
   const r = rc.getBoundingClientRect(); const i = Math.min(2, Math.max(0, Math.floor((e.clientX - r.left)/r.width*3))); pressStop(i);
 });
 window.addEventListener('keydown', e=>{
+  if(!G) return;
   if(e.target.closest && e.target.closest('button,a') && (e.key===' '||e.key==='Enter')) return;
   const k = e.key.toLowerCase();
   if(k===' ' || k==='enter' || k==='arrowdown'){ e.preventDefault(); if(state==='idle') lever(); else { const i = reels.findIndex(R=>R.spin && R.stopAt===null); if(i>=0) pressStop(i); } }
   else if(k==='1'||k==='z') pressStop(0); else if(k==='2'||k==='x') pressStop(1); else if(k==='3'||k==='c') pressStop(2);
 });
-$('assistBtn').addEventListener('click', ()=>{ S.assist = !S.assist; save(); ui(); toast(S.assist ? 'アシスト オン：ランプが ついたら かならず そろうよ' : 'アシスト オフ：本気の 目押しモード！'); });
-$('autoBtn').addEventListener('click', ()=>{ ac(); setAuto(!auto); if(auto && lampLit) { setAuto(false); toast('ランプが ついてるよ！ じぶんで そろえてね'); } });
+$('assistBtn').addEventListener('click', ()=>{ S.assist = !S.assist; save(); ui(); toast(S.assist ? 'アシスト オン：当たった 役は かならず そろうよ' : 'アシスト オフ：本気の 目押しモード！'); });
+$('autoBtn').addEventListener('click', ()=>{ ac(); if(!auto && lampLit){ toast('ボーナスが 当たってるよ！ じぶんで そろえてね'); return; } setAuto(!auto); });
 $('sndBtn').addEventListener('click', ()=>{ S.sound = !S.sound; save(); ui(); if(S.sound) sfx.replay(); });
 $('refill').addEventListener('click', ()=>{ S.medals += 100; S.refills++; save(); ui(); mood('happy'); say('はい、メダル 100まい！ ひろってきたよ〜'); });
 
-UMI.onAssets(()=>{ tileKey=''; dirty=true; drawPaytbl(); });
-let rt=0; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ dirty=true; drawPaytbl(); }, 150); });
+UMI.onAssets(()=>{ tileKey=''; dirty=true; if(G) drawPaytbl(); else drawThumbs(); });
+let rt=0; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ dirty=true; if(G) drawPaytbl(); else drawThumbs(); }, 150); });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) save(); lastT = performance.now(); });
 window.addEventListener('pagehide', save);
 
-// つづきから
-if(S.flag){ lampLit = true; $('lamp').classList.add('on'); $('lampTxt').textContent='ペカッ！'; moodNow='lamp'; say('ランプ ついたままだよ！ そろえてね'); }
-if(S.bonus){ mood('bonus'); }
-ui(); drawPaytbl(); requestAnimationFrame(loop);
+renderSelect(); ui(); requestAnimationFrame(loop);
 })();
 </script>
 </body>
